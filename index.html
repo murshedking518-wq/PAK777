@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pak777 Casino & Secure Admin Control</title>
+    <title>Pak777 Casino & Aviator Admin</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CryptoJS for Aviator Provably Fair -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -47,6 +50,311 @@
         ::-webkit-scrollbar-thumb {
             background: #4a3382;
             border-radius: 4px;
+        }
+
+        /* --- AVIATOR SPECIFIC CSS SCOPED --- */
+        :root {
+            --av-neon-red: #ff0055;
+            --av-neon-green: #00ff66;
+            --av-neon-orange: #ff9900;
+            --av-neon-cyan: #00e5ff;
+            --av-text-sub: rgba(255, 255, 255, 0.5);
+        }
+        
+        .av-game-container {
+            width: 100%;
+            background: #030305;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+            min-height: 100%;
+        }
+
+        .av-history-bar {
+            display: flex;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #000000;
+            overflow-x: auto;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            scrollbar-width: none;
+        }
+        .av-history-bar::-webkit-scrollbar { display: none; }
+
+        .av-history-chip {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #0a0b10;
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            color: var(--av-neon-cyan);
+            white-space: nowrap;
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.1);
+        }
+        .av-history-chip.high {
+            color: #bf5af2;
+            border-color: rgba(191, 90, 242, 0.3);
+            box-shadow: 0 0 10px rgba(191, 90, 242, 0.2);
+        }
+        .av-history-chip.huge {
+            color: var(--av-neon-red);
+            border-color: rgba(255, 0, 85, 0.4);
+            box-shadow: 0 0 12px rgba(255, 0, 85, 0.3);
+        }
+
+        .av-screen-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            background: #000000;
+            overflow: hidden;
+        }
+        .av-screen-container canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .av-toast {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50px);
+            background: rgba(0, 255, 102, 0.95);
+            color: #000;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 13px;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.6);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .av-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .av-controls-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            padding: 12px;
+            background: #050508;
+        }
+
+        .av-bet-box {
+            background: #0a0b10;
+            border-radius: 16px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .av-tabs {
+            display: flex;
+            background: #000000;
+            border-radius: 20px;
+            padding: 3px;
+            width: 140px;
+            margin: 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .av-tab {
+            flex: 1;
+            text-align: center;
+            padding: 4px 0;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--av-text-sub);
+            cursor: pointer;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+        .av-tab.active {
+            background: #1a1b24;
+            color: #fff;
+        }
+
+        .av-auto-panel {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            background: #000000;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .av-auto-panel.show { display: flex; }
+        
+        .av-auto-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--av-text-sub);
+        }
+
+        .av-switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 18px;
+        }
+        .av-switch input { opacity: 0; width: 0; height: 0; }
+        .av-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #1a1b24;
+            transition: .3s;
+            border-radius: 18px;
+        }
+        .av-slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        .av-switch input:checked + .av-slider { background-color: var(--av-neon-green); }
+        .av-switch input:checked + .av-slider:before { transform: translateX(16px); background-color: #000; }
+
+        .av-auto-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #0e0f14;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .av-auto-input-wrap input {
+            width: 45px;
+            background: transparent;
+            border: none;
+            color: var(--av-neon-green);
+            font-weight: 800;
+            font-size: 12px;
+            text-align: right;
+            outline: none;
+        }
+
+        .av-bet-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .av-amount-control {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .av-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #000000;
+            border-radius: 10px;
+            padding: 6px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .av-btn-step {
+            background: none;
+            border: none;
+            color: var(--av-text-sub);
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0 8px;
+        }
+        .av-btn-step:hover:not(:disabled) { color: #fff; }
+        .av-btn-step:disabled { opacity: 0.2; cursor: not-allowed; }
+
+        .av-bet-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            text-align: center;
+            font-weight: 800;
+            font-size: 17px;
+            outline: none;
+        }
+        .av-bet-input:disabled { color: var(--av-text-sub); }
+
+        .av-preset-btns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+        }
+        .av-btn-preset {
+            background: #000000;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 6px 2px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .av-btn-action {
+            flex: 1.1;
+            height: 68px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+        .av-btn-action:active { transform: scale(0.97); }
+        .av-btn-action.bet {
+            background: linear-gradient(180deg, #00ff66 0%, #00b347 100%);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.25);
+        }
+        .av-btn-action.cashout {
+            background: linear-gradient(180deg, #ff9900 0%, #cc7a00 100%);
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 153, 0, 0.4);
+            animation: avPulse 0.6s infinite alternate ease-in-out;
+        }
+        .av-btn-action.queued {
+            background: linear-gradient(180deg, #ff0055 0%, #b3003b 100%);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
+        }
+        .av-btn-action .av-sub-text {
+            font-size: 11px;
+            font-weight: 700;
+            opacity: 0.9;
+            margin-top: 2px;
+            text-transform: none;
+        }
+        @keyframes avPulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.03); }
         }
     </style>
 </head>
@@ -127,7 +435,7 @@
                 </button>
             </div>
 
-            <!-- Mandatory Password Screen (No hints shown) -->
+            <!-- Mandatory Password Screen -->
             <div id="admin-login-box" class="space-y-4 my-auto bg-brand-card p-5 rounded-2xl border border-purple-800">
                 <div class="text-center">
                     <i class="fa-solid fa-lock text-yellow-400 text-3xl mb-2"></i>
@@ -151,11 +459,28 @@
                 <!-- Registered Users Details & Balance Editor -->
                 <div class="bg-brand-card p-3 rounded-xl border border-purple-600/50 space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="font-bold text-yellow-400"><i class="fa-solid fa-users mr-1"></i> Registered Players (<span id="admin-users-count">0</span>)</span>
+                        <span class="font-bold text-yellow-400"><i class="fa-solid fa-users mr-1"></i> Players (<span id="admin-users-count">0</span>)</span>
                     </div>
-                    <div id="admin-users-list" class="space-y-2 max-h-48 overflow-y-auto">
-                        <!-- Loaded dynamically from Cloud -->
+                    <div id="admin-users-list" class="space-y-2 max-h-40 overflow-y-auto">
+                        <!-- Loaded dynamically -->
                     </div>
+                </div>
+
+                <!-- Aviator Result Override -->
+                <div class="bg-brand-card p-3 rounded-xl border border-purple-600/50 space-y-3">
+                    <span class="font-bold text-yellow-400 flex items-center justify-between">
+                        <span><i class="fa-solid fa-plane-up mr-1"></i> Aviator Result Override</span>
+                    </span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] text-gray-400">Crash Multiplier</label>
+                            <input type="text" id="admin-aviator-val" placeholder="e.g 2.50 or AUTO" class="w-full bg-slate-900 border border-purple-800 rounded p-1.5 text-white mt-0.5 uppercase">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="saveAdminAviator()" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 rounded">Set Target</button>
+                        </div>
+                    </div>
+                    <p class="text-[9px] text-gray-400">Type <span class="text-yellow-400 font-bold">AUTO</span> for provably fair, or e.g <span class="text-yellow-400 font-bold">5.50</span> for forced crash.</p>
                 </div>
 
                 <!-- Win Go Result Override per Room -->
@@ -165,7 +490,6 @@
                     </span>
                     <div class="space-y-2">
                         <div>
-                            <label class="text-[10px] text-gray-400">Select Target Room</label>
                             <select id="admin-room-select" class="w-full bg-slate-900 border border-purple-800 rounded p-1.5 text-white mt-0.5">
                                 <option value="30Sec">Win Go 30Sec</option>
                                 <option value="1Min">Win Go 1Min</option>
@@ -175,15 +499,14 @@
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="text-[10px] text-gray-400">Preset Result</label>
                                 <select id="admin-override-val" class="w-full bg-slate-900 border border-purple-800 rounded p-1.5 text-white mt-0.5">
-                                    <option value="AUTO">AUTO (Random Fair)</option>
-                                    <option value="0">0 (Red/Violet - Small)</option>
+                                    <option value="AUTO">AUTO (Fair)</option>
+                                    <option value="0">0 (Red/V - Small)</option>
                                     <option value="1">1 (Green - Small)</option>
                                     <option value="2">2 (Red - Small)</option>
                                     <option value="3">3 (Green - Small)</option>
                                     <option value="4">4 (Red - Small)</option>
-                                    <option value="5">5 (Green/Violet - Big)</option>
+                                    <option value="5">5 (Green/V - Big)</option>
                                     <option value="6">6 (Red - Big)</option>
                                     <option value="7">7 (Green - Big)</option>
                                     <option value="8">8 (Red - Big)</option>
@@ -197,7 +520,7 @@
                     </div>
                 </div>
 
-                <!-- Deposit Requests with Trx ID -->
+                <!-- Deposit Requests -->
                 <div class="bg-brand-card p-3 rounded-xl border border-purple-600/50 space-y-2">
                     <span class="font-bold text-yellow-400 flex items-center justify-between">
                         <span><i class="fa-solid fa-money-bill-transfer mr-1"></i> Deposit Requests</span>
@@ -215,24 +538,7 @@
                     <div id="admin-withdraw-list" class="space-y-1.5 max-h-36 overflow-y-auto"></div>
                 </div>
 
-                <!-- Change Admin Login Credentials -->
-                <div class="bg-brand-card p-3 rounded-xl border border-purple-600/50 space-y-2">
-                    <span class="font-bold text-yellow-400"><i class="fa-solid fa-key mr-1"></i> Change Admin Login Credentials</span>
-                    <div class="space-y-2 pt-1">
-                        <div>
-                            <label class="text-[10px] text-gray-400">New Admin Email</label>
-                            <input type="email" id="change-admin-email" placeholder="newadmin@pak777.com" class="w-full bg-slate-900 border border-purple-800 rounded p-1.5 text-white">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-gray-400">New Admin Password</label>
-                            <input type="password" id="change-admin-pass" placeholder="******" class="w-full bg-slate-900 border border-purple-800 rounded p-1.5 text-white">
-                        </div>
-                        <button onclick="updateAdminCredentials()" class="w-full bg-purple-600 hover:bg-purple-700 font-bold py-1.5 rounded text-white text-xs">Save New Admin Credentials</button>
-                    </div>
-                </div>
-
-                <!-- Admin Logout -->
-                <button onclick="adminLogout()" class="w-full bg-slate-900 border border-red-800 text-red-400 font-bold py-2 rounded">Exit Admin Panel</button>
+                <button onclick="adminLogout()" class="w-full bg-slate-900 border border-red-800 text-red-400 font-bold py-2 rounded mb-10">Exit Admin Panel</button>
             </div>
         </div>
 
@@ -245,31 +551,23 @@
                 </div>
                 
                 <div class="space-y-3 text-xs">
-                    <!-- Signup Name Field -->
                     <div id="auth-name-container">
                         <label class="text-gray-300">Full Name</label>
                         <input type="text" id="auth-fullname" placeholder="Ali Khan" class="w-full bg-slate-900 border border-purple-800 rounded px-3 py-2 text-white mt-1">
                     </div>
-
-                    <!-- Pakistani Phone Number (+92 Prefix) -->
                     <div>
                         <label class="text-gray-300">Pakistani Phone Number</label>
                         <div class="flex items-center mt-1 bg-slate-900 border border-purple-800 rounded overflow-hidden">
                             <span class="bg-purple-950 px-2.5 py-2 text-yellow-400 font-bold border-r border-purple-800 text-xs">+92</span>
                             <input type="text" id="auth-phone" placeholder="3001234567" maxlength="10" class="w-full bg-slate-900 px-2.5 py-2 text-white focus:outline-none text-xs">
                         </div>
-                        <p class="text-[9px] text-gray-400 mt-0.5">Enter 10-digit number (e.g. 3001234567)</p>
                     </div>
-
-                    <!-- Password Field (6 to 12 digits) -->
                     <div>
-                        <label class="text-gray-300">Password (6 to 12 digits)</label>
+                        <label class="text-gray-300">Password</label>
                         <input type="password" id="auth-pass" placeholder="******" maxlength="12" class="w-full bg-slate-900 border border-purple-800 rounded px-3 py-2 text-white mt-1">
                     </div>
-
                     <button onclick="processAuthSubmit()" id="auth-action-btn" class="w-full gold-btn font-extrabold py-2.5 rounded-xl text-xs shadow-lg">Sign Up & Play</button>
                 </div>
-
                 <div class="text-center text-[11px] text-gray-400">
                     <span id="auth-switch-text">Already have an account?</span> 
                     <button onclick="switchAuthMode()" id="auth-switch-btn" class="text-yellow-400 font-bold ml-1 underline">Login</button>
@@ -282,7 +580,6 @@
             <i class="fa-solid fa-circle-info text-slate-900"></i>
             <span id="toast-msg">Notification</span>
         </div>
-
     </div>
 
     <!-- Firebase Storage Scripts -->
@@ -312,10 +609,7 @@
             authenticated: false,
             activeUser: null,
             users: [],
-            adminCreds: {
-                email: 'admin@pak777.com',
-                pass: 'admin123'
-            },
+            adminCreds: { email: 'admin@pak777.com', pass: 'admin123' },
             currentTab: 'home',
             authMode: 'signup',
             jazzcashNumber: '03082836422',
@@ -327,7 +621,16 @@
                 '5Min': { totalSec: 300, timerSec: 300, period: 202607285000051, override: 'AUTO', history: [], myBets: [] }
             },
             activeWinGoRoom: '30Sec',
-
+            
+            // Aviator State Tracking
+            aviator: {
+                override: 'AUTO',
+                history: [1.23, 1.51, 2.24, 1.06, 2.80, 2.01, 37.60],
+                bets: {
+                    1: { state: 'IDLE', amount: 50.00, winAmount: 0, autoBet: false, autoCash: true, autoCashVal: 2.00 },
+                    2: { state: 'IDLE', amount: 100.00, winAmount: 0, autoBet: false, autoCash: false, autoCashVal: 1.50 }
+                }
+            },
             deposits: [],
             withdrawals: []
         };
@@ -336,6 +639,7 @@
         window.addEventListener('DOMContentLoaded', async () => {
             initSeedHistory();
             startRoomTimers();
+            initAviatorEngine();
 
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -347,100 +651,61 @@
                 console.error("Auth init error:", err);
             }
 
-            // Sync Users Collection
-            const usersCol = collection(db, 'artifacts', appId, 'public', 'data', 'users');
-            onSnapshot(usersCol, (snapshot) => {
+            // Sync Collections
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'users'), (snapshot) => {
                 const uList = [];
-                snapshot.forEach(docSnap => {
-                    uList.push(docSnap.data());
-                });
+                snapshot.forEach(docSnap => uList.push(docSnap.data()));
                 window.appState.users = uList;
-
-                // Sync Active User Balance
                 if (window.appState.activeUser) {
                     const updated = uList.find(u => u.phone === window.appState.activeUser.phone);
-                    if (updated) {
-                        window.appState.activeUser = updated;
-                        updateBalanceDisplay();
-                    }
+                    if (updated) { window.appState.activeUser = updated; updateBalanceDisplay(); }
                 }
                 renderAdminData();
-            }, (err) => console.error("Users sync error:", err));
+            });
 
-            // Sync Deposits Collection
-            const depCol = collection(db, 'artifacts', appId, 'public', 'data', 'deposits');
-            onSnapshot(depCol, (snapshot) => {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'deposits'), (snapshot) => {
                 const dList = [];
                 snapshot.forEach(docSnap => dList.push(docSnap.data()));
                 window.appState.deposits = dList.sort((a,b) => b.timestamp - a.timestamp);
                 if (window.appState.currentTab === 'deposit') renderContent();
                 renderAdminData();
-            }, (err) => console.error("Deposits sync error:", err));
+            });
 
-            // Sync Withdrawals Collection
-            const wdsCol = collection(db, 'artifacts', appId, 'public', 'data', 'withdrawals');
-            onSnapshot(wdsCol, (snapshot) => {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'withdrawals'), (snapshot) => {
                 const wList = [];
                 snapshot.forEach(docSnap => wList.push(docSnap.data()));
                 window.appState.withdrawals = wList.sort((a,b) => b.timestamp - a.timestamp);
                 if (window.appState.currentTab === 'withdraw') renderContent();
                 renderAdminData();
-            }, (err) => console.error("Withdrawals sync error:", err));
+            });
 
-            // Sync Admin Settings
             const adminDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config');
             onSnapshot(adminDocRef, (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
-                    if (data.email) window.appState.adminCreds.email = data.email;
-                    if (data.pass) window.appState.adminCreds.pass = data.pass;
-                } else {
-                    setDoc(adminDocRef, window.appState.adminCreds);
-                }
-            }, (err) => console.error("Admin settings sync error:", err));
+                    if(data.aviatorOverride) {
+                        window.appState.aviator.override = data.aviatorOverride;
+                        const el = document.getElementById('admin-aviator-val');
+                        if(el) el.value = data.aviatorOverride;
+                    }
+                } else { setDoc(adminDocRef, window.appState.adminCreds); }
+            });
 
             renderContent();
             updateBalanceDisplay();
         });
 
-        // Save User To Cloud Firestore
         window.saveUserToCloud = async function(userData) {
-            try {
-                const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.phone);
-                await setDoc(userDocRef, userData);
-            } catch (e) {
-                console.error("Error saving user:", e);
-            }
+            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.phone), userData); } catch (e) {}
         };
-
-        // Save Deposit To Cloud
         window.saveDepositToCloud = async function(depData) {
-            try {
-                const depRef = doc(db, 'artifacts', appId, 'public', 'data', 'deposits', depData.id);
-                await setDoc(depRef, depData);
-            } catch (e) {
-                console.error("Error saving deposit:", e);
-            }
+            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'deposits', depData.id), depData); } catch (e) {}
         };
-
-        // Save Withdrawal To Cloud
         window.saveWithdrawalToCloud = async function(wdsData) {
-            try {
-                const wdsRef = doc(db, 'artifacts', appId, 'public', 'data', 'withdrawals', wdsData.id);
-                await setDoc(wdsRef, wdsData);
-            } catch (e) {
-                console.error("Error saving withdrawal:", e);
-            }
+            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'withdrawals', wdsData.id), wdsData); } catch (e) {}
         };
-
-        // Save Admin Settings To Cloud
-        window.saveAdminCredsToCloud = async function(creds) {
-            try {
-                const adminRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config');
-                await setDoc(adminRef, creds);
-            } catch (e) {
-                console.error("Error updating admin settings:", e);
-            }
+        window.saveSettingsToCloud = async function(settings) {
+            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config'), settings, {merge: true}); } catch(e){}
         };
 
         function initSeedHistory() {
@@ -448,12 +713,7 @@
                 const r = window.appState.wingoRooms[roomKey];
                 for(let i=0; i<5; i++) {
                     const num = Math.floor(Math.random()*10);
-                    r.history.push({
-                        period: (r.period - (i+1)).toString(),
-                        number: num,
-                        size: num >= 5 ? 'Big' : 'Small',
-                        color: [1,3,7,9].includes(num) ? 'Green' : ([2,4,6,8].includes(num) ? 'Red' : 'Violet')
-                    });
+                    r.history.push({ period: (r.period - (i+1)).toString(), number: num, size: num >= 5 ? 'Big' : 'Small', color: [1,3,7,9].includes(num) ? 'Green' : ([2,4,6,8].includes(num) ? 'Red' : 'Violet') });
                 }
             });
         }
@@ -463,13 +723,8 @@
                 Object.keys(window.appState.wingoRooms).forEach(roomKey => {
                     const room = window.appState.wingoRooms[roomKey];
                     room.timerSec--;
-
-                    if (room.timerSec <= 0) {
-                        calculateRoomOutcome(roomKey);
-                        room.timerSec = room.totalSec;
-                    }
+                    if (room.timerSec <= 0) { calculateRoomOutcome(roomKey); room.timerSec = room.totalSec; }
                 });
-
                 const timerElem = document.getElementById('active-room-timer');
                 if (timerElem) {
                     const activeRoom = window.appState.wingoRooms[window.appState.activeWinGoRoom];
@@ -481,30 +736,21 @@
         }
 
         window.requireAuth = function(callback) {
-            if (!window.appState.authenticated) {
-                openAuthModal('signup');
-                showToast('Please Sign Up or Login first!');
-            } else {
-                callback();
-            }
+            if (!window.appState.authenticated) { openAuthModal('signup'); showToast('Please Sign Up or Login first!'); } else { callback(); }
         };
 
         window.showToast = function(msg) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = msg;
             toast.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'pointer-events-none');
-            }, 2500);
+            setTimeout(() => { toast.classList.add('opacity-0', 'pointer-events-none'); }, 2500);
         };
 
         window.updateBalanceDisplay = function() {
             const bal = window.appState.authenticated ? window.appState.activeUser.balance : 0.00;
             document.getElementById('user-balance-display').innerText = bal.toFixed(2);
-            const accountBal = document.getElementById('account-balance-val');
-            if (accountBal) accountBal.innerText = bal.toFixed(2);
-            const wingoBal = document.getElementById('wingo-balance-val');
-            if (wingoBal) wingoBal.innerText = bal.toFixed(2);
+            if (document.getElementById('account-balance-val')) document.getElementById('account-balance-val').innerText = bal.toFixed(2);
+            if (document.getElementById('wingo-balance-val')) document.getElementById('wingo-balance-val').innerText = bal.toFixed(2);
         };
 
         window.switchTab = function(tab) {
@@ -514,6 +760,9 @@
                 if (btn) btn.className = (t === tab) ? "flex flex-col items-center text-yellow-400 font-bold" : "flex flex-col items-center text-gray-400 hover:text-gray-200";
             });
             renderContent();
+            if(tab === 'aviator') {
+                setTimeout(avResizeCanvas, 50);
+            }
         };
 
         window.renderContent = function() {
@@ -521,15 +770,12 @@
             switch (window.appState.currentTab) {
                 case 'home': main.innerHTML = getHomeHTML(); break;
                 case 'wingo': main.innerHTML = getWinGoHTML(); break;
+                case 'aviator': main.innerHTML = getAviatorHTML(); break;
                 case 'deposit': main.innerHTML = getDepositHTML(); break;
                 case 'withdraw': main.innerHTML = getWithdrawHTML(); break;
                 case 'account': main.innerHTML = getAccountHTML(); break;
-                case 'activity': 
-                    main.innerHTML = `<div class="p-4 text-center text-xs space-y-3"><h3 class="font-bold text-yellow-400 text-sm">Activity Rewards</h3><div class="bg-brand-card p-4 rounded-xl border border-purple-800 text-left">🎁 Daily Rewards available on recharge.</div></div>`;
-                    break;
-                case 'promotion':
-                    main.innerHTML = `<div class="p-4 text-center text-xs space-y-3"><h3 class="font-bold text-yellow-400 text-sm">Agency Partner Program</h3><div class="bg-brand-card p-4 rounded-xl border border-purple-800 text-left font-mono">My Ref Code: PAK777_${window.appState.authenticated ? window.appState.activeUser.id : 'GUEST'}</div></div>`;
-                    break;
+                case 'activity': main.innerHTML = `<div class="p-4 text-center text-xs space-y-3"><h3 class="font-bold text-yellow-400 text-sm">Activity Rewards</h3><div class="bg-brand-card p-4 rounded-xl border border-purple-800 text-left">🎁 Daily Rewards available on recharge.</div></div>`; break;
+                case 'promotion': main.innerHTML = `<div class="p-4 text-center text-xs space-y-3"><h3 class="font-bold text-yellow-400 text-sm">Agency Partner Program</h3><div class="bg-brand-card p-4 rounded-xl border border-purple-800 text-left font-mono">My Ref Code: PAK777_${window.appState.authenticated ? window.appState.activeUser.id : 'GUEST'}</div></div>`; break;
             }
         };
 
@@ -545,43 +791,524 @@
 
                     <div class="bg-[#1a0f37] px-3 py-1.5 rounded-full flex items-center space-x-2 border border-purple-800/50">
                         <i class="fa-solid fa-bullhorn text-yellow-400 text-xs"></i>
-                        <marquee class="text-[11px] text-purple-200">Welcome to Pak777 Casino! Sign up, recharge with JazzCash and start winning!</marquee>
+                        <marquee class="text-[11px] text-purple-200">Welcome to Pak777 Casino! Play Win Go and Aviator and start winning!</marquee>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-2">
-                        <div onclick="requireAuth(() => switchTab('wingo'))" class="bg-gradient-to-br from-red-600 to-orange-600 rounded-xl p-2.5 flex flex-col justify-between h-20 shadow cursor-pointer border border-orange-400/30">
-                            <i class="fa-solid fa-fire text-yellow-300 text-2xl"></i>
-                            <span class="text-xs font-bold">Lottery</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div onclick="requireAuth(() => switchTab('wingo'))" class="bg-gradient-to-br from-red-600 to-orange-600 rounded-xl p-3 flex flex-col justify-between h-24 shadow-lg cursor-pointer border border-orange-400/40 relative overflow-hidden">
+                            <i class="fa-solid fa-fire text-yellow-300 text-3xl mb-1 z-10"></i>
+                            <span class="text-sm font-black z-10">Win Go Lottery</span>
+                            <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-white/10 rounded-full blur-md"></div>
                         </div>
-                        <div onclick="showToast('Slots maintenance')" class="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-xl p-2.5 flex flex-col justify-between h-20 shadow cursor-pointer border border-blue-400/30">
-                            <i class="fa-solid fa-slot-machine text-yellow-300 text-2xl"></i>
-                            <span class="text-xs font-bold">Slots</span>
-                        </div>
-                        <div onclick="showToast('Original games coming soon')" class="bg-gradient-to-br from-pink-600 to-purple-700 rounded-xl p-2.5 flex flex-col justify-between h-20 shadow cursor-pointer border border-pink-400/30">
-                            <i class="fa-solid fa-plane-departure text-yellow-300 text-2xl"></i>
-                            <span class="text-xs font-bold">Original</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-xs font-bold text-yellow-400 uppercase mb-2 border-l-2 border-yellow-400 pl-2">Featured Lottery Game</h3>
-                        
-                        <div onclick="requireAuth(() => switchTab('wingo'))" class="bg-gradient-to-r from-purple-800 via-indigo-900 to-brand-card p-4 rounded-2xl border-2 border-yellow-500/50 cursor-pointer flex items-center justify-between shadow-xl hover:scale-[1.02] transition-transform">
-                            <div class="space-y-1">
-                                <span class="bg-red-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full">POPULAR</span>
-                                <h4 class="text-base font-black text-yellow-400">WIN GO LOTTERY</h4>
-                                <p class="text-[10px] text-gray-300">Choose from 30Sec, 1Min, 3Min & 5Min modes inside!</p>
-                                <button class="gold-btn text-[10px] font-black px-3 py-1 rounded-full mt-1">Play Game →</button>
-                            </div>
-                            <div class="w-16 h-16 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center">
-                                <i class="fa-solid fa-trophy text-yellow-400 text-3xl"></i>
-                            </div>
+                        <div onclick="requireAuth(() => switchTab('aviator'))" class="bg-gradient-to-br from-pink-600 to-purple-700 rounded-xl p-3 flex flex-col justify-between h-24 shadow-lg cursor-pointer border border-pink-400/40 relative overflow-hidden">
+                            <i class="fa-solid fa-plane-departure text-cyan-300 text-3xl mb-1 z-10"></i>
+                            <span class="text-sm font-black z-10">Aviator</span>
+                            <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-white/10 rounded-full blur-md"></div>
                         </div>
                     </div>
                 </div>
             `;
         }
 
+        // ================= AVIATOR HTML & ENGINE =================
+        function getAviatorHTML() {
+            return `
+                <div class="av-game-container pb-6">
+                    <div class="av-history-bar" id="avHistoryBar">
+                        ${window.appState.aviator.history.map(m => `<div class="av-history-chip ${m>=10?'huge':(m>=2?'high':'')}">${m.toFixed(2)}x</div>`).join('')}
+                    </div>
+
+                    <div class="av-screen-container" id="avStageContainer">
+                        <div class="av-toast" id="avToastMessage">CASHED OUT</div>
+                        <canvas id="avGameCanvas"></canvas>
+                    </div>
+
+                    <div class="av-controls-grid">
+                        ${[1, 2].map(i => {
+                            const b = window.appState.aviator.bets[i];
+                            return `
+                            <div class="av-bet-box">
+                                <div class="av-tabs">
+                                    <div class="av-tab ${!b.autoBetToggleTab ? 'active' : ''}" id="avTabBet${i}" onclick="avSwitchTabUI(${i}, 'bet')">Bet</div>
+                                    <div class="av-tab ${b.autoBetToggleTab ? 'active' : ''}" id="avTabAuto${i}" onclick="avSwitchTabUI(${i}, 'auto')">Auto</div>
+                                </div>
+
+                                <div class="av-auto-panel ${b.autoBetToggleTab ? 'show' : ''}" id="avAutoPanel${i}">
+                                    <div class="av-auto-row">
+                                        <span>Auto Bet</span>
+                                        <label class="av-switch">
+                                            <input type="checkbox" id="avAutoBetToggle${i}" ${b.autoBet ? 'checked' : ''} onchange="avUpdateLocalState(${i})">
+                                            <span class="av-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="av-auto-row">
+                                        <span>Auto Cash Out</span>
+                                        <div class="av-auto-input-wrap">
+                                            <input type="number" id="avAutoCashVal${i}" value="${b.autoCashVal.toFixed(2)}" step="0.10" min="1.10" onchange="avUpdateLocalState(${i})">
+                                            <span style="color:var(--av-neon-green)">x</span>
+                                        </div>
+                                        <label class="av-switch">
+                                            <input type="checkbox" id="avAutoCashToggle${i}" ${b.autoCash ? 'checked' : ''} onchange="avUpdateLocalState(${i})">
+                                            <span class="av-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="av-bet-inputs">
+                                    <div class="av-amount-control">
+                                        <div class="av-input-wrapper">
+                                            <button class="av-btn-step" id="avBtnMinus${i}" onclick="avAdjustBet(${i}, -50)">-</button>
+                                            <input type="number" id="avBetInput${i}" class="av-bet-input" value="${b.amount.toFixed(2)}" step="50" min="10" onchange="avUpdateLocalState(${i})">
+                                            <button class="av-btn-step" id="avBtnPlus${i}" onclick="avAdjustBet(${i}, 50)">+</button>
+                                        </div>
+                                        <div class="av-preset-btns">
+                                            <button class="av-btn-preset av-btn-preset-${i}" onclick="avSetBet(${i}, 50)">50</button>
+                                            <button class="av-btn-preset av-btn-preset-${i}" onclick="avSetBet(${i}, 100)">100</button>
+                                            <button class="av-btn-preset av-btn-preset-${i}" onclick="avSetBet(${i}, 200)">200</button>
+                                            <button class="av-btn-preset av-btn-preset-${i}" onclick="avSetBet(${i}, 500)">500</button>
+                                        </div>
+                                    </div>
+                                    <button id="avBtnAction${i}" class="av-btn-action bet" onclick="avHandleAction(${i})">
+                                        BET
+                                        <span class="av-sub-text" id="avBtnSub${i}">${b.amount.toFixed(2)} PKR</span>
+                                    </button>
+                                </div>
+                            </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div class="text-center text-[9px] text-gray-500 py-2 border-t border-white/5 bg-black">Provably Fair SHA-256 Engine Connected</div>
+                </div>
+            `;
+        }
+
+        // Aviator Engine Variables
+        let avEngine = {
+            status: 'WAITING',
+            multiplier: 1.00,
+            target: 1.00,
+            startTime: null,
+            waitingProgress: 0,
+            flightPath: [],
+            particles: [],
+            shockwave: 0
+        };
+
+        function initAviatorEngine() {
+            avPrepareNextRound();
+            requestAnimationFrame(avGameLoop);
+        }
+
+        function avGenerateCrashPoint() {
+            if (window.appState.aviator.override !== 'AUTO') {
+                let overrideVal = parseFloat(window.appState.aviator.override);
+                if (!isNaN(overrideVal) && overrideVal >= 1.0) return overrideVal;
+            }
+            
+            const serverSeed = CryptoJS.lib.WordArray.random(16).toString();
+            const clientSeed = "pkr_session_" + Math.floor(Math.random() * 1000000);
+            const hash = CryptoJS.SHA256(serverSeed + clientSeed).toString();
+            const h = parseInt(hash.substring(0, 8), 16);
+            const e = Math.pow(2, 32);
+
+            if (h % 33 === 0) return 1.00;
+            let crash = Math.floor((100 * e - h) / (e - h)) / 100;
+            return Math.max(1.01, Math.min(crash, 100.00));
+        }
+
+        function avPrepareNextRound() {
+            avEngine.status = 'WAITING';
+            avEngine.multiplier = 1.00;
+            avEngine.waitingProgress = 0;
+            avEngine.flightPath = [];
+            avEngine.particles = [];
+            avEngine.shockwave = 0;
+            avEngine.startTime = performance.now();
+
+            for (let i of [1, 2]) {
+                let b = window.appState.aviator.bets[i];
+                if (b.autoBet && b.state === 'IDLE' && window.appState.activeUser && window.appState.activeUser.balance >= b.amount) {
+                    window.appState.activeUser.balance -= b.amount;
+                    window.saveUserToCloud(window.appState.activeUser);
+                    window.updateBalanceDisplay();
+                    b.state = 'QUEUED';
+                } else if (b.state !== 'QUEUED') {
+                    b.state = 'IDLE';
+                }
+                avUpdateButtonUI(i);
+            }
+        }
+
+        function avStartRound() {
+            avEngine.status = 'IN_FLIGHT';
+            avEngine.multiplier = 1.00;
+            avEngine.target = avGenerateCrashPoint();
+            avEngine.startTime = performance.now();
+            avEngine.flightPath = [];
+            avEngine.particles = [];
+
+            for (let i of [1, 2]) {
+                if (window.appState.aviator.bets[i].state === 'QUEUED') {
+                    window.appState.aviator.bets[i].state = 'ACTIVE';
+                }
+                avUpdateButtonUI(i);
+            }
+        }
+
+        function avTriggerCashOut(boxId) {
+            let b = window.appState.aviator.bets[boxId];
+            if (b.state !== 'ACTIVE') return;
+
+            let cashoutVal = b.autoCash ? Math.min(avEngine.multiplier, b.autoCashVal) : avEngine.multiplier;
+            b.winAmount = b.amount * cashoutVal;
+            
+            if (window.appState.activeUser) {
+                window.appState.activeUser.balance += b.winAmount;
+                window.saveUserToCloud(window.appState.activeUser);
+                window.updateBalanceDisplay();
+            }
+
+            avShowToast(`CASHED OUT ${b.winAmount.toFixed(2)} PKR`);
+            b.state = 'IDLE';
+            avUpdateButtonUI(boxId);
+        }
+
+        function avTriggerCrash() {
+            avEngine.status = 'CRASHED';
+            avEngine.startTime = performance.now();
+
+            for (let i of [1, 2]) {
+                if (window.appState.aviator.bets[i].state === 'ACTIVE') {
+                    window.appState.aviator.bets[i].state = 'IDLE';
+                }
+                avUpdateButtonUI(i);
+            }
+
+            window.appState.aviator.history.unshift(avEngine.target);
+            if (window.appState.aviator.history.length > 20) window.appState.aviator.history.pop();
+            
+            const bar = document.getElementById('avHistoryBar');
+            if (bar) {
+                bar.innerHTML = window.appState.aviator.history.map(m => `<div class="av-history-chip ${m>=10?'huge':(m>=2?'high':'')}">${m.toFixed(2)}x</div>`).join('');
+            }
+
+            if (avEngine.flightPath.length > 0) {
+                const lastPt = avEngine.flightPath[avEngine.flightPath.length - 1];
+                avCreateExplosion(lastPt.x, lastPt.y);
+            }
+
+            const container = document.getElementById('avStageContainer');
+            if (container) {
+                container.style.transform = "translate(5px, -5px)";
+                setTimeout(() => { if(container) container.style.transform = "translate(-5px, 5px)"; }, 50);
+                setTimeout(() => { if(container) container.style.transform = "translate(0px, 0px)"; }, 100);
+            }
+        }
+
+        function avGameLoop(timestamp) {
+            if (avEngine.status === 'WAITING') {
+                let elapsed = timestamp - avEngine.startTime;
+                avEngine.waitingProgress = elapsed / 2500;
+                if (avEngine.waitingProgress >= 1) avStartRound();
+            } 
+            else if (avEngine.status === 'IN_FLIGHT') {
+                const elapsedSec = (timestamp - avEngine.startTime) / 1000;
+                avEngine.multiplier = Math.pow(Math.E, 0.08 * elapsedSec);
+
+                for (let i of [1, 2]) {
+                    let b = window.appState.aviator.bets[i];
+                    if (b.state === 'ACTIVE' && b.autoCash && avEngine.multiplier >= b.autoCashVal) {
+                        avTriggerCashOut(i);
+                    }
+                }
+
+                if (avEngine.multiplier >= avEngine.target) {
+                    avEngine.multiplier = avEngine.target;
+                    avTriggerCrash();
+                } else {
+                    for (let i of [1, 2]) {
+                        if (window.appState.aviator.bets[i].state === 'ACTIVE') {
+                            const sub = document.getElementById(`avBtnSub${i}`);
+                            if (sub) sub.innerText = `${(window.appState.aviator.bets[i].amount * avEngine.multiplier).toFixed(2)} PKR`;
+                        }
+                    }
+                }
+            }
+            else if (avEngine.status === 'CRASHED') {
+                let elapsed = timestamp - avEngine.startTime;
+                if (elapsed >= 2200) avPrepareNextRound();
+            }
+
+            avDrawCanvas();
+            requestAnimationFrame(avGameLoop);
+        }
+
+        window.avUpdateLocalState = function(boxId) {
+            let b = window.appState.aviator.bets[boxId];
+            const autoBetToggle = document.getElementById(`avAutoBetToggle${boxId}`);
+            const autoCashToggle = document.getElementById(`avAutoCashToggle${boxId}`);
+            const autoCashVal = document.getElementById(`avAutoCashVal${boxId}`);
+            const betInput = document.getElementById(`avBetInput${boxId}`);
+            
+            if(autoBetToggle) b.autoBet = autoBetToggle.checked;
+            if(autoCashToggle) b.autoCash = autoCashToggle.checked;
+            if(autoCashVal) b.autoCashVal = parseFloat(autoCashVal.value) || 1.10;
+            if(betInput) b.amount = parseFloat(betInput.value) || 10;
+        };
+
+        window.avSwitchTabUI = function(boxId, tabType) {
+            let b = window.appState.aviator.bets[boxId];
+            b.autoBetToggleTab = (tabType === 'auto');
+            if (window.appState.currentTab === 'aviator') renderContent();
+        };
+
+        window.avAdjustBet = function(boxId, change) {
+            if (window.appState.aviator.bets[boxId].state !== 'IDLE') return;
+            let b = window.appState.aviator.bets[boxId];
+            b.amount += change;
+            if (b.amount < 10) b.amount = 10;
+            const input = document.getElementById(`avBetInput${boxId}`);
+            if(input) input.value = b.amount.toFixed(2);
+            avUpdateButtonUI(boxId);
+        };
+
+        window.avSetBet = function(boxId, val) {
+            if (window.appState.aviator.bets[boxId].state !== 'IDLE') return;
+            window.appState.aviator.bets[boxId].amount = val;
+            const input = document.getElementById(`avBetInput${boxId}`);
+            if(input) input.value = val.toFixed(2);
+            avUpdateButtonUI(boxId);
+        };
+
+        window.avHandleAction = function(boxId) {
+            if (!window.appState.activeUser) {
+                showToast("Please login first!");
+                return;
+            }
+            let b = window.appState.aviator.bets[boxId];
+            
+            if (b.state === 'ACTIVE' && avEngine.status === 'IN_FLIGHT') {
+                avTriggerCashOut(boxId);
+            } 
+            else if (b.state === 'QUEUED') {
+                window.appState.activeUser.balance += b.amount;
+                window.saveUserToCloud(window.appState.activeUser);
+                window.updateBalanceDisplay();
+                b.state = 'IDLE';
+                avUpdateButtonUI(boxId);
+            } 
+            else if (b.state === 'IDLE') {
+                avUpdateLocalState(boxId);
+                if (window.appState.activeUser.balance >= b.amount) {
+                    window.appState.activeUser.balance -= b.amount;
+                    window.saveUserToCloud(window.appState.activeUser);
+                    window.updateBalanceDisplay();
+                    b.state = 'QUEUED';
+                    avUpdateButtonUI(boxId);
+                } else {
+                    showToast("Insufficient Balance!");
+                }
+            }
+        };
+
+        function avUpdateButtonUI(boxId) {
+            const btn = document.getElementById(`avBtnAction${boxId}`);
+            const sub = document.getElementById(`avBtnSub${boxId}`);
+            if (!btn || !sub) return;
+
+            const b = window.appState.aviator.bets[boxId];
+
+            if (b.state === 'ACTIVE') {
+                btn.className = "av-btn-action cashout";
+                btn.childNodes[0].nodeValue = "CASH OUT";
+                sub.innerText = `${(b.amount * avEngine.multiplier).toFixed(2)} PKR`;
+                avToggleInputs(boxId, true);
+            } else if (b.state === 'QUEUED') {
+                btn.className = "av-btn-action queued";
+                btn.childNodes[0].nodeValue = "CANCEL";
+                sub.innerText = "Waiting for next round";
+                avToggleInputs(boxId, true);
+            } else {
+                btn.className = "av-btn-action bet";
+                btn.childNodes[0].nodeValue = "BET";
+                if (avEngine.status === 'IN_FLIGHT' || avEngine.status === 'CRASHED') {
+                    sub.innerText = "Waiting for next round";
+                } else {
+                    sub.innerText = `${b.amount.toFixed(2)} PKR`;
+                }
+                avToggleInputs(boxId, false);
+            }
+        }
+
+        function avToggleInputs(boxId, disable) {
+            const bi = document.getElementById(`avBetInput${boxId}`); if(bi) bi.disabled = disable;
+            const bm = document.getElementById(`avBtnMinus${boxId}`); if(bm) bm.disabled = disable;
+            const bp = document.getElementById(`avBtnPlus${boxId}`); if(bp) bp.disabled = disable;
+            document.querySelectorAll(`.av-btn-preset-${boxId}`).forEach(p => p.disabled = disable);
+        }
+
+        function avShowToast(text) {
+            const toast = document.getElementById('avToastMessage');
+            if (toast) {
+                toast.innerText = text;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            } else {
+                showToast(text);
+            }
+        }
+
+        function avCreateExplosion(x, y) {
+            avEngine.particles = [];
+            avEngine.shockwave = 5;
+            const colors = ['#ff0055', '#ff9900', '#ffff00', '#ffffff', '#ff3300'];
+            for (let i = 0; i < 65; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 8 + 2;
+                avEngine.particles.push({
+                    x: x, y: y,
+                    vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+                    size: Math.random() * 6 + 3,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1, decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        window.avResizeCanvas = function() {
+            const canvas = document.getElementById('avGameCanvas');
+            if (canvas && canvas.parentElement) {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
+        }
+        window.addEventListener('resize', () => { if(window.appState.currentTab === 'aviator') avResizeCanvas(); });
+
+        function avDrawCanvas() {
+            const canvas = document.getElementById('avGameCanvas');
+            if (!canvas) return;
+            if(canvas.width === 0) avResizeCanvas();
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, w, h);
+
+            // Draw Grid
+            ctx.lineWidth = 1;
+            for (let x = 60; x < w; x += 75) {
+                ctx.strokeStyle = "rgba(0, 229, 255, 0.08)";
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+                ctx.fillStyle = "rgba(0, 229, 255, 0.2)";
+                ctx.beginPath(); ctx.arc(x, h - 15, 2, 0, Math.PI * 2); ctx.fill();
+            }
+            for (let y = h - 40; y > 20; y -= 55) {
+                ctx.strokeStyle = "rgba(255, 0, 85, 0.08)";
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                ctx.fillStyle = "rgba(255, 0, 85, 0.2)";
+                ctx.beginPath(); ctx.arc(25, y, 2, 0, Math.PI * 2); ctx.fill();
+            }
+
+            if (avEngine.status === 'WAITING') {
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "700 20px -apple-system, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("WAITING FOR NEXT ROUND", w / 2, h / 2 - 15);
+
+                const barW = 200; const barH = 4;
+                ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+                ctx.beginPath(); ctx.roundRect((w - barW) / 2, h / 2 + 10, barW, barH, 2); ctx.fill();
+                
+                ctx.fillStyle = "#ff0055";
+                ctx.shadowColor = "#ff0055"; ctx.shadowBlur = 12;
+                ctx.beginPath(); ctx.roundRect((w - barW) / 2, h / 2 + 10, barW * Math.min(1, avEngine.waitingProgress), barH, 2); ctx.fill();
+                ctx.shadowBlur = 0;
+                return;
+            }
+
+            const elapsedSec = (performance.now() - avEngine.startTime) / 1000;
+            let fastProgress = Math.min(1.0, elapsedSec / 1.8);
+            let progressX = Math.pow(fastProgress, 0.5) * 0.85;
+            let progressY = Math.pow(fastProgress, 0.65) * 0.82;
+            const planeX = 35 + progressX * (w - 100);
+            const planeY = (h - 35) - progressY * (h - 100);
+
+            if (avEngine.status === 'IN_FLIGHT') {
+                avEngine.flightPath.push({ x: planeX, y: planeY });
+            }
+
+            if (avEngine.flightPath.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(0, h);
+                ctx.lineTo(avEngine.flightPath[0].x, avEngine.flightPath[0].y);
+                for (let i = 1; i < avEngine.flightPath.length; i++) ctx.lineTo(avEngine.flightPath[i].x, avEngine.flightPath[i].y);
+                ctx.lineTo(avEngine.flightPath[avEngine.flightPath.length - 1].x, h);
+                ctx.closePath();
+                const grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, "rgba(255, 0, 85, 0.65)");
+                grad.addColorStop(1, "rgba(255, 0, 85, 0.0)");
+                ctx.fillStyle = grad; ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(avEngine.flightPath[0].x, avEngine.flightPath[0].y);
+                for (let i = 1; i < avEngine.flightPath.length; i++) ctx.lineTo(avEngine.flightPath[i].x, avEngine.flightPath[i].y);
+                ctx.strokeStyle = "#ff0055"; ctx.lineWidth = 4;
+                ctx.shadowColor = "#ff0055"; ctx.shadowBlur = 15;
+                ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            if (avEngine.status === 'IN_FLIGHT') {
+                let pitchAngle = -0.35 + (fastProgress * 0.25);
+                ctx.save();
+                ctx.translate(planeX, planeY);
+                if (fastProgress > 0.8) ctx.translate(0, Math.sin(performance.now() * 0.008) * 1.5);
+                ctx.rotate(pitchAngle);
+                ctx.fillStyle = "#ff0055"; ctx.shadowColor = "#ff0055"; ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.moveTo(26, 0); ctx.lineTo(8, -5); ctx.lineTo(-2, -20); ctx.lineTo(3, -20); ctx.lineTo(12, -4); ctx.lineTo(-14, -3); ctx.lineTo(-24, -13); ctx.lineTo(-20, -13); ctx.lineTo(-8, -2); ctx.lineTo(-20, 0); ctx.lineTo(-8, 2); ctx.lineTo(-20, 13); ctx.lineTo(-24, 13); ctx.lineTo(-14, 3); ctx.lineTo(12, 4); ctx.lineTo(3, 20); ctx.lineTo(-2, 20); ctx.lineTo(8, 5);
+                ctx.closePath(); ctx.fill();
+                ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 0;
+                ctx.beginPath(); ctx.ellipse(12, 0, 7, 2, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = "#ff9900"; ctx.shadowColor = "#ff9900"; ctx.shadowBlur = 10;
+                ctx.beginPath(); ctx.ellipse(-24, 0, 18, 3, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0; ctx.restore();
+            } else if (avEngine.status === 'CRASHED') {
+                if (avEngine.shockwave < 80) {
+                    avEngine.shockwave += 4;
+                    ctx.strokeStyle = `rgba(255, 0, 85, ${1 - avEngine.shockwave / 80})`;
+                    ctx.lineWidth = 3; ctx.beginPath();
+                    if (avEngine.flightPath.length > 0) ctx.arc(avEngine.flightPath[avEngine.flightPath.length - 1].x, avEngine.flightPath[avEngine.flightPath.length - 1].y, avEngine.shockwave, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                for (let p of avEngine.particles) {
+                    if (p.alpha <= 0) continue;
+                    p.x += p.vx; p.y += p.vy; p.alpha -= p.decay;
+                    ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.alpha);
+                    ctx.shadowColor = p.color; ctx.shadowBlur = 10;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+                }
+                ctx.globalAlpha = 1.0; ctx.shadowBlur = 0;
+            }
+
+            ctx.textAlign = "center";
+            if (avEngine.status === 'CRASHED') {
+                ctx.fillStyle = "#ff0055"; ctx.font = "900 42px -apple-system, sans-serif";
+                ctx.shadowColor = "#ff0055"; ctx.shadowBlur = 20;
+                ctx.fillText("FLEW AWAY!", w / 2, h / 2 - 20);
+                ctx.fillStyle = "#ffffff"; ctx.font = "700 32px -apple-system, sans-serif";
+                ctx.shadowBlur = 0; ctx.fillText(avEngine.multiplier.toFixed(2) + "x", w / 2, h / 2 + 30);
+            } else {
+                ctx.fillStyle = "#ffffff"; ctx.font = "900 58px -apple-system, sans-serif";
+                ctx.shadowColor = "rgba(255, 0, 85, 0.4)"; ctx.shadowBlur = 20;
+                ctx.fillText(avEngine.multiplier.toFixed(2) + "x", w / 2, h / 2);
+                ctx.shadowBlur = 0;
+            }
+        }
+        // ================= END AVIATOR ENGINE =================
+
+        // ================= WINGO ENGINE & TABS =================
         function getWinGoHTML() {
             const room = window.appState.wingoRooms[window.appState.activeWinGoRoom];
             return `
@@ -589,7 +1316,7 @@
                     <div class="bg-gradient-to-r from-purple-900 to-indigo-900 p-3 rounded-2xl border border-purple-500/30 flex justify-between items-center">
                         <div>
                             <span class="text-[10px] text-purple-300 uppercase">Wallet Balance</span>
-                            <div class="text-lg font-black text-yellow-400">Rs <span id="wingo-balance-val">${window.appState.activeUser.balance.toFixed(2)}</span></div>
+                            <div class="text-lg font-black text-yellow-400">Rs <span id="wingo-balance-val">${window.appState.activeUser ? window.appState.activeUser.balance.toFixed(2) : '0.00'}</span></div>
                         </div>
                         <div class="flex space-x-1.5">
                             <button onclick="switchTab('withdraw')" class="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow">Withdraw</button>
@@ -599,9 +1326,7 @@
 
                     <div class="grid grid-cols-4 gap-1 bg-[#160b33] p-1 rounded-xl border border-purple-900/50 text-center text-xs">
                         ${['30Sec', '1Min', '3Min', '5Min'].map(r => `
-                            <button onclick="window.appState.activeWinGoRoom='${r}'; renderContent();" class="${window.appState.activeWinGoRoom === r ? 'gold-btn font-extrabold shadow' : 'text-gray-400'} py-1.5 rounded-lg">
-                                ${r}
-                            </button>
+                            <button onclick="window.appState.activeWinGoRoom='${r}'; renderContent();" class="${window.appState.activeWinGoRoom === r ? 'gold-btn font-extrabold shadow' : 'text-gray-400'} py-1.5 rounded-lg">${r}</button>
                         `).join('')}
                     </div>
 
@@ -613,20 +1338,13 @@
                             </div>
                             <div class="text-right">
                                 <span class="text-[10px] text-gray-300">Time Remaining</span>
-                                <div id="active-room-timer" class="font-mono text-xl font-black text-red-400 bg-slate-900 px-2 py-0.5 rounded border border-purple-700">
-                                    00:30
-                                </div>
+                                <div id="active-room-timer" class="font-mono text-xl font-black text-red-400 bg-slate-900 px-2 py-0.5 rounded border border-purple-700">00:30</div>
                             </div>
                         </div>
-
                         <div class="flex items-center justify-between pt-1">
                             <span class="text-[10px] text-purple-200">Recent Results:</span>
                             <div class="flex space-x-1">
-                                ${room.history.slice(0, 5).map(h => `
-                                    <div class="w-6 h-6 rounded-full ${getBallColorClass(h.number)} flex items-center justify-center font-bold text-xs text-white shadow">
-                                        ${h.number}
-                                    </div>
-                                `).join('')}
+                                ${room.history.slice(0, 5).map(h => `<div class="w-6 h-6 rounded-full ${getBallColorClass(h.number)} flex items-center justify-center font-bold text-xs text-white shadow">${h.number}</div>`).join('')}
                             </div>
                         </div>
                     </div>
@@ -639,11 +1357,7 @@
 
                     <div class="bg-brand-card p-3 rounded-2xl border border-purple-800/60 space-y-2">
                         <div class="grid grid-cols-5 gap-2">
-                            ${[0,1,2,3,4,5,6,7,8,9].map(n => `
-                                <button onclick="openBetModal(${n})" class="h-10 rounded-xl font-black text-sm text-white ${getBallColorClass(n)} shadow border border-white/20 active:scale-95">
-                                    ${n}
-                                </button>
-                            `).join('')}
+                            ${[0,1,2,3,4,5,6,7,8,9].map(n => `<button onclick="openBetModal(${n})" class="h-10 rounded-xl font-black text-sm text-white ${getBallColorClass(n)} shadow border border-white/20 active:scale-95">${n}</button>`).join('')}
                         </div>
                         <div class="grid grid-cols-2 gap-2 pt-1">
                             <button onclick="openBetModal('Big')" class="bg-amber-500 font-black py-2 rounded-xl text-xs text-slate-950">Big (5-9)</button>
@@ -651,34 +1365,17 @@
                         </div>
                     </div>
 
-                    <div class="bg-brand-card rounded-2xl border border-purple-800/60 p-3 text-xs">
-                        <h4 class="font-bold text-yellow-400 mb-2">Game History (${window.appState.activeWinGoRoom})</h4>
+                    <div class="bg-brand-card rounded-2xl border border-purple-800/60 p-3 text-xs mb-4">
+                        <h4 class="font-bold text-yellow-400 mb-2">History (${window.appState.activeWinGoRoom})</h4>
                         <table class="w-full text-left">
-                            <thead>
-                                <tr class="text-gray-400 border-b border-purple-800">
-                                    <th class="pb-1">Period ID</th>
-                                    <th class="pb-1 text-center">Num</th>
-                                    <th class="pb-1 text-center">Size</th>
-                                    <th class="pb-1 text-right">Color</th>
-                                </tr>
-                            </thead>
                             <tbody class="divide-y divide-purple-900/40">
-                                ${room.history.map(row => `
-                                    <tr>
-                                        <td class="py-1.5 font-mono text-gray-300">${row.period}</td>
-                                        <td class="py-1.5 text-center font-bold text-yellow-400">${row.number}</td>
-                                        <td class="py-1.5 text-center">${row.size}</td>
-                                        <td class="py-1.5 text-right">
-                                            <span class="px-2 py-0.5 rounded text-[9px] text-white ${getBallColorClass(row.number)}">${row.color}</span>
-                                        </td>
-                                    </tr>
-                                `).join('')}
+                                ${room.history.slice(0,10).map(row => `<tr><td class="py-1.5 font-mono text-gray-300">${row.period}</td><td class="py-1.5 text-center font-bold text-yellow-400">${row.number}</td><td class="py-1.5 text-center">${row.size}</td><td class="py-1.5 text-right"><span class="px-2 py-0.5 rounded text-[9px] text-white ${getBallColorClass(row.number)}">${row.color}</span></td></tr>`).join('')}
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div id="bet-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+                <div id="bet-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-end justify-center p-0 sm:p-4">
                     <div class="bg-brand-card w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 border-t border-purple-600/60 space-y-4">
                         <div class="flex justify-between items-center border-b border-purple-800 pb-2">
                             <h3 class="font-bold text-yellow-400 text-xs">Confirm Bet - Win Go ${window.appState.activeWinGoRoom}</h3>
@@ -700,208 +1397,45 @@
                 </div>
             `;
         }
-
-        function getDepositHTML() {
-            return `
-                <div class="p-3 space-y-3.5">
-                    <div class="bg-gradient-to-r from-red-600 to-orange-600 p-3 rounded-2xl shadow border border-orange-400/40">
-                        <div class="text-xs text-orange-100 uppercase font-bold">Fast Deposit via JazzCash</div>
-                        <div class="text-base font-black text-white">Manual Transfer Channel</div>
-                    </div>
-
-                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-2 text-xs">
-                        <span class="text-gray-300">Send Payment To This JazzCash Account:</span>
-                        <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-xl border border-purple-700">
-                            <div>
-                                <div class="text-[10px] text-gray-400">JazzCash Account Number</div>
-                                <div class="text-base font-mono font-black text-yellow-400">${window.appState.jazzcashNumber}</div>
-                            </div>
-                            <button onclick="navigator.clipboard.writeText('${window.appState.jazzcashNumber}'); showToast('Number copied!');" class="bg-purple-600 text-white font-bold px-3 py-1.5 rounded-lg text-[10px]">Copy Number</button>
-                        </div>
-                    </div>
-
-                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-3 text-xs">
-                        <div>
-                            <label class="font-bold text-yellow-400">Sent Amount (Rs)</label>
-                            <input type="number" id="deposit-amount-input" value="500" placeholder="Minimum Rs 300" class="w-full bg-slate-900 border border-purple-700 rounded-xl px-3 py-2 text-sm text-yellow-400 font-bold mt-1">
-                        </div>
-
-                        <div>
-                            <label class="font-bold text-yellow-400">Transaction ID (Trx ID / TID)</label>
-                            <input type="text" id="deposit-trx-input" placeholder="e.g. 01234567890" class="w-full bg-slate-900 border border-purple-700 rounded-xl px-3 py-2 text-sm text-white font-mono mt-1">
-                            <p class="text-[9px] text-gray-400 mt-1">Enter transaction ID received from JazzCash SMS.</p>
-                        </div>
-
-                        <button onclick="submitDeposit()" class="w-full gold-btn font-black py-3 rounded-xl text-xs shadow-lg">Proceed Deposit Request</button>
-                    </div>
-
-                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800/60 space-y-2 text-xs">
-                        <h4 class="font-bold text-yellow-400">Deposit History</h4>
-                        ${window.appState.deposits.length === 0 ? '<p class="text-gray-500">No deposit requests yet.</p>' : ''}
-                        ${window.appState.deposits.map(d => `
-                            <div class="bg-slate-900 p-2 rounded-xl border border-purple-900/40 flex justify-between items-center">
-                                <div>
-                                    <div class="font-bold text-green-400">Rs ${d.amount} (Trx: ${d.trxId})</div>
-                                    <div class="text-[9px] text-gray-400">${d.time}</div>
-                                </div>
-                                <span class="px-2 py-0.5 rounded text-[9px] font-bold ${d.status === 'Completed' ? 'bg-green-950 text-green-400' : (d.status === 'Rejected' ? 'bg-red-950 text-red-400' : 'bg-yellow-950 text-yellow-400')}">${d.status}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function getWithdrawHTML() {
-            return `
-                <div class="p-3 space-y-3.5">
-                    <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-4 rounded-2xl shadow-lg">
-                        <span class="text-xs text-blue-200">Withdrawable Balance</span>
-                        <div class="text-2xl font-black text-white">Rs ${window.appState.activeUser.balance.toFixed(2)}</div>
-                    </div>
-
-                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-3 text-xs">
-                        <h4 class="font-bold text-yellow-400">JazzCash Account Info</h4>
-                        <div>
-                            <label class="text-gray-300">Account Title</label>
-                            <input type="text" id="wds-account-name" placeholder="Name" class="w-full bg-slate-900 border border-purple-700 rounded px-3 py-2 text-white mt-1">
-                        </div>
-                        <div>
-                            <label class="text-gray-300">Account Number</label>
-                            <input type="text" id="wds-account-num" placeholder="0300xxxxxxx" class="w-full bg-slate-900 border border-purple-700 rounded px-3 py-2 text-white mt-1">
-                        </div>
-                    </div>
-
-                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-3 text-xs">
-                        <label class="font-bold text-yellow-400">Withdraw Amount (Min Rs 500)</label>
-                        <input type="number" id="wds-amount-input" placeholder="500" class="w-full bg-slate-900 border border-purple-700 rounded px-3 py-2 text-yellow-400 font-bold">
-                        <button onclick="submitWithdrawal()" class="w-full gold-btn font-black py-3 rounded-xl shadow-lg">Submit Request</button>
-                    </div>
-
-                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800/60 space-y-2 text-xs">
-                        <h4 class="font-bold text-yellow-400">Withdrawal Logs</h4>
-                        ${window.appState.withdrawals.length === 0 ? '<p class="text-gray-500">No withdrawal requests yet.</p>' : ''}
-                        ${window.appState.withdrawals.map(w => `
-                            <div class="bg-slate-900 p-2 rounded-xl border border-purple-900/40 flex justify-between items-center">
-                                <div>
-                                    <div class="font-bold text-yellow-400">Rs ${w.amount}</div>
-                                    <div class="text-[9px] text-gray-400">${w.time}</div>
-                                </div>
-                                <span class="px-2 py-0.5 rounded text-[9px] font-bold ${w.status === 'Completed' ? 'bg-green-950 text-green-400' : 'bg-yellow-950 text-yellow-400'}">${w.status}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function getAccountHTML() {
-            const u = window.appState.activeUser;
-            return `
-                <div class="p-3 space-y-3.5">
-                    <div class="bg-gradient-to-r from-purple-900 to-indigo-950 p-4 rounded-2xl border border-purple-600/40 flex items-center space-x-3">
-                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center font-black text-slate-950 text-lg">
-                            ${u.fullName ? u.fullName.charAt(0).toUpperCase() : 'U'}
-                        </div>
-                        <div>
-                            <div class="font-bold text-sm text-white">${u.fullName || 'User'}</div>
-                            <div class="text-xs text-gray-300 font-mono">+92${u.phone}</div>
-                            <div class="text-[10px] text-gray-400">UID: ${u.id}</div>
-                        </div>
-                    </div>
-
-                    <div class="bg-brand-card p-4 rounded-2xl border border-purple-800/60 flex justify-between items-center">
-                        <div>
-                            <span class="text-[10px] text-gray-400">Main Balance</span>
-                            <div class="text-xl font-black text-yellow-400">Rs <span id="account-balance-val">${u.balance.toFixed(2)}</span></div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button onclick="switchTab('deposit')" class="bg-green-600 text-white font-bold text-xs px-3 py-2 rounded-xl">Deposit</button>
-                            <button onclick="switchTab('withdraw')" class="bg-red-600 text-white font-bold text-xs px-3 py-2 rounded-xl">Withdraw</button>
-                        </div>
-                    </div>
-
-                    <button onclick="handleUserLogout()" class="w-full bg-slate-900 border border-purple-800 text-red-400 font-bold py-3 rounded-2xl text-xs">Log Out</button>
-                </div>
-            `;
-        }
-
+        
         let currentBetTarget = null;
-        window.openBetModal = function(val) {
-            currentBetTarget = val;
-            document.getElementById('bet-target-val').innerText = val;
-            document.getElementById('bet-modal').classList.remove('hidden');
-        };
-
-        window.closeBetModal = function() {
-            document.getElementById('bet-modal').classList.add('hidden');
-        };
-
+        window.openBetModal = function(val) { currentBetTarget = val; document.getElementById('bet-target-val').innerText = val; document.getElementById('bet-modal').classList.remove('hidden'); };
+        window.closeBetModal = function() { document.getElementById('bet-modal').classList.add('hidden'); };
         window.processBetSubmit = function() {
+            if (!window.appState.activeUser) return showToast('Pehle login karein!');
             const amt = parseFloat(document.getElementById('bet-amount-val').value) || 10;
-            if (window.appState.activeUser.balance < amt) {
-                showToast('Insufficient wallet balance!');
-                return;
-            }
-
+            if (window.appState.activeUser.balance < amt) { showToast('Insufficient wallet balance!'); return; }
             window.appState.activeUser.balance -= amt;
-            window.saveUserToCloud(window.appState.activeUser);
-            updateBalanceDisplay();
-
+            window.saveUserToCloud(window.appState.activeUser); updateBalanceDisplay();
             const room = window.appState.wingoRooms[window.appState.activeWinGoRoom];
-            room.myBets.push({
-                period: room.period.toString(),
-                target: currentBetTarget,
-                amount: amt
-            });
-
-            showToast(`Bet placed: Rs ${amt} on ${currentBetTarget}`);
-            closeBetModal();
+            room.myBets.push({ period: room.period.toString(), target: currentBetTarget, amount: amt });
+            showToast(`Bet placed: Rs ${amt} on ${currentBetTarget}`); closeBetModal();
         };
 
         function calculateRoomOutcome(roomKey) {
             const room = window.appState.wingoRooms[roomKey];
-            let num;
-
-            if (room.override !== 'AUTO') {
-                num = parseInt(room.override);
-            } else {
-                num = Math.floor(Math.random() * 10);
-            }
-
+            let num = room.override !== 'AUTO' ? parseInt(room.override) : Math.floor(Math.random() * 10);
             const size = num >= 5 ? 'Big' : 'Small';
             const color = [1,3,7,9].includes(num) ? 'Green' : ([2,4,6,8].includes(num) ? 'Red' : 'Violet');
 
-            room.history.unshift({
-                period: room.period.toString(),
-                number: num,
-                size: size,
-                color: color
-            });
+            room.history.unshift({ period: room.period.toString(), number: num, size: size, color: color });
 
-            room.myBets.forEach(b => {
-                if (b.period === room.period.toString()) {
-                    let isWin = false;
-                    if (typeof b.target === 'number' && b.target === num) isWin = true;
-                    if (b.target === 'Big' && size === 'Big') isWin = true;
-                    if (b.target === 'Small' && size === 'Small') isWin = true;
-                    if (b.target === color) isWin = true;
-
-                    if (isWin) {
-                        const payout = b.amount * 1.95;
-                        window.appState.activeUser.balance += payout;
-                        window.saveUserToCloud(window.appState.activeUser);
-                        showToast(`🎉 WIN! Room ${roomKey} Period ${b.period.slice(-4)} paid Rs ${payout.toFixed(2)}`);
+            if (window.appState.activeUser) {
+                room.myBets.forEach(b => {
+                    if (b.period === room.period.toString()) {
+                        let isWin = (typeof b.target === 'number' && b.target === num) || (b.target === size) || (b.target === color);
+                        if (isWin) {
+                            const payout = b.amount * 1.95;
+                            window.appState.activeUser.balance += payout;
+                            window.saveUserToCloud(window.appState.activeUser);
+                            showToast(`🎉 WIN! Room ${roomKey} Period ${b.period.slice(-4)} paid Rs ${payout.toFixed(2)}`);
+                        }
                     }
-                }
-            });
-
+                });
+            }
             room.period = room.period + 1;
             updateBalanceDisplay();
-
-            if (window.appState.currentTab === 'wingo' && window.appState.activeWinGoRoom === roomKey) {
-                renderContent();
-            }
+            if (window.appState.currentTab === 'wingo' && window.appState.activeWinGoRoom === roomKey) renderContent();
         }
 
         function getBallColorClass(num) {
@@ -912,342 +1446,261 @@
             return 'bg-purple-600';
         }
 
-        window.submitDeposit = function() {
-            const amt = parseFloat(document.getElementById('deposit-amount-input').value);
-            const trx = document.getElementById('deposit-trx-input').value.trim();
+        // ================= UTILITIES & OTHER HTML (DEPOSIT, WD, ACCOUNT) =================
+        function getDepositHTML() {
+            return `
+                <div class="p-3 space-y-3.5">
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-2 text-xs">
+                        <span class="text-gray-300">Send Payment To This JazzCash Account:</span>
+                        <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-xl border border-purple-700">
+                            <div>
+                                <div class="text-[10px] text-gray-400">JazzCash Account Number</div>
+                                <div class="text-base font-mono font-black text-yellow-400">${window.appState.jazzcashNumber}</div>
+                            </div>
+                            <button onclick="navigator.clipboard.writeText('${window.appState.jazzcashNumber}'); showToast('Number copied!');" class="bg-purple-600 text-white font-bold px-3 py-1.5 rounded-lg text-[10px]">Copy</button>
+                        </div>
+                    </div>
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-3 text-xs">
+                        <div>
+                            <label class="font-bold text-yellow-400">Sent Amount (Rs)</label>
+                            <input type="number" id="deposit-amount-input" value="500" placeholder="Minimum Rs 300" class="w-full bg-slate-900 border border-purple-700 rounded-xl px-3 py-2 text-sm text-yellow-400 font-bold mt-1">
+                        </div>
+                        <div>
+                            <label class="font-bold text-yellow-400">Transaction ID (Trx ID)</label>
+                            <input type="text" id="deposit-trx-input" placeholder="e.g. 01234567890" class="w-full bg-slate-900 border border-purple-700 rounded-xl px-3 py-2 text-sm text-white font-mono mt-1">
+                        </div>
+                        <button onclick="submitDeposit()" class="w-full gold-btn font-black py-3 rounded-xl shadow-lg">Proceed Request</button>
+                    </div>
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800/60 space-y-2 text-xs mb-5">
+                        <h4 class="font-bold text-yellow-400">Deposit History</h4>
+                        ${window.appState.deposits.length === 0 ? '<p class="text-gray-500">No requests yet.</p>' : window.appState.deposits.map(d => `<div class="bg-slate-900 p-2 rounded-xl border border-purple-900/40 flex justify-between items-center"><div><div class="font-bold text-green-400">Rs ${d.amount} (Trx: ${d.trxId})</div><div class="text-[9px] text-gray-400">${d.time}</div></div><span class="px-2 py-0.5 rounded text-[9px] font-bold ${d.status === 'Completed' ? 'bg-green-950 text-green-400' : (d.status === 'Rejected' ? 'bg-red-950 text-red-400' : 'bg-yellow-950 text-yellow-400')}">${d.status}</span></div>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
 
-            if (!amt || amt < 300) {
-                showToast('Min Deposit is Rs 300');
-                return;
-            }
+        function getWithdrawHTML() {
+            return `
+                <div class="p-3 space-y-3.5">
+                    <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-4 rounded-2xl shadow-lg">
+                        <span class="text-xs text-blue-200">Withdrawable Balance</span>
+                        <div class="text-2xl font-black text-white">Rs ${window.appState.activeUser ? window.appState.activeUser.balance.toFixed(2) : '0.00'}</div>
+                    </div>
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-3 text-xs">
+                        <h4 class="font-bold text-yellow-400">JazzCash Account Info</h4>
+                        <input type="text" id="wds-account-name" placeholder="Title Name" class="w-full bg-slate-900 border border-purple-700 rounded px-3 py-2 text-white">
+                        <input type="text" id="wds-account-num" placeholder="0300xxxxxxx" class="w-full bg-slate-900 border border-purple-700 rounded px-3 py-2 text-white">
+                    </div>
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-3 text-xs">
+                        <label class="font-bold text-yellow-400">Withdraw Amount (Min 500)</label>
+                        <input type="number" id="wds-amount-input" placeholder="500" class="w-full bg-slate-900 border border-purple-700 rounded px-3 py-2 text-yellow-400 font-bold">
+                        <button onclick="submitWithdrawal()" class="w-full gold-btn font-black py-3 rounded-xl">Submit</button>
+                    </div>
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800/60 space-y-2 text-xs mb-5">
+                        <h4 class="font-bold text-yellow-400">History</h4>
+                        ${window.appState.withdrawals.length === 0 ? '<p class="text-gray-500">No requests yet.</p>' : window.appState.withdrawals.map(w => `<div class="bg-slate-900 p-2 rounded-xl flex justify-between items-center border border-purple-900/40"><div><div class="font-bold text-yellow-400">Rs ${w.amount}</div><div class="text-[9px] text-gray-400">${w.time}</div></div><span class="px-2 py-0.5 rounded text-[9px] font-bold ${w.status === 'Completed' ? 'bg-green-950 text-green-400' : 'bg-yellow-950 text-yellow-400'}">${w.status}</span></div>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
 
-            if (!trx || trx.length < 5) {
-                showToast('Please enter valid Transaction ID (Trx ID)');
-                return;
-            }
+        function getAccountHTML() {
+            const u = window.appState.activeUser;
+            if (!u) return '';
+            return `
+                <div class="p-3 space-y-3.5">
+                    <div class="bg-gradient-to-r from-purple-900 to-indigo-950 p-4 rounded-2xl border border-purple-600/40 flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center font-black text-slate-950 text-lg">${u.fullName ? u.fullName.charAt(0).toUpperCase() : 'U'}</div>
+                        <div><div class="font-bold text-sm text-white">${u.fullName || 'User'}</div><div class="text-xs text-gray-300 font-mono">+92${u.phone}</div><div class="text-[10px] text-gray-400">UID: ${u.id}</div></div>
+                    </div>
+                    <div class="bg-brand-card p-4 rounded-2xl border border-purple-800/60 flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] text-gray-400">Main Balance</span>
+                            <div class="text-xl font-black text-yellow-400">Rs <span id="account-balance-val">${u.balance.toFixed(2)}</span></div>
+                        </div>
+                    </div>
+                    <button onclick="handleUserLogout()" class="w-full bg-slate-900 border border-purple-800 text-red-400 font-bold py-3 rounded-2xl text-xs">Log Out</button>
+                </div>
+            `;
+        }
 
-            const depObj = {
-                id: 'DEP' + Math.floor(100 + Math.random()*900),
-                userPhone: window.appState.activeUser.phone,
-                amount: amt,
-                trxId: trx,
-                time: new Date().toLocaleTimeString().slice(0, 5),
-                status: 'Pending',
-                timestamp: Date.now()
-            };
-
-            window.saveDepositToCloud(depObj);
-            showToast('Deposit request sent! Saved to Cloud.');
-            renderContent();
-        };
-
-        window.submitWithdrawal = function() {
-            const amt = parseFloat(document.getElementById('wds-amount-input').value);
-            const name = document.getElementById('wds-account-name').value;
-            const num = document.getElementById('wds-account-num').value;
-
-            if (!name || !num) {
-                showToast('Please fill account info');
-                return;
-            }
-
-            if (!amt || amt < 500) {
-                showToast('Min Withdrawal is Rs 500');
-                return;
-            }
-
-            if (window.appState.activeUser.balance < amt) {
-                showToast('Insufficient wallet balance');
-                return;
-            }
-
-            window.appState.activeUser.balance -= amt;
-            window.saveUserToCloud(window.appState.activeUser);
-            updateBalanceDisplay();
-
-            const wdsObj = {
-                id: 'WDS' + Math.floor(100 + Math.random()*900),
-                userPhone: window.appState.activeUser.phone,
-                amount: amt,
-                time: new Date().toLocaleTimeString().slice(0, 5),
-                status: 'Pending',
-                timestamp: Date.now()
-            };
-
-            window.saveWithdrawalToCloud(wdsObj);
-            showToast('Withdrawal request sent to Cloud Admin!');
-            renderContent();
-        };
-
+        // ================= AUTH, ADMIN & API =================
         window.openAuthModal = function(mode) {
             window.appState.authMode = mode;
-            const modal = document.getElementById('auth-modal');
-            const nameBox = document.getElementById('auth-name-container');
-            
-            document.getElementById('auth-modal-title').innerText = mode === 'signup' ? 'Sign Up Account' : 'Login Account';
+            document.getElementById('auth-modal-title').innerText = mode === 'signup' ? 'Sign Up' : 'Login';
             document.getElementById('auth-action-btn').innerText = mode === 'signup' ? 'Sign Up & Play' : 'Log In';
             document.getElementById('auth-switch-text').innerText = mode === 'signup' ? 'Already registered?' : "Don't have an account?";
             document.getElementById('auth-switch-btn').innerText = mode === 'signup' ? 'Login' : 'Sign Up';
-            
-            if (mode === 'login') {
-                nameBox.classList.add('hidden');
-            } else {
-                nameBox.classList.remove('hidden');
-            }
-
-            modal.classList.remove('hidden');
+            mode === 'login' ? document.getElementById('auth-name-container').classList.add('hidden') : document.getElementById('auth-name-container').classList.remove('hidden');
+            document.getElementById('auth-modal').classList.remove('hidden');
         };
-
-        window.closeAuthModal = function() {
-            document.getElementById('auth-modal').classList.add('hidden');
-        };
-
-        window.switchAuthMode = function() {
-            openAuthModal(window.appState.authMode === 'signup' ? 'login' : 'signup');
-        };
+        window.closeAuthModal = function() { document.getElementById('auth-modal').classList.add('hidden'); };
+        window.switchAuthMode = function() { openAuthModal(window.appState.authMode === 'signup' ? 'login' : 'signup'); };
 
         window.processAuthSubmit = async function() {
-            const phoneInput = document.getElementById('auth-phone').value.trim();
-            const passInput = document.getElementById('auth-pass').value.trim();
-            const fullName = document.getElementById('auth-fullname').value.trim();
-
-            if (!/^\d{10}$/.test(phoneInput)) {
-                showToast('Enter exactly 10-digit number (e.g. 3001234567)');
-                return;
-            }
-
-            if (passInput.length < 6 || passInput.length > 12) {
-                showToast('Password must be 6 to 12 characters');
-                return;
-            }
+            const p = document.getElementById('auth-phone').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+            const fName = document.getElementById('auth-fullname').value.trim();
+            if (!/^\d{10}$/.test(p)) return showToast('Enter 10-digit number (e.g. 3001234567)');
+            if (pass.length < 6) return showToast('Password min 6 chars');
 
             if (window.appState.authMode === 'signup') {
-                if (!fullName) {
-                    showToast('Please enter your full name');
-                    return;
-                }
-
-                const exists = window.appState.users.find(u => u.phone === phoneInput);
-                if (exists) {
-                    showToast('Phone number already registered! Please Login.');
-                    openAuthModal('login');
-                    return;
-                }
-
-                const newUser = {
-                    id: Math.floor(10000 + Math.random()*90000).toString(),
-                    fullName: fullName,
-                    phone: phoneInput,
-                    pass: passInput,
-                    balance: 0.00,
-                    status: 'Online'
-                };
-
-                await window.saveUserToCloud(newUser);
-                showToast('Signup saved to Cloud! Please login now.');
-                openAuthModal('login');
+                if (!fName) return showToast('Enter name');
+                if (window.appState.users.find(u => u.phone === p)) return showToast('Phone registered! Login.');
+                await window.saveUserToCloud({ id: Math.floor(10000+Math.random()*90000).toString(), fullName: fName, phone: p, pass: pass, balance: 0.00 });
+                showToast('Signup successful! Please login.'); openAuthModal('login');
             } else {
-                const user = window.appState.users.find(u => u.phone === phoneInput && u.pass === passInput);
-                if (user) {
-                    window.appState.activeUser = user;
-                    window.appState.authenticated = true;
-                    updateBalanceDisplay();
-                    showToast(`Welcome back, ${user.fullName || user.phone}!`);
-                    closeAuthModal();
-                    renderContent();
-                } else {
-                    showToast('Invalid Phone or Password!');
-                }
+                const u = window.appState.users.find(u => u.phone === p && u.pass === pass);
+                if (u) { window.appState.activeUser = u; window.appState.authenticated = true; updateBalanceDisplay(); closeAuthModal(); showToast(`Welcome!`); renderContent(); } 
+                else showToast('Invalid credentials!');
             }
         };
 
-        window.handleUserLogout = function() {
-            window.appState.authenticated = false;
-            window.appState.activeUser = null;
-            updateBalanceDisplay();
-            showToast('Logged out');
-            switchTab('home');
-        };
-
-        window.toggleAdminModal = function() {
-            const modal = document.getElementById('admin-modal');
-            modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                renderAdminData();
-            }
-        };
-
+        window.handleUserLogout = function() { window.appState.authenticated = false; window.appState.activeUser = null; switchTab('home'); };
+        window.toggleAdminModal = function() { const m = document.getElementById('admin-modal'); m.classList.toggle('hidden'); if (!m.classList.contains('hidden')) renderAdminData(); };
+        
         window.handleAdminLogin = function() {
-            const email = document.getElementById('admin-email').value.trim();
-            const pass = document.getElementById('admin-pass').value.trim();
-
-            if (email === window.appState.adminCreds.email && pass === window.appState.adminCreds.pass) {
-                document.getElementById('admin-login-box').classList.add('hidden');
-                document.getElementById('admin-dashboard').classList.remove('hidden');
-                renderAdminData();
-                showToast('Admin Control Unlocked');
-            } else {
-                showToast('Access Denied: Invalid Email/Password');
-            }
+            if (document.getElementById('admin-email').value === window.appState.adminCreds.email && document.getElementById('admin-pass').value === window.appState.adminCreds.pass) {
+                document.getElementById('admin-login-box').classList.add('hidden'); document.getElementById('admin-dashboard').classList.remove('hidden'); renderAdminData();
+            } else showToast('Invalid Admin Login');
         };
-
-        window.adminLogout = function() {
-            document.getElementById('admin-dashboard').classList.add('hidden');
-            document.getElementById('admin-login-box').classList.remove('hidden');
-            document.getElementById('admin-email').value = '';
-            document.getElementById('admin-pass').value = '';
-            showToast('Admin Logged Out');
-        };
-
-        window.updateAdminCredentials = function() {
-            const newEmail = document.getElementById('change-admin-email').value.trim();
-            const newPass = document.getElementById('change-admin-pass').value.trim();
-
-            if (!newEmail || !newPass) {
-                showToast('Fill in both email and password');
-                return;
-            }
-
-            window.appState.adminCreds.email = newEmail;
-            window.appState.adminCreds.pass = newPass;
-
-            window.saveAdminCredsToCloud({ email: newEmail, pass: newPass });
-            showToast('Admin credentials saved to Cloud!');
-        };
+        window.adminLogout = function() { document.getElementById('admin-dashboard').classList.add('hidden'); document.getElementById('admin-login-box').classList.remove('hidden'); };
 
         window.renderAdminData = function() {
-            const uCount = document.getElementById('admin-users-count');
-            if (uCount) uCount.innerText = window.appState.users.length;
+            document.getElementById('admin-users-count').innerText = window.appState.users.length;
+            const uc = document.getElementById('admin-users-list');
+            if (uc) uc.innerHTML = window.appState.users.map(u => `<div class="bg-slate-900 p-2 rounded border border-purple-800"><div class="flex justify-between items-center font-bold"><span>${u.fullName} (+92${u.phone})</span><span class="text-yellow-400">Rs ${u.balance.toFixed(2)}</span></div><div class="flex space-x-1 pt-1"><input type="number" id="adj-${u.phone}" class="bg-slate-950 border border-purple-800 rounded px-1 w-20 text-[10px] text-white"><button onclick="modifyUserBal('${u.phone}', 1)" class="bg-green-600 text-white text-[9px] px-2 rounded">+ Add</button><button onclick="modifyUserBal('${u.phone}', -1)" class="bg-red-600 text-white text-[9px] px-2 rounded">- Cut</button></div></div>`).join('');
             
-            const usersContainer = document.getElementById('admin-users-list');
-            if (usersContainer) {
-                usersContainer.innerHTML = window.appState.users.length === 0 ? '<p class="text-gray-500">No registered users in cloud.</p>' : window.appState.users.map(u => `
-                    <div class="bg-slate-900 p-2 rounded border border-purple-800 space-y-1">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <span class="font-bold text-white">${u.fullName || 'User'}</span>
-                                <span class="text-[9px] text-gray-400 font-mono ml-1">(+92${u.phone})</span>
-                            </div>
-                            <span class="text-yellow-400 font-extrabold">Rs ${u.balance.toFixed(2)}</span>
-                        </div>
-                        <div class="flex items-center space-x-1 pt-1">
-                            <input type="number" id="adj-amt-${u.phone}" placeholder="Amt" class="bg-slate-950 border border-purple-800 rounded px-1.5 py-0.5 text-[10px] w-20 text-white">
-                            <button onclick="modifyUserBal('${u.phone}', 1)" class="bg-green-600 text-white text-[9px] font-bold px-2 py-0.5 rounded">+ Add</button>
-                            <button onclick="modifyUserBal('${u.phone}', -1)" class="bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded">- Cut</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            const pendingDeps = window.appState.deposits.filter(d => d.status === 'Pending');
-            const depBadge = document.getElementById('admin-dep-badge');
-            if (depBadge) depBadge.innerText = pendingDeps.length;
-            const depList = document.getElementById('admin-deposit-list');
-            if (depList) {
-                depList.innerHTML = pendingDeps.length === 0 ? '<p class="text-gray-500 py-1">No pending deposit orders.</p>' :
-                pendingDeps.map(d => `
-                    <div class="bg-slate-900 p-2 rounded border border-purple-800 space-y-1">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-green-400">Rs ${d.amount}</span>
-                            <span class="text-[9px] font-mono text-yellow-400">Trx: ${d.trxId}</span>
-                        </div>
-                        <div class="text-[9px] text-gray-400">User: +92${d.userPhone}</div>
-                        <div class="flex justify-end space-x-1 pt-1">
-                            <button onclick="adminApproveDep('${d.id}')" class="bg-green-600 text-white text-[9px] px-2 py-0.5 rounded font-bold">Approve</button>
-                            <button onclick="adminRejectDep('${d.id}')" class="bg-red-600 text-white text-[9px] px-2 py-0.5 rounded font-bold">Reject</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            const pendingWds = window.appState.withdrawals.filter(w => w.status === 'Pending');
-            const wdsBadge = document.getElementById('admin-wds-badge');
-            if (wdsBadge) wdsBadge.innerText = pendingWds.length;
-            const wdsList = document.getElementById('admin-withdraw-list');
-            if (wdsList) {
-                wdsList.innerHTML = pendingWds.length === 0 ? '<p class="text-gray-500 py-1">No pending withdraw orders.</p>' :
-                pendingWds.map(w => `
-                    <div class="bg-slate-900 p-1.5 rounded flex justify-between items-center border border-purple-800">
-                        <div>
-                            <span class="font-bold text-yellow-400">Rs ${w.amount}</span>
-                            <span class="text-[9px] text-gray-400">(+92${w.userPhone})</span>
-                        </div>
-                        <div class="space-x-1">
-                            <button onclick="adminApproveWds('${w.id}')" class="bg-green-600 text-white text-[9px] px-2 py-0.5 rounded font-bold">Approve</button>
-                            <button onclick="adminRejectWds('${w.id}')" class="bg-red-600 text-white text-[9px] px-2 py-0.5 rounded font-bold">Reject</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
+            const pd = window.appState.deposits.filter(d => d.status === 'Pending');
+            document.getElementById('admin-dep-badge').innerText = pd.length;
+            if(document.getElementById('admin-deposit-list')) document.getElementById('admin-deposit-list').innerHTML = pd.map(d => `<div class="bg-slate-900 p-1.5 rounded flex justify-between border border-purple-800"><div><div class="font-bold text-green-400">Rs ${d.amount}</div><div class="text-[9px] text-gray-400">+92${d.userPhone}</div></div><div><button onclick="adminApproveDep('${d.id}')" class="bg-green-600 px-2 py-0.5 text-[9px] text-white rounded">Approve</button></div></div>`).join('');
+            
+            const pw = window.appState.withdrawals.filter(w => w.status === 'Pending');
+            document.getElementById('admin-wds-badge').innerText = pw.length;
+            if(document.getElementById('admin-withdraw-list')) document.getElementById('admin-withdraw-list').innerHTML = pw.map(w => `<div class="bg-slate-900 p-1.5 rounded flex justify-between border border-purple-800"><div><div class="font-bold text-yellow-400">Rs ${w.amount}</div><div class="text-[9px] text-gray-400">+92${w.userPhone}</div></div><div><button onclick="adminApproveWds('${w.id}')" class="bg-green-600 px-2 py-0.5 text-[9px] text-white rounded">Approve</button></div></div>`).join('');
         };
 
-        window.modifyUserBal = async function(userPhone, factor) {
-            const input = document.getElementById(`adj-amt-${userPhone}`);
-            const val = parseFloat(input.value);
-            if (!val) return;
-
-            const u = window.appState.users.find(x => x.phone === userPhone);
+        // --- COMPLETED ADMIN & USER ACTIONS ---
+        window.modifyUserBal = async function(p, factor) {
+            const input = document.getElementById(`adj-${p}`);
+            if (!input) return;
+            const v = parseFloat(input.value);
+            if (isNaN(v) || v <= 0) {
+                showToast('Valid amount enter karein!');
+                return;
+            }
+            const u = window.appState.users.find(item => item.phone === p);
             if (u) {
-                u.balance += (val * factor);
+                u.balance = Math.max(0, u.balance + (v * factor));
                 await window.saveUserToCloud(u);
-                showToast(`Updated balance to Rs ${u.balance}`);
+                if (window.appState.activeUser && window.appState.activeUser.phone === u.phone) {
+                    window.appState.activeUser.balance = u.balance;
+                }
+                updateBalanceDisplay();
+                renderAdminData();
+                showToast(`Balance updated: Rs ${u.balance.toFixed(2)}`);
             }
         };
 
-        window.saveAdminOverride = function() {
-            const roomKey = document.getElementById('admin-room-select').value;
-            const target = document.getElementById('admin-override-val').value;
+        window.saveAdminAviator = async function() {
+            const val = document.getElementById('admin-aviator-val').value.trim();
+            if (!val) return;
+            window.appState.aviator.override = val;
+            await window.saveSettingsToCloud({ aviatorOverride: val });
+            showToast(`Aviator Target Set: ${val}`);
+        };
 
-            window.appState.wingoRooms[roomKey].override = target;
-            showToast(`Room ${roomKey} target set to: ${target}`);
+        window.saveAdminOverride = async function() {
+            const roomKey = document.getElementById('admin-room-select').value;
+            const overrideVal = document.getElementById('admin-override-val').value;
+            if (window.appState.wingoRooms[roomKey]) {
+                window.appState.wingoRooms[roomKey].override = overrideVal;
+                showToast(`Win Go ${roomKey} Target: ${overrideVal}`);
+            }
+        };
+
+        window.submitDeposit = async function() {
+            if (!window.appState.activeUser) return showToast('Pehle login karein!');
+            const amt = parseFloat(document.getElementById('deposit-amount-input').value);
+            const trx = document.getElementById('deposit-trx-input').value.trim();
+            if (isNaN(amt) || amt < 300) return showToast('Minimum deposit Rs 300 hai!');
+            if (!trx) return showToast('Transaction ID enter karein!');
+
+            const depData = {
+                id: 'DEP_' + Date.now(),
+                userPhone: window.appState.activeUser.phone,
+                userName: window.appState.activeUser.fullName,
+                amount: amt,
+                trxId: trx,
+                status: 'Pending',
+                time: new Date().toLocaleString(),
+                timestamp: Date.now()
+            };
+
+            await window.saveDepositToCloud(depData);
+            showToast('Deposit request submit ho gayi!');
+            document.getElementById('deposit-trx-input').value = '';
+        };
+
+        window.submitWithdrawal = async function() {
+            if (!window.appState.activeUser) return showToast('Pehle login karein!');
+            const title = document.getElementById('wds-account-name').value.trim();
+            const num = document.getElementById('wds-account-num').value.trim();
+            const amt = parseFloat(document.getElementById('wds-amount-input').value);
+
+            if (!title || !num) return showToast('Account details complete karein!');
+            if (isNaN(amt) || amt < 500) return showToast('Minimum withdrawal Rs 500 hai!');
+            if (window.appState.activeUser.balance < amt) return showToast('Insufficient balance!');
+
+            window.appState.activeUser.balance -= amt;
+            await window.saveUserToCloud(window.appState.activeUser);
+            updateBalanceDisplay();
+
+            const wdsData = {
+                id: 'WDS_' + Date.now(),
+                userPhone: window.appState.activeUser.phone,
+                userName: window.appState.activeUser.fullName,
+                accountTitle: title,
+                accountNum: num,
+                amount: amt,
+                status: 'Pending',
+                time: new Date().toLocaleString(),
+                timestamp: Date.now()
+            };
+
+            await window.saveWithdrawalToCloud(wdsData);
+            showToast('Withdrawal request submit ho gayi!');
         };
 
         window.adminApproveDep = async function(id) {
-            const d = window.appState.deposits.find(x => x.id === id);
-            if (d) {
-                d.status = 'Completed';
-                await window.saveDepositToCloud(d);
+            const dep = window.appState.deposits.find(d => d.id === id);
+            if (!dep || dep.status !== 'Pending') return;
 
-                const u = window.appState.users.find(x => x.phone === d.userPhone);
-                if (u) {
-                    u.balance += d.amount;
-                    await window.saveUserToCloud(u);
+            dep.status = 'Completed';
+            await window.saveDepositToCloud(dep);
+
+            const u = window.appState.users.find(user => user.phone === dep.userPhone);
+            if (u) {
+                u.balance += dep.amount;
+                await window.saveUserToCloud(u);
+                if (window.appState.activeUser && window.appState.activeUser.phone === u.phone) {
+                    window.appState.activeUser.balance = u.balance;
                 }
-                showToast(`Deposit Approved & Balance Added.`);
             }
-        };
-
-        window.adminRejectDep = async function(id) {
-            const d = window.appState.deposits.find(x => x.id === id);
-            if (d) {
-                d.status = 'Rejected';
-                await window.saveDepositToCloud(d);
-                showToast(`Deposit Rejected`);
-            }
+            updateBalanceDisplay();
+            renderAdminData();
+            showToast(`Deposit Rs ${dep.amount} Approved!`);
         };
 
         window.adminApproveWds = async function(id) {
-            const w = window.appState.withdrawals.find(x => x.id === id);
-            if (w) {
-                w.status = 'Completed';
-                await window.saveWithdrawalToCloud(w);
-                showToast(`Withdrawal Approved!`);
-            }
-        };
+            const wds = window.appState.withdrawals.find(w => w.id === id);
+            if (!wds || wds.status !== 'Pending') return;
 
-        window.adminRejectWds = async function(id) {
-            const w = window.appState.withdrawals.find(x => x.id === id);
-            if (w) {
-                w.status = 'Rejected';
-                await window.saveWithdrawalToCloud(w);
+            wds.status = 'Completed';
+            await window.saveWithdrawalToCloud(wds);
 
-                const u = window.appState.users.find(x => x.phone === w.userPhone);
-                if (u) {
-                    u.balance += w.amount;
-                    await window.saveUserToCloud(u);
-                }
-                showToast(`Withdrawal Rejected. Amount refunded.`);
-            }
+            renderAdminData();
+            showToast(`Withdrawal Rs ${wds.amount} Approved!`);
         };
     </script>
 </body>
