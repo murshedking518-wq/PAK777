@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pak777 Casino & Secure Admin Control</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#12092b',
+                            header: '#1f1244',
+                            card: '#24144e',
+                            cardLight: '#321c6a',
+                            accent: '#ffb703',
+                            purple: '#6c5ce7',
+                            green: '#00b894',
+                            red: '#ff7675',
+                            violet: '#a29bfe'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b051b;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .gold-btn {
+            background: linear-gradient(180deg, #ffd700 0%, #ffa500 100%);
+            color: #3d1e00;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a3382;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-[#0b051b] min-h-screen flex justify-center items-start sm:py-4">
+
+    <!-- Mobile Frame Container -->
+    <div id="app-container" class="w-full max-w-md bg-brand-dark min-h-screen sm:min-h-[844px] sm:rounded-3xl sm:shadow-2xl overflow-hidden relative flex flex-col border-0 sm:border-4 border-slate-800">
+
+        <!-- Top Header Navigation -->
+        <header class="bg-brand-header px-4 py-3 flex justify-between items-center sticky top-0 z-30 border-b border-purple-900/40">
+            <div onclick="switchTab('home')" class="cursor-pointer flex items-center space-x-1">
+                <span class="text-xl font-black italic tracking-wider text-yellow-400 drop-shadow">PAK<span class="text-red-500">777</span></span>
+                <i class="fa-solid fa-dice text-yellow-400 text-xs"></i>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <!-- User Balance Badge -->
+                <div onclick="requireAuth(() => switchTab('deposit'))" class="bg-[#2a1a5c] px-3 py-1 rounded-full flex items-center space-x-2 border border-purple-500/30 cursor-pointer">
+                    <i class="fa-solid fa-wallet text-yellow-400 text-xs"></i>
+                    <span class="text-xs font-bold text-gray-200">Rs <span id="user-balance-display">0.00</span></span>
+                    <i class="fa-solid fa-circle-plus text-green-400 text-xs ml-0.5"></i>
+                </div>
+
+                <!-- Protected Admin Control Button -->
+                <button onclick="toggleAdminModal()" class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow border border-red-400">
+                    <i class="fa-solid fa-lock"></i> Admin
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Body -->
+        <main id="main-content" class="flex-1 overflow-y-auto pb-20">
+            <!-- Rendered by JavaScript -->
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="fixed bottom-0 w-full max-w-md bg-[#160b33] border-t border-purple-900/60 flex justify-around items-center py-2 z-30">
+            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-yellow-400">
+                <i class="fa-solid fa-gamepad text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">Home</span>
+            </button>
+            <button onclick="switchTab('activity')" id="nav-activity" class="flex flex-col items-center text-gray-400 hover:text-gray-200">
+                <i class="fa-solid fa-gift text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">Activity</span>
+            </button>
+
+            <!-- Center Wheel Promotion -->
+            <div onclick="showToast('Spin Wheel Unlocks at Rs 500 Deposit!')" class="relative -top-4 cursor-pointer">
+                <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-green-500 to-emerald-300 p-1 shadow-xl flex items-center justify-center animate-bounce">
+                    <div class="w-full h-full bg-brand-dark rounded-full flex flex-col items-center justify-center border-2 border-yellow-400">
+                        <i class="fa-solid fa-dharmachakra text-yellow-400 text-xl animate-spin" style="animation-duration: 9s;"></i>
+                    </div>
+                </div>
+                <span class="text-[9px] bg-green-500 text-black font-extrabold px-1.5 py-0.5 rounded-full absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap shadow">
+                    Get Rs500
+                </span>
+            </div>
+
+            <button onclick="switchTab('promotion')" id="nav-promotion" class="flex flex-col items-center text-gray-400 hover:text-gray-200">
+                <i class="fa-solid fa-heart text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">Promotion</span>
+            </button>
+            <button onclick="requireAuth(() => switchTab('account'))" id="nav-account" class="flex flex-col items-center text-gray-400 hover:text-gray-200">
+                <i class="fa-solid fa-user text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">Account</span>
+            </button>
+        </nav>
+
+        <!-- SECURE ADMIN PANEL MODAL -->
+        <div id="admin-modal" class="fixed inset-0 bg-slate-950/95 z-50 hidden flex flex-col overflow-y-auto p-4 max-w-md mx-auto">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-3 mb-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-shield-halved text-red-500 text-xl"></i>
+                    <h2 class="text-base font-bold text-white">Pak777 Secure Admin Panel</h2>
+                </div>
+                <button onclick="toggleAdminModal()" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Mandatory Password Screen (No hints shown) -->
+            <div id="admin-login-box" class="space-y-4 my-auto bg-brand-card p-5 rounded-2xl border border-purple-800">
+                <div class="text-center">
+                    <i class="fa-solid fa-lock text-yellow-400 text-3xl mb-2"></i>
+                    <h3 class="font-bold text-yellow-400 text-base">Restricted Area</h3>
+                    <p class="text-xs text-gray-400 mt-1">Authorized Administrator Access Only</p>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">Admin Email</label>
+                    <input type="email" id="admin-email" placeholder="Enter admin email" class="w-full bg-slate-900 border border-purple-800 rounded px-3 py-2 text-xs text-white mt-1 focus:outline-none focus:border-yellow-400">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-300">Password</label>
+                    <input type="password" id="admin-pass" placeholder="Enter password" class="w-full bg-slate-900 border border-purple-800 rounded px-3 py-2 text-xs text-white mt-1 focus:outline-none focus:border-yellow-400">
+                </div>
+                <button onclick="handleAdminLogin()" class="w-full gold-btn font-bold py-2.5 rounded-lg text-xs">Authenticate & Login</button>
+            </div>
+
+            <!-- Protected Admin Dashboard Screen -->
+            <div id="admin-dashboard" class="hidden space-y-4 text-xs">
+                
+                <!-- Registered Users Details & Balance Editor -->
+                <div class="bg-brand-card p-3 rounded-xl border border-purple-600/50 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-yellow-400"><i class="fa-solid fa-users mr-1"></i> Registered Players (<span id="admin-users-count">0</span>)</span>
+                    </div>
+                    <div id="admin-users-list" class="space-y-2 max-h-48 overflow-y-auto">
+                        <!-- Loaded dynamically from Cloud -->
+                    </div>
+                </div>
+
+                <!-- Win Go Result Override per Room -->
+                <div class="bg-brand-card p-3 rounded-xl border border-purple-600/50 space-y-3">
+                    <span class="font-bold text-yellow-400 flex items-center justify-between">
+                        <span><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Win Go Result Override</span>
+                    </span>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="text-[10px] text-gray-400">Select Target Room</label>
+                            <select id="admin-room-select" class="w-full bg-slate-900 border border-purple-800 rounded p-1.5 text-white mt-0.5">
+                                <option value="30Sec">Win Go 30Sec</option>
+                                <option value="1Min">Win Go 1Min</option>
+                                <option value="3Min">Win Go 3Min</option>
+                                <option value="5Min">Win Go 5Min</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] text-gray-400">Preset Result</label>
+                                <select id="admin-override-val" class="w-full bg-slate-900 border border-purple-800 rounded p-1.5 text-white mt-0.5">
+                                    <option value="AUTO">AUTO (Random Fair)</option>
+                                    <option value="0">0 (Red/Violet - Small)</option>
+                                    <option value="1">1 (Green - Small)</option>
+                                    <option value="2">2 (Red - Small)</option>
+                                    <option value="3">3 (Green - Small)</option>
+                                    <option value="4">4 (Red - Small)</option>
+                                    <option value="5">5 (Green/Violet - Big)</option>
+                                    <option value="6">6 (Red - Big)</option>
+                                    <option value="7">7 (Green - Big)</option>
+                                    <option value="8">8 (Red - Big)</option>
+                                    <option value="9">9 (Green - Big)</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button onclick="saveAdminOverride()" class="w-full gold-btn font-bold py-2 rounded">Set Target</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposit Requests with Trx ID -->
+                <div class="bg-brand-card p-3 rounded-xl border border-purple-600/50 space-y-2">
+                    <span class="font-bold text-yellow-400 flex items-center justify-between">
+                        <span><i class="fa-solid fa-money-bill-transfer mr-1"></i> Deposit Requests</span>
+                        <span id="admin-dep-badge" class="bg-yellow-500 text-black text-[9px] font-bold px-1.5 rounded-full">0</span>
+                    </span>
+                    <div id="admin-deposit-list" class="space-y-1.5 max-h-36 overflow-y-auto"></div>
+                </div>
+
+                <!-- Withdrawal Requests -->
+                <div class="bg-brand-card p-3 rounded-xl border border-purple-600/50 space-y-2">
+                    <span class="font-bold text-yellow-400 flex items-center justify-between">
+                        <span><i class="fa-solid fa-hand-holding-dollar mr-1"></i> Withdrawal Requests</span>
+                        <span id="admin-wds-badge" class="bg-red-500 text-white text-[9px] font-bold px-1.5 rounded-full">0</span>
+                    </span>
+                    <div id="admin-withdraw-list" class="space-y-1.5 max-h-36 overflow-y-auto"></div>
+                </div>
+
+                <!-- Change Admin Login Credentials -->
+                <div class="bg-brand-card p-3 rounded-xl border border-purple-600/50 space-y-2">
+                    <span class="font-bold text-yellow-400"><i class="fa-solid fa-key mr-1"></i> Change Admin Login Credentials</span>
+                    <div class="space-y-2 pt-1">
+                        <div>
+                            <label class="text-[10px] text-gray-400">New Admin Email</label>
+                            <input type="email" id="change-admin-email" placeholder="newadmin@pak777.com" class="w-full bg-slate-900 border border-purple-800 rounded p-1.5 text-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400">New Admin Password</label>
+                            <input type="password" id="change-admin-pass" placeholder="******" class="w-full bg-slate-900 border border-purple-800 rounded p-1.5 text-white">
+                        </div>
+                        <button onclick="updateAdminCredentials()" class="w-full bg-purple-600 hover:bg-purple-700 font-bold py-1.5 rounded text-white text-xs">Save New Admin Credentials</button>
+                    </div>
+                </div>
+
+                <!-- Admin Logout -->
+                <button onclick="adminLogout()" class="w-full bg-slate-900 border border-red-800 text-red-400 font-bold py-2 rounded">Exit Admin Panel</button>
+            </div>
+        </div>
+
+        <!-- Mandatory Signup / Login Modal -->
+        <div id="auth-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-brand-card w-full max-w-xs rounded-2xl p-5 border border-purple-600/60 space-y-4">
+                <div class="flex justify-between items-center border-b border-purple-800 pb-2">
+                    <h3 id="auth-modal-title" class="font-bold text-yellow-400 text-sm">Sign Up Account</h3>
+                    <button onclick="closeAuthModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <div class="space-y-3 text-xs">
+                    <!-- Signup Name Field -->
+                    <div id="auth-name-container">
+                        <label class="text-gray-300">Full Name</label>
+                        <input type="text" id="auth-fullname" placeholder="Ali Khan" class="w-full bg-slate-900 border border-purple-800 rounded px-3 py-2 text-white mt-1">
+                    </div>
+
+                    <!-- Pakistani Phone Number (+92 Prefix) -->
+                    <div>
+                        <label class="text-gray-300">Pakistani Phone Number</label>
+                        <div class="flex items-center mt-1 bg-slate-900 border border-purple-800 rounded overflow-hidden">
+                            <span class="bg-purple-950 px-2.5 py-2 text-yellow-400 font-bold border-r border-purple-800 text-xs">+92</span>
+                            <input type="text" id="auth-phone" placeholder="3001234567" maxlength="10" class="w-full bg-slate-900 px-2.5 py-2 text-white focus:outline-none text-xs">
+                        </div>
+                        <p class="text-[9px] text-gray-400 mt-0.5">Enter 10-digit number (e.g. 3001234567)</p>
+                    </div>
+
+                    <!-- Password Field (6 to 12 digits) -->
+                    <div>
+                        <label class="text-gray-300">Password (6 to 12 digits)</label>
+                        <input type="password" id="auth-pass" placeholder="******" maxlength="12" class="w-full bg-slate-900 border border-purple-800 rounded px-3 py-2 text-white mt-1">
+                    </div>
+
+                    <button onclick="processAuthSubmit()" id="auth-action-btn" class="w-full gold-btn font-extrabold py-2.5 rounded-xl text-xs shadow-lg">Sign Up & Play</button>
+                </div>
+
+                <div class="text-center text-[11px] text-gray-400">
+                    <span id="auth-switch-text">Already have an account?</span> 
+                    <button onclick="switchAuthMode()" id="auth-switch-btn" class="text-yellow-400 font-bold ml-1 underline">Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 bg-yellow-400 text-slate-950 font-extrabold text-xs px-4 py-2 rounded-full shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center space-x-2 border border-amber-300">
+            <i class="fa-solid fa-circle-info text-slate-900"></i>
+            <span id="toast-msg">Notification</span>
+        </div>
+
+    </div>
+
+    <!-- Firebase Storage Scripts -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInAnonymously, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // Firebase Configuration Setup
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtqsrYPaZxUVsdL6w6tWs_JkYk5_KqxE8",
+            authDomain: "pak77-fb0c7.firebaseapp.com",
+            databaseURL: "https://pak77-fb0c7-default-rtdb.firebaseio.com",
+            projectId: "pak77-fb0c7",
+            storageBucket: "pak77-fb0c7.firebasestorage.app",
+            messagingSenderId: "348641862718",
+            appId: "1:348641862718:web:d22f909a1eeb625ec51d6f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pak777-casino-app';
+
+        // Global State
+        window.appState = {
+            authenticated: false,
+            activeUser: null,
+            users: [],
+            adminCreds: {
+                email: 'admin@pak777.com',
+                pass: 'admin123'
+            },
+            currentTab: 'home',
+            authMode: 'signup',
+            jazzcashNumber: '03082836422',
+
+            wingoRooms: {
+                '30Sec': { totalSec: 30, timerSec: 30, period: 202607281000501, override: 'AUTO', history: [], myBets: [] },
+                '1Min': { totalSec: 60, timerSec: 60, period: 202607282000201, override: 'AUTO', history: [], myBets: [] },
+                '3Min': { totalSec: 180, timerSec: 180, period: 202607283000101, override: 'AUTO', history: [], myBets: [] },
+                '5Min': { totalSec: 300, timerSec: 300, period: 202607285000051, override: 'AUTO', history: [], myBets: [] }
+            },
+            activeWinGoRoom: '30Sec',
+
+            deposits: [],
+            withdrawals: []
+        };
+
+        // Firebase Auth & Realtime Sync Init
+        window.addEventListener('DOMContentLoaded', async () => {
+            initSeedHistory();
+            startRoomTimers();
+
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth init error:", err);
+            }
+
+            // Sync Users Collection
+            const usersCol = collection(db, 'artifacts', appId, 'public', 'data', 'users');
+            onSnapshot(usersCol, (snapshot) => {
+                const uList = [];
+                snapshot.forEach(docSnap => {
+                    uList.push(docSnap.data());
+                });
+                window.appState.users = uList;
+
+                // Sync Active User Balance
+                if (window.appState.activeUser) {
+                    const updated = uList.find(u => u.phone === window.appState.activeUser.phone);
+                    if (updated) {
+                        window.appState.activeUser = updated;
+                        updateBalanceDisplay();
+                    }
+                }
+                renderAdminData();
+            }, (err) => console.error("Users sync error:", err));
+
+            // Sync Deposits Collection
+            const depCol = collection(db, 'artifacts', appId, 'public', 'data', 'deposits');
+            onSnapshot(depCol, (snapshot) => {
+                const dList = [];
+                snapshot.forEach(docSnap => dList.push(docSnap.data()));
+                window.appState.deposits = dList.sort((a,b) => b.timestamp - a.timestamp);
+                if (window.appState.currentTab === 'deposit') renderContent();
+                renderAdminData();
+            }, (err) => console.error("Deposits sync error:", err));
+
+            // Sync Withdrawals Collection
+            const wdsCol = collection(db, 'artifacts', appId, 'public', 'data', 'withdrawals');
+            onSnapshot(wdsCol, (snapshot) => {
+                const wList = [];
+                snapshot.forEach(docSnap => wList.push(docSnap.data()));
+                window.appState.withdrawals = wList.sort((a,b) => b.timestamp - a.timestamp);
+                if (window.appState.currentTab === 'withdraw') renderContent();
+                renderAdminData();
+            }, (err) => console.error("Withdrawals sync error:", err));
+
+            // Sync Admin Settings
+            const adminDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config');
+            onSnapshot(adminDocRef, (snap) => {
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.email) window.appState.adminCreds.email = data.email;
+                    if (data.pass) window.appState.adminCreds.pass = data.pass;
+                } else {
+                    setDoc(adminDocRef, window.appState.adminCreds);
+                }
+            }, (err) => console.error("Admin settings sync error:", err));
+
+            renderContent();
+            updateBalanceDisplay();
+        });
+
+        // Save User To Cloud Firestore
+        window.saveUserToCloud = async function(userData) {
+            try {
+                const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.phone);
+                await setDoc(userDocRef, userData);
+            } catch (e) {
+                console.error("Error saving user:", e);
+            }
+        };
+
+        // Save Deposit To Cloud
+        window.saveDepositToCloud = async function(depData) {
+            try {
+                const depRef = doc(db, 'artifacts', appId, 'public', 'data', 'deposits', depData.id);
+                await setDoc(depRef, depData);
+            } catch (e) {
+                console.error("Error saving deposit:", e);
+            }
+        };
+
+        // Save Withdrawal To Cloud
+        window.saveWithdrawalToCloud = async function(wdsData) {
+            try {
+                const wdsRef = doc(db, 'artifacts', appId, 'public', 'data', 'withdrawals', wdsData.id);
+                await setDoc(wdsRef, wdsData);
+            } catch (e) {
+                console.error("Error saving withdrawal:", e);
+            }
+        };
+
+        // Save Admin Settings To Cloud
+        window.saveAdminCredsToCloud = async function(creds) {
+            try {
+                const adminRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'admin_config');
+                await setDoc(adminRef, creds);
+            } catch (e) {
+                console.error("Error updating admin settings:", e);
+            }
+        };
+
+        function initSeedHistory() {
+            Object.keys(window.appState.wingoRooms).forEach(roomKey => {
+                const r = window.appState.wingoRooms[roomKey];
+                for(let i=0; i<5; i++) {
+                    const num = Math.floor(Math.random()*10);
+                    r.history.push({
+                        period: (r.period - (i+1)).toString(),
+                        number: num,
+                        size: num >= 5 ? 'Big' : 'Small',
+                        color: [1,3,7,9].includes(num) ? 'Green' : ([2,4,6,8].includes(num) ? 'Red' : 'Violet')
+                    });
+                }
+            });
+        }
+
+        function startRoomTimers() {
+            setInterval(() => {
+                Object.keys(window.appState.wingoRooms).forEach(roomKey => {
+                    const room = window.appState.wingoRooms[roomKey];
+                    room.timerSec--;
+
+                    if (room.timerSec <= 0) {
+                        calculateRoomOutcome(roomKey);
+                        room.timerSec = room.totalSec;
+                    }
+                });
+
+                const timerElem = document.getElementById('active-room-timer');
+                if (timerElem) {
+                    const activeRoom = window.appState.wingoRooms[window.appState.activeWinGoRoom];
+                    const mins = Math.floor(activeRoom.timerSec / 60);
+                    const secs = activeRoom.timerSec % 60;
+                    timerElem.innerText = `${mins < 10 ? '0'+mins : mins}:${secs < 10 ? '0'+secs : secs}`;
+                }
+            }, 1000);
+        }
+
+        window.requireAuth = function(callback) {
+            if (!window.appState.authenticated) {
+                openAuthModal('signup');
+                showToast('Please Sign Up or Login first!');
+            } else {
+                callback();
+            }
+        };
+
+        window.showToast = function(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        };
+
+        window.updateBalanceDisplay = function() {
+            const bal = window.appState.authenticated ? window.appState.activeUser.balance : 0.00;
+            document.getElementById('user-balance-display').innerText = bal.toFixed(2);
+            const accountBal = document.getElementById('account-balance-val');
+            if (accountBal) accountBal.innerText = bal.toFixed(2);
+            const wingoBal = document.getElementById('wingo-balance-val');
+            if (wingoBal) wingoBal.innerText = bal.toFixed(2);
+        };
+
+        window.switchTab = function(tab) {
+            window.appState.currentTab = tab;
+            ['home', 'activity', 'promotion', 'account'].forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                if (btn) btn.className = (t === tab) ? "flex flex-col items-center text-yellow-400 font-bold" : "flex flex-col items-center text-gray-400 hover:text-gray-200";
+            });
+            renderContent();
+        };
+
+        window.renderContent = function() {
+            const main = document.getElementById('main-content');
+            switch (window.appState.currentTab) {
+                case 'home': main.innerHTML = getHomeHTML(); break;
+                case 'wingo': main.innerHTML = getWinGoHTML(); break;
+                case 'deposit': main.innerHTML = getDepositHTML(); break;
+                case 'withdraw': main.innerHTML = getWithdrawHTML(); break;
+                case 'account': main.innerHTML = getAccountHTML(); break;
+                case 'activity': 
+                    main.innerHTML = `<div class="p-4 text-center text-xs space-y-3"><h3 class="font-bold text-yellow-400 text-sm">Activity Rewards</h3><div class="bg-brand-card p-4 rounded-xl border border-purple-800 text-left">🎁 Daily Rewards available on recharge.</div></div>`;
+                    break;
+                case 'promotion':
+                    main.innerHTML = `<div class="p-4 text-center text-xs space-y-3"><h3 class="font-bold text-yellow-400 text-sm">Agency Partner Program</h3><div class="bg-brand-card p-4 rounded-xl border border-purple-800 text-left font-mono">My Ref Code: PAK777_${window.appState.authenticated ? window.appState.activeUser.id : 'GUEST'}</div></div>`;
+                    break;
+            }
+        };
+
+        function getHomeHTML() {
+            return `
+                <div class="p-3 space-y-3.5">
+                    <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-950 rounded-2xl p-4 border border-purple-500/40 shadow-xl relative overflow-hidden">
+                        <span class="bg-yellow-400 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">PAK777 OFFICIAL</span>
+                        <h3 class="text-sm font-extrabold text-white mt-1">RECHARGE & WIN BIG REWARDS</h3>
+                        <p class="text-[10px] text-purple-200">Play instant lottery games with guaranteed payouts.</p>
+                        <button onclick="requireAuth(() => switchTab('deposit'))" class="mt-2 gold-btn text-[10px] font-black px-3 py-1 rounded-full shadow">DEPOSIT NOW</button>
+                    </div>
+
+                    <div class="bg-[#1a0f37] px-3 py-1.5 rounded-full flex items-center space-x-2 border border-purple-800/50">
+                        <i class="fa-solid fa-bullhorn text-yellow-400 text-xs"></i>
+                        <marquee class="text-[11px] text-purple-200">Welcome to Pak777 Casino! Sign up, recharge with JazzCash and start winning!</marquee>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div onclick="requireAuth(() => switchTab('wingo'))" class="bg-gradient-to-br from-red-600 to-orange-600 rounded-xl p-2.5 flex flex-col justify-between h-20 shadow cursor-pointer border border-orange-400/30">
+                            <i class="fa-solid fa-fire text-yellow-300 text-2xl"></i>
+                            <span class="text-xs font-bold">Lottery</span>
+                        </div>
+                        <div onclick="showToast('Slots maintenance')" class="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-xl p-2.5 flex flex-col justify-between h-20 shadow cursor-pointer border border-blue-400/30">
+                            <i class="fa-solid fa-slot-machine text-yellow-300 text-2xl"></i>
+                            <span class="text-xs font-bold">Slots</span>
+                        </div>
+                        <div onclick="showToast('Original games coming soon')" class="bg-gradient-to-br from-pink-600 to-purple-700 rounded-xl p-2.5 flex flex-col justify-between h-20 shadow cursor-pointer border border-pink-400/30">
+                            <i class="fa-solid fa-plane-departure text-yellow-300 text-2xl"></i>
+                            <span class="text-xs font-bold">Original</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xs font-bold text-yellow-400 uppercase mb-2 border-l-2 border-yellow-400 pl-2">Featured Lottery Game</h3>
+                        
+                        <div onclick="requireAuth(() => switchTab('wingo'))" class="bg-gradient-to-r from-purple-800 via-indigo-900 to-brand-card p-4 rounded-2xl border-2 border-yellow-500/50 cursor-pointer flex items-center justify-between shadow-xl hover:scale-[1.02] transition-transform">
+                            <div class="space-y-1">
+                                <span class="bg-red-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full">POPULAR</span>
+                                <h4 class="text-base font-black text-yellow-400">WIN GO LOTTERY</h4>
+                                <p class="text-[10px] text-gray-300">Choose from 30Sec, 1Min, 3Min & 5Min modes inside!</p>
+                                <button class="gold-btn text-[10px] font-black px-3 py-1 rounded-full mt-1">Play Game →</button>
+                            </div>
+                            <div class="w-16 h-16 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center">
+                                <i class="fa-solid fa-trophy text-yellow-400 text-3xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getWinGoHTML() {
+            const room = window.appState.wingoRooms[window.appState.activeWinGoRoom];
+            return `
+                <div class="p-3 space-y-3">
+                    <div class="bg-gradient-to-r from-purple-900 to-indigo-900 p-3 rounded-2xl border border-purple-500/30 flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] text-purple-300 uppercase">Wallet Balance</span>
+                            <div class="text-lg font-black text-yellow-400">Rs <span id="wingo-balance-val">${window.appState.activeUser.balance.toFixed(2)}</span></div>
+                        </div>
+                        <div class="flex space-x-1.5">
+                            <button onclick="switchTab('withdraw')" class="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow">Withdraw</button>
+                            <button onclick="switchTab('deposit')" class="bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow">Deposit</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-1 bg-[#160b33] p-1 rounded-xl border border-purple-900/50 text-center text-xs">
+                        ${['30Sec', '1Min', '3Min', '5Min'].map(r => `
+                            <button onclick="window.appState.activeWinGoRoom='${r}'; renderContent();" class="${window.appState.activeWinGoRoom === r ? 'gold-btn font-extrabold shadow' : 'text-gray-400'} py-1.5 rounded-lg">
+                                ${r}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <div class="bg-gradient-to-r from-blue-950 via-purple-900 to-indigo-950 p-3 rounded-2xl border border-purple-500/40 space-y-2">
+                        <div class="flex justify-between items-center border-b border-purple-700/50 pb-2">
+                            <div>
+                                <span class="text-[10px] bg-purple-800 text-purple-200 px-2 py-0.5 rounded-full">Win Go ${window.appState.activeWinGoRoom}</span>
+                                <div class="text-[11px] font-mono text-gray-300 mt-1">Period: <span class="text-yellow-400 font-bold">${room.period}</span></div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-gray-300">Time Remaining</span>
+                                <div id="active-room-timer" class="font-mono text-xl font-black text-red-400 bg-slate-900 px-2 py-0.5 rounded border border-purple-700">
+                                    00:30
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="text-[10px] text-purple-200">Recent Results:</span>
+                            <div class="flex space-x-1">
+                                ${room.history.slice(0, 5).map(h => `
+                                    <div class="w-6 h-6 rounded-full ${getBallColorClass(h.number)} flex items-center justify-center font-bold text-xs text-white shadow">
+                                        ${h.number}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="openBetModal('Green')" class="bg-green-600 hover:bg-green-700 font-bold py-2.5 rounded-xl text-xs border border-green-400/40">Green</button>
+                        <button onclick="openBetModal('Violet')" class="bg-purple-600 hover:bg-purple-700 font-bold py-2.5 rounded-xl text-xs border border-purple-400/40">Violet</button>
+                        <button onclick="openBetModal('Red')" class="bg-red-600 hover:bg-red-700 font-bold py-2.5 rounded-xl text-xs border border-red-400/40">Red</button>
+                    </div>
+
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800/60 space-y-2">
+                        <div class="grid grid-cols-5 gap-2">
+                            ${[0,1,2,3,4,5,6,7,8,9].map(n => `
+                                <button onclick="openBetModal(${n})" class="h-10 rounded-xl font-black text-sm text-white ${getBallColorClass(n)} shadow border border-white/20 active:scale-95">
+                                    ${n}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="openBetModal('Big')" class="bg-amber-500 font-black py-2 rounded-xl text-xs text-slate-950">Big (5-9)</button>
+                            <button onclick="openBetModal('Small')" class="bg-sky-500 font-black py-2 rounded-xl text-xs text-slate-950">Small (0-4)</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-brand-card rounded-2xl border border-purple-800/60 p-3 text-xs">
+                        <h4 class="font-bold text-yellow-400 mb-2">Game History (${window.appState.activeWinGoRoom})</h4>
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-gray-400 border-b border-purple-800">
+                                    <th class="pb-1">Period ID</th>
+                                    <th class="pb-1 text-center">Num</th>
+                                    <th class="pb-1 text-center">Size</th>
+                                    <th class="pb-1 text-right">Color</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-purple-900/40">
+                                ${room.history.map(row => `
+                                    <tr>
+                                        <td class="py-1.5 font-mono text-gray-300">${row.period}</td>
+                                        <td class="py-1.5 text-center font-bold text-yellow-400">${row.number}</td>
+                                        <td class="py-1.5 text-center">${row.size}</td>
+                                        <td class="py-1.5 text-right">
+                                            <span class="px-2 py-0.5 rounded text-[9px] text-white ${getBallColorClass(row.number)}">${row.color}</span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="bet-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+                    <div class="bg-brand-card w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 border-t border-purple-600/60 space-y-4">
+                        <div class="flex justify-between items-center border-b border-purple-800 pb-2">
+                            <h3 class="font-bold text-yellow-400 text-xs">Confirm Bet - Win Go ${window.appState.activeWinGoRoom}</h3>
+                            <button onclick="closeBetModal()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="text-center py-2 bg-slate-900 rounded-xl border border-purple-800">
+                            <span class="text-xs text-gray-400">Selected Target:</span>
+                            <div id="bet-target-val" class="text-lg font-black text-yellow-400">Green</div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-300">Amount (Rs)</label>
+                            <input type="number" id="bet-amount-val" value="50" min="10" class="w-full bg-slate-900 border border-purple-700 rounded text-center text-yellow-400 font-bold py-1.5 text-sm mt-1">
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="closeBetModal()" class="w-1/2 bg-gray-800 py-2.5 rounded-xl text-xs font-bold text-gray-300">Cancel</button>
+                            <button onclick="processBetSubmit()" class="w-1/2 gold-btn py-2.5 rounded-xl text-xs font-bold">Place Bet</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getDepositHTML() {
+            return `
+                <div class="p-3 space-y-3.5">
+                    <div class="bg-gradient-to-r from-red-600 to-orange-600 p-3 rounded-2xl shadow border border-orange-400/40">
+                        <div class="text-xs text-orange-100 uppercase font-bold">Fast Deposit via JazzCash</div>
+                        <div class="text-base font-black text-white">Manual Transfer Channel</div>
+                    </div>
+
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-2 text-xs">
+                        <span class="text-gray-300">Send Payment To This JazzCash Account:</span>
+                        <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-xl border border-purple-700">
+                            <div>
+                                <div class="text-[10px] text-gray-400">JazzCash Account Number</div>
+                                <div class="text-base font-mono font-black text-yellow-400">${window.appState.jazzcashNumber}</div>
+                            </div>
+                            <button onclick="navigator.clipboard.writeText('${window.appState.jazzcashNumber}'); showToast('Number copied!');" class="bg-purple-600 text-white font-bold px-3 py-1.5 rounded-lg text-[10px]">Copy Number</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-3 text-xs">
+                        <div>
+                            <label class="font-bold text-yellow-400">Sent Amount (Rs)</label>
+                            <input type="number" id="deposit-amount-input" value="500" placeholder="Minimum Rs 300" class="w-full bg-slate-900 border border-purple-700 rounded-xl px-3 py-2 text-sm text-yellow-400 font-bold mt-1">
+                        </div>
+
+                        <div>
+                            <label class="font-bold text-yellow-400">Transaction ID (Trx ID / TID)</label>
+                            <input type="text" id="deposit-trx-input" placeholder="e.g. 01234567890" class="w-full bg-slate-900 border border-purple-700 rounded-xl px-3 py-2 text-sm text-white font-mono mt-1">
+                            <p class="text-[9px] text-gray-400 mt-1">Enter transaction ID received from JazzCash SMS.</p>
+                        </div>
+
+                        <button onclick="submitDeposit()" class="w-full gold-btn font-black py-3 rounded-xl text-xs shadow-lg">Proceed Deposit Request</button>
+                    </div>
+
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800/60 space-y-2 text-xs">
+                        <h4 class="font-bold text-yellow-400">Deposit History</h4>
+                        ${window.appState.deposits.length === 0 ? '<p class="text-gray-500">No deposit requests yet.</p>' : ''}
+                        ${window.appState.deposits.map(d => `
+                            <div class="bg-slate-900 p-2 rounded-xl border border-purple-900/40 flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold text-green-400">Rs ${d.amount} (Trx: ${d.trxId})</div>
+                                    <div class="text-[9px] text-gray-400">${d.time}</div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold ${d.status === 'Completed' ? 'bg-green-950 text-green-400' : (d.status === 'Rejected' ? 'bg-red-950 text-red-400' : 'bg-yellow-950 text-yellow-400')}">${d.status}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getWithdrawHTML() {
+            return `
+                <div class="p-3 space-y-3.5">
+                    <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-4 rounded-2xl shadow-lg">
+                        <span class="text-xs text-blue-200">Withdrawable Balance</span>
+                        <div class="text-2xl font-black text-white">Rs ${window.appState.activeUser.balance.toFixed(2)}</div>
+                    </div>
+
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-3 text-xs">
+                        <h4 class="font-bold text-yellow-400">JazzCash Account Info</h4>
+                        <div>
+                            <label class="text-gray-300">Account Title</label>
+                            <input type="text" id="wds-account-name" placeholder="Name" class="w-full bg-slate-900 border border-purple-700 rounded px-3 py-2 text-white mt-1">
+                        </div>
+                        <div>
+                            <label class="text-gray-300">Account Number</label>
+                            <input type="text" id="wds-account-num" placeholder="0300xxxxxxx" class="w-full bg-slate-900 border border-purple-700 rounded px-3 py-2 text-white mt-1">
+                        </div>
+                    </div>
+
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800 space-y-3 text-xs">
+                        <label class="font-bold text-yellow-400">Withdraw Amount (Min Rs 500)</label>
+                        <input type="number" id="wds-amount-input" placeholder="500" class="w-full bg-slate-900 border border-purple-700 rounded px-3 py-2 text-yellow-400 font-bold">
+                        <button onclick="submitWithdrawal()" class="w-full gold-btn font-black py-3 rounded-xl shadow-lg">Submit Request</button>
+                    </div>
+
+                    <div class="bg-brand-card p-3 rounded-2xl border border-purple-800/60 space-y-2 text-xs">
+                        <h4 class="font-bold text-yellow-400">Withdrawal Logs</h4>
+                        ${window.appState.withdrawals.length === 0 ? '<p class="text-gray-500">No withdrawal requests yet.</p>' : ''}
+                        ${window.appState.withdrawals.map(w => `
+                            <div class="bg-slate-900 p-2 rounded-xl border border-purple-900/40 flex justify-between items-center">
+                                <div>
+                                    <div class="font-bold text-yellow-400">Rs ${w.amount}</div>
+                                    <div class="text-[9px] text-gray-400">${w.time}</div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold ${w.status === 'Completed' ? 'bg-green-950 text-green-400' : 'bg-yellow-950 text-yellow-400'}">${w.status}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getAccountHTML() {
+            const u = window.appState.activeUser;
+            return `
+                <div class="p-3 space-y-3.5">
+                    <div class="bg-gradient-to-r from-purple-900 to-indigo-950 p-4 rounded-2xl border border-purple-600/40 flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center font-black text-slate-950 text-lg">
+                            ${u.fullName ? u.fullName.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm text-white">${u.fullName || 'User'}</div>
+                            <div class="text-xs text-gray-300 font-mono">+92${u.phone}</div>
+                            <div class="text-[10px] text-gray-400">UID: ${u.id}</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-brand-card p-4 rounded-2xl border border-purple-800/60 flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] text-gray-400">Main Balance</span>
+                            <div class="text-xl font-black text-yellow-400">Rs <span id="account-balance-val">${u.balance.toFixed(2)}</span></div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="switchTab('deposit')" class="bg-green-600 text-white font-bold text-xs px-3 py-2 rounded-xl">Deposit</button>
+                            <button onclick="switchTab('withdraw')" class="bg-red-600 text-white font-bold text-xs px-3 py-2 rounded-xl">Withdraw</button>
+                        </div>
+                    </div>
+
+                    <button onclick="handleUserLogout()" class="w-full bg-slate-900 border border-purple-800 text-red-400 font-bold py-3 rounded-2xl text-xs">Log Out</button>
+                </div>
+            `;
+        }
+
+        let currentBetTarget = null;
+        window.openBetModal = function(val) {
+            currentBetTarget = val;
+            document.getElementById('bet-target-val').innerText = val;
+            document.getElementById('bet-modal').classList.remove('hidden');
+        };
+
+        window.closeBetModal = function() {
+            document.getElementById('bet-modal').classList.add('hidden');
+        };
+
+        window.processBetSubmit = function() {
+            const amt = parseFloat(document.getElementById('bet-amount-val').value) || 10;
+            if (window.appState.activeUser.balance < amt) {
+                showToast('Insufficient wallet balance!');
+                return;
+            }
+
+            window.appState.activeUser.balance -= amt;
+            window.saveUserToCloud(window.appState.activeUser);
+            updateBalanceDisplay();
+
+            const room = window.appState.wingoRooms[window.appState.activeWinGoRoom];
+            room.myBets.push({
+                period: room.period.toString(),
+                target: currentBetTarget,
+                amount: amt
+            });
+
+            showToast(`Bet placed: Rs ${amt} on ${currentBetTarget}`);
+            closeBetModal();
+        };
+
+        function calculateRoomOutcome(roomKey) {
+            const room = window.appState.wingoRooms[roomKey];
+            let num;
+
+            if (room.override !== 'AUTO') {
+                num = parseInt(room.override);
+            } else {
+                num = Math.floor(Math.random() * 10);
+            }
+
+            const size = num >= 5 ? 'Big' : 'Small';
+            const color = [1,3,7,9].includes(num) ? 'Green' : ([2,4,6,8].includes(num) ? 'Red' : 'Violet');
+
+            room.history.unshift({
+                period: room.period.toString(),
+                number: num,
+                size: size,
+                color: color
+            });
+
+            room.myBets.forEach(b => {
+                if (b.period === room.period.toString()) {
+                    let isWin = false;
+                    if (typeof b.target === 'number' && b.target === num) isWin = true;
+                    if (b.target === 'Big' && size === 'Big') isWin = true;
+                    if (b.target === 'Small' && size === 'Small') isWin = true;
+                    if (b.target === color) isWin = true;
+
+                    if (isWin) {
+                        const payout = b.amount * 1.95;
+                        window.appState.activeUser.balance += payout;
+                        window.saveUserToCloud(window.appState.activeUser);
+                        showToast(`🎉 WIN! Room ${roomKey} Period ${b.period.slice(-4)} paid Rs ${payout.toFixed(2)}`);
+                    }
+                }
+            });
+
+            room.period = room.period + 1;
+            updateBalanceDisplay();
+
+            if (window.appState.currentTab === 'wingo' && window.appState.activeWinGoRoom === roomKey) {
+                renderContent();
+            }
+        }
+
+        function getBallColorClass(num) {
+            if (num === 0) return 'bg-gradient-to-r from-red-600 to-purple-600';
+            if (num === 5) return 'bg-gradient-to-r from-green-600 to-purple-600';
+            if ([1,3,7,9].includes(num)) return 'bg-green-600';
+            if ([2,4,6,8].includes(num)) return 'bg-red-600';
+            return 'bg-purple-600';
+        }
+
+        window.submitDeposit = function() {
+            const amt = parseFloat(document.getElementById('deposit-amount-input').value);
+            const trx = document.getElementById('deposit-trx-input').value.trim();
+
+            if (!amt || amt < 300) {
+                showToast('Min Deposit is Rs 300');
+                return;
+            }
+
+            if (!trx || trx.length < 5) {
+                showToast('Please enter valid Transaction ID (Trx ID)');
+                return;
+            }
+
+            const depObj = {
+                id: 'DEP' + Math.floor(100 + Math.random()*900),
+                userPhone: window.appState.activeUser.phone,
+                amount: amt,
+                trxId: trx,
+                time: new Date().toLocaleTimeString().slice(0, 5),
+                status: 'Pending',
+                timestamp: Date.now()
+            };
+
+            window.saveDepositToCloud(depObj);
+            showToast('Deposit request sent! Saved to Cloud.');
+            renderContent();
+        };
+
+        window.submitWithdrawal = function() {
+            const amt = parseFloat(document.getElementById('wds-amount-input').value);
+            const name = document.getElementById('wds-account-name').value;
+            const num = document.getElementById('wds-account-num').value;
+
+            if (!name || !num) {
+                showToast('Please fill account info');
+                return;
+            }
+
+            if (!amt || amt < 500) {
+                showToast('Min Withdrawal is Rs 500');
+                return;
+            }
+
+            if (window.appState.activeUser.balance < amt) {
+                showToast('Insufficient wallet balance');
+                return;
+            }
+
+            window.appState.activeUser.balance -= amt;
+            window.saveUserToCloud(window.appState.activeUser);
+            updateBalanceDisplay();
+
+            const wdsObj = {
+                id: 'WDS' + Math.floor(100 + Math.random()*900),
+                userPhone: window.appState.activeUser.phone,
+                amount: amt,
+                time: new Date().toLocaleTimeString().slice(0, 5),
+                status: 'Pending',
+                timestamp: Date.now()
+            };
+
+            window.saveWithdrawalToCloud(wdsObj);
+            showToast('Withdrawal request sent to Cloud Admin!');
+            renderContent();
+        };
+
+        window.openAuthModal = function(mode) {
+            window.appState.authMode = mode;
+            const modal = document.getElementById('auth-modal');
+            const nameBox = document.getElementById('auth-name-container');
+            
+            document.getElementById('auth-modal-title').innerText = mode === 'signup' ? 'Sign Up Account' : 'Login Account';
+            document.getElementById('auth-action-btn').innerText = mode === 'signup' ? 'Sign Up & Play' : 'Log In';
+            document.getElementById('auth-switch-text').innerText = mode === 'signup' ? 'Already registered?' : "Don't have an account?";
+            document.getElementById('auth-switch-btn').innerText = mode === 'signup' ? 'Login' : 'Sign Up';
+            
+            if (mode === 'login') {
+                nameBox.classList.add('hidden');
+            } else {
+                nameBox.classList.remove('hidden');
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closeAuthModal = function() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        };
+
+        window.switchAuthMode = function() {
+            openAuthModal(window.appState.authMode === 'signup' ? 'login' : 'signup');
+        };
+
+        window.processAuthSubmit = async function() {
+            const phoneInput = document.getElementById('auth-phone').value.trim();
+            const passInput = document.getElementById('auth-pass').value.trim();
+            const fullName = document.getElementById('auth-fullname').value.trim();
+
+            if (!/^\d{10}$/.test(phoneInput)) {
+                showToast('Enter exactly 10-digit number (e.g. 3001234567)');
+                return;
+            }
+
+            if (passInput.length < 6 || passInput.length > 12) {
+                showToast('Password must be 6 to 12 characters');
+                return;
+            }
+
+            if (window.appState.authMode === 'signup') {
+                if (!fullName) {
+                    showToast('Please enter your full name');
+                    return;
+                }
+
+                const exists = window.appState.users.find(u => u.phone === phoneInput);
+                if (exists) {
+                    showToast('Phone number already registered! Please Login.');
+                    openAuthModal('login');
+                    return;
+                }
+
+                const newUser = {
+                    id: Math.floor(10000 + Math.random()*90000).toString(),
+                    fullName: fullName,
+                    phone: phoneInput,
+                    pass: passInput,
+                    balance: 0.00,
+                    status: 'Online'
+                };
+
+                await window.saveUserToCloud(newUser);
+                showToast('Signup saved to Cloud! Please login now.');
+                openAuthModal('login');
+            } else {
+                const user = window.appState.users.find(u => u.phone === phoneInput && u.pass === passInput);
+                if (user) {
+                    window.appState.activeUser = user;
+                    window.appState.authenticated = true;
+                    updateBalanceDisplay();
+                    showToast(`Welcome back, ${user.fullName || user.phone}!`);
+                    closeAuthModal();
+                    renderContent();
+                } else {
+                    showToast('Invalid Phone or Password!');
+                }
+            }
+        };
+
+        window.handleUserLogout = function() {
+            window.appState.authenticated = false;
+            window.appState.activeUser = null;
+            updateBalanceDisplay();
+            showToast('Logged out');
+            switchTab('home');
+        };
+
+        window.toggleAdminModal = function() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                renderAdminData();
+            }
+        };
+
+        window.handleAdminLogin = function() {
+            const email = document.getElementById('admin-email').value.trim();
+            const pass = document.getElementById('admin-pass').value.trim();
+
+            if (email === window.appState.adminCreds.email && pass === window.appState.adminCreds.pass) {
+                document.getElementById('admin-login-box').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                renderAdminData();
+                showToast('Admin Control Unlocked');
+            } else {
+                showToast('Access Denied: Invalid Email/Password');
+            }
+        };
+
+        window.adminLogout = function() {
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('admin-login-box').classList.remove('hidden');
+            document.getElementById('admin-email').value = '';
+            document.getElementById('admin-pass').value = '';
+            showToast('Admin Logged Out');
+        };
+
+        window.updateAdminCredentials = function() {
+            const newEmail = document.getElementById('change-admin-email').value.trim();
+            const newPass = document.getElementById('change-admin-pass').value.trim();
+
+            if (!newEmail || !newPass) {
+                showToast('Fill in both email and password');
+                return;
+            }
+
+            window.appState.adminCreds.email = newEmail;
+            window.appState.adminCreds.pass = newPass;
+
+            window.saveAdminCredsToCloud({ email: newEmail, pass: newPass });
+            showToast('Admin credentials saved to Cloud!');
+        };
+
+        window.renderAdminData = function() {
+            const uCount = document.getElementById('admin-users-count');
+            if (uCount) uCount.innerText = window.appState.users.length;
+            
+            const usersContainer = document.getElementById('admin-users-list');
+            if (usersContainer) {
+                usersContainer.innerHTML = window.appState.users.length === 0 ? '<p class="text-gray-500">No registered users in cloud.</p>' : window.appState.users.map(u => `
+                    <div class="bg-slate-900 p-2 rounded border border-purple-800 space-y-1">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-white">${u.fullName || 'User'}</span>
+                                <span class="text-[9px] text-gray-400 font-mono ml-1">(+92${u.phone})</span>
+                            </div>
+                            <span class="text-yellow-400 font-extrabold">Rs ${u.balance.toFixed(2)}</span>
+                        </div>
+                        <div class="flex items-center space-x-1 pt-1">
+                            <input type="number" id="adj-amt-${u.phone}" placeholder="Amt" class="bg-slate-950 border border-purple-800 rounded px-1.5 py-0.5 text-[10px] w-20 text-white">
+                            <button onclick="modifyUserBal('${u.phone}', 1)" class="bg-green-600 text-white text-[9px] font-bold px-2 py-0.5 rounded">+ Add</button>
+                            <button onclick="modifyUserBal('${u.phone}', -1)" class="bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded">- Cut</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const pendingDeps = window.appState.deposits.filter(d => d.status === 'Pending');
+            const depBadge = document.getElementById('admin-dep-badge');
+            if (depBadge) depBadge.innerText = pendingDeps.length;
+            const depList = document.getElementById('admin-deposit-list');
+            if (depList) {
+                depList.innerHTML = pendingDeps.length === 0 ? '<p class="text-gray-500 py-1">No pending deposit orders.</p>' :
+                pendingDeps.map(d => `
+                    <div class="bg-slate-900 p-2 rounded border border-purple-800 space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-green-400">Rs ${d.amount}</span>
+                            <span class="text-[9px] font-mono text-yellow-400">Trx: ${d.trxId}</span>
+                        </div>
+                        <div class="text-[9px] text-gray-400">User: +92${d.userPhone}</div>
+                        <div class="flex justify-end space-x-1 pt-1">
+                            <button onclick="adminApproveDep('${d.id}')" class="bg-green-600 text-white text-[9px] px-2 py-0.5 rounded font-bold">Approve</button>
+                            <button onclick="adminRejectDep('${d.id}')" class="bg-red-600 text-white text-[9px] px-2 py-0.5 rounded font-bold">Reject</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const pendingWds = window.appState.withdrawals.filter(w => w.status === 'Pending');
+            const wdsBadge = document.getElementById('admin-wds-badge');
+            if (wdsBadge) wdsBadge.innerText = pendingWds.length;
+            const wdsList = document.getElementById('admin-withdraw-list');
+            if (wdsList) {
+                wdsList.innerHTML = pendingWds.length === 0 ? '<p class="text-gray-500 py-1">No pending withdraw orders.</p>' :
+                pendingWds.map(w => `
+                    <div class="bg-slate-900 p-1.5 rounded flex justify-between items-center border border-purple-800">
+                        <div>
+                            <span class="font-bold text-yellow-400">Rs ${w.amount}</span>
+                            <span class="text-[9px] text-gray-400">(+92${w.userPhone})</span>
+                        </div>
+                        <div class="space-x-1">
+                            <button onclick="adminApproveWds('${w.id}')" class="bg-green-600 text-white text-[9px] px-2 py-0.5 rounded font-bold">Approve</button>
+                            <button onclick="adminRejectWds('${w.id}')" class="bg-red-600 text-white text-[9px] px-2 py-0.5 rounded font-bold">Reject</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        };
+
+        window.modifyUserBal = async function(userPhone, factor) {
+            const input = document.getElementById(`adj-amt-${userPhone}`);
+            const val = parseFloat(input.value);
+            if (!val) return;
+
+            const u = window.appState.users.find(x => x.phone === userPhone);
+            if (u) {
+                u.balance += (val * factor);
+                await window.saveUserToCloud(u);
+                showToast(`Updated balance to Rs ${u.balance}`);
+            }
+        };
+
+        window.saveAdminOverride = function() {
+            const roomKey = document.getElementById('admin-room-select').value;
+            const target = document.getElementById('admin-override-val').value;
+
+            window.appState.wingoRooms[roomKey].override = target;
+            showToast(`Room ${roomKey} target set to: ${target}`);
+        };
+
+        window.adminApproveDep = async function(id) {
+            const d = window.appState.deposits.find(x => x.id === id);
+            if (d) {
+                d.status = 'Completed';
+                await window.saveDepositToCloud(d);
+
+                const u = window.appState.users.find(x => x.phone === d.userPhone);
+                if (u) {
+                    u.balance += d.amount;
+                    await window.saveUserToCloud(u);
+                }
+                showToast(`Deposit Approved & Balance Added.`);
+            }
+        };
+
+        window.adminRejectDep = async function(id) {
+            const d = window.appState.deposits.find(x => x.id === id);
+            if (d) {
+                d.status = 'Rejected';
+                await window.saveDepositToCloud(d);
+                showToast(`Deposit Rejected`);
+            }
+        };
+
+        window.adminApproveWds = async function(id) {
+            const w = window.appState.withdrawals.find(x => x.id === id);
+            if (w) {
+                w.status = 'Completed';
+                await window.saveWithdrawalToCloud(w);
+                showToast(`Withdrawal Approved!`);
+            }
+        };
+
+        window.adminRejectWds = async function(id) {
+            const w = window.appState.withdrawals.find(x => x.id === id);
+            if (w) {
+                w.status = 'Rejected';
+                await window.saveWithdrawalToCloud(w);
+
+                const u = window.appState.users.find(x => x.phone === w.userPhone);
+                if (u) {
+                    u.balance += w.amount;
+                    await window.saveUserToCloud(u);
+                }
+                showToast(`Withdrawal Rejected. Amount refunded.`);
+            }
+        };
+    </script>
+</body>
+</html>
