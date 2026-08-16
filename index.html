@@ -362,6 +362,10 @@
                         <input type="text" id="auth-phone" placeholder="3001234567" maxlength="10" class="w-full bg-transparent px-3 py-3 text-white text-sm">
                     </div>
                 </div>
+                <div id="auth-referral-container">
+                    <label class="text-xs text-gray-300">REFERRAL CODE (OPTIONAL)</label>
+                    <input type="text" id="auth-referral" placeholder="Enter invite code" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white mt-1">
+                </div>
                 <div>
                     <label class="text-xs text-gray-300">PASSWORD</label>
                     <input type="password" id="auth-pass" placeholder="Min 6 characters" maxlength="12" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white mt-1">
@@ -405,6 +409,19 @@
             <div class="glass-card p-4 space-y-2">
                 <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-hand-holding-dollar mr-2"></i>WITHDRAWALS (<span id="admin-wds-badge">0</span>)</span>
                 <div id="admin-withdraw-list" class="space-y-2 max-h-40 overflow-y-auto"></div>
+            </div>
+            <!-- Referral Settings -->
+            <div class="glass-card p-4 space-y-2">
+                <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-gift mr-2"></i>REFERRAL BONUS %</span>
+                <div class="flex gap-2">
+                    <input type="number" id="admin-ref-bonus" value="5" min="0" max="100" step="0.5" class="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm">
+                    <button onclick="saveReferralBonus()" class="neon-btn neon-btn-green px-4 py-2 rounded-lg font-bold text-xs">SET</button>
+                </div>
+            </div>
+            <!-- Referral Report -->
+            <div class="glass-card p-4 space-y-2">
+                <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-chart-bar mr-2"></i>REFERRAL REPORT</span>
+                <div id="admin-ref-report" class="space-y-2 max-h-60 overflow-y-auto"></div>
             </div>
             <div class="glass-card p-4 space-y-2">
                 <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-plane-up mr-2"></i>AVIATOR OVERRIDE</span>
@@ -460,6 +477,7 @@
         const USERS_KEY = 'halalpk_users_local';
         const DEPOSITS_KEY = 'halalpk_deposits_local';
         const WITHDRAWALS_KEY = 'halalpk_withdrawals_local';
+        const REF_BONUS_KEY = 'halalpk_ref_bonus';
 
         // ============ GLOBAL STATE ============
         window.appState = {
@@ -471,6 +489,7 @@
             currentTab: 'home',
             authMode: 'signup',
             jazzcashNumber: '03082836422',
+            referralBonusPercentage: 5, // default 5%
             wingoRooms: {
                 '30Sec': { totalSec: 30, timerSec: 30, period: Date.now(), override: 'AUTO', history: [], myBets: [] },
                 '1Min': { totalSec: 60, timerSec: 60, period: Date.now(), override: 'AUTO', history: [], myBets: [] },
@@ -546,6 +565,31 @@
                 const userRef = doc(db, 'users', uid);
                 await updateDoc(userRef, { balance: newBalance });
             } catch(e) {}
+        }
+
+        // ============ REFERRAL HELPERS ============
+        function generateReferralCode(uid) {
+            // Generate a unique code from uid (remove non-alphanumeric, take first 8 chars)
+            return uid.replace(/[^a-zA-Z0-9]/g, '').substring(0,8).toUpperCase();
+        }
+
+        async function findUserByReferralCode(code) {
+            if (!code) return null;
+            code = code.trim().toUpperCase();
+            // First check in-memory users list (fast)
+            const found = window.appState.users.find(u => u.referralCode && u.referralCode.toUpperCase() === code);
+            if (found) return found;
+            // If not found in memory, query Firestore (slower but works)
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                for (const docSnap of usersSnapshot.docs) {
+                    const data = docSnap.data();
+                    if (data.referralCode && data.referralCode.toUpperCase() === code) {
+                        return { ...data, uid: docSnap.id };
+                    }
+                }
+            } catch(e) { console.error(e); }
+            return null;
         }
 
         // ============ TOAST ============
@@ -1086,6 +1130,7 @@
         function getAccountHTML() {
             const u = window.appState.userData;
             if (!u) return '<div class="p-4 text-center"><p class="text-gray-400">Please login</p></div>';
+            const refLink = `${window.location.origin}${window.location.pathname}?ref=${u.referralCode || ''}`;
             return `
                 <div class="p-4 space-y-3">
                     <div class="glass-card-strong p-5 flex items-center gap-4">
@@ -1100,9 +1145,50 @@
                         <span class="text-xs text-gray-400">Balance</span>
                         <div class="font-orbitron font-black text-yellow-400 text-2xl">Rs ${u.balance.toFixed(2)}</div>
                     </div>
+                    <!-- Referral Section -->
+                    <div class="glass-card-strong p-4 space-y-3">
+                        <h3 class="font-orbitron text-yellow-400 text-sm">REFERRAL PROGRAM</h3>
+                        <div class="bg-black/50 p-3 rounded-xl">
+                            <p class="text-xs text-gray-400">Your Code:</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="font-orbitron font-black text-yellow-400 text-lg">${u.referralCode || 'N/A'}</span>
+                                <button onclick="copyReferralCode('${u.referralCode}')" class="neon-btn neon-btn-purple px-3 py-1 rounded-lg text-xs font-bold">COPY</button>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">Referral Link:</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] text-gray-300 break-all">${refLink}</span>
+                                <button onclick="copyReferralLink('${refLink}')" class="neon-btn neon-btn-green px-3 py-1 rounded-lg text-xs font-bold">COPY</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="bg-black/30 p-3 rounded-lg">
+                                <div class="text-xl font-black text-yellow-400">${u.referralCount || 0}</div>
+                                <div class="text-[10px] text-gray-400">Invites</div>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg">
+                                <div class="text-xl font-black text-green-400">Rs ${(u.referralDepositTotal || 0).toFixed(2)}</div>
+                                <div class="text-[10px] text-gray-400">Ref Deposits</div>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg">
+                                <div class="text-xl font-black text-purple-400">Rs ${(u.referralBonusEarned || 0).toFixed(2)}</div>
+                                <div class="text-[10px] text-gray-400">Bonus Earned</div>
+                            </div>
+                        </div>
+                    </div>
                     <button onclick="handleUserLogout()" class="w-full bg-red-600/20 border border-red-500/50 text-red-400 py-3 rounded-xl font-bold">LOGOUT</button>
                 </div>`;
         }
+
+        window.copyReferralCode = (code) => {
+            if (code) {
+                navigator.clipboard.writeText(code).then(() => showToast('Code copied!', 'success')).catch(() => showToast('Copy failed', 'error'));
+            }
+        };
+        window.copyReferralLink = (link) => {
+            if (link) {
+                navigator.clipboard.writeText(link).then(() => showToast('Link copied!', 'success')).catch(() => showToast('Copy failed', 'error'));
+            }
+        };
 
         // ============ AUTH FUNCTIONS ============
         window.openAuthModal = (mode) => {
@@ -1111,9 +1197,18 @@
             document.getElementById('auth-action-btn').innerText = mode === 'signup' ? 'SIGN UP & PLAY' : 'LOGIN';
             document.getElementById('auth-switch-text').innerText = mode === 'signup' ? 'Already registered?' : 'No account?';
             document.getElementById('auth-switch-btn').innerText = mode === 'signup' ? 'LOGIN' : 'SIGN UP';
-            // Show/hide name and phone fields for signup vs login
+            // Show/hide signup-only fields
             document.getElementById('auth-name-container').style.display = mode === 'signup' ? 'block' : 'none';
             document.getElementById('auth-phone-container').style.display = mode === 'signup' ? 'block' : 'none';
+            document.getElementById('auth-referral-container').style.display = mode === 'signup' ? 'block' : 'none';
+            // Prefill referral from URL if available
+            if (mode === 'signup') {
+                const params = new URLSearchParams(window.location.search);
+                const ref = params.get('ref');
+                if (ref) {
+                    document.getElementById('auth-referral').value = ref;
+                }
+            }
             document.getElementById('auth-modal').classList.remove('hidden');
         };
         window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
@@ -1124,6 +1219,7 @@
             const pass = document.getElementById('auth-pass').value.trim();
             const name = document.getElementById('auth-fullname').value.trim();
             const phone = document.getElementById('auth-phone').value.trim();
+            const referralCodeInput = document.getElementById('auth-referral').value.trim();
 
             if (!email) { showToast('Email required!', 'error'); return; }
             if (pass.length < 6) { showToast('Password min 6 chars!', 'error'); return; }
@@ -1134,12 +1230,36 @@
                 try {
                     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                     const user = userCredential.user;
-                    // Save user data to Firestore
+                    const referralCode = generateReferralCode(user.uid);
+                    
+                    let referredBy = null;
+                    if (referralCodeInput) {
+                        const inviter = await findUserByReferralCode(referralCodeInput);
+                        if (inviter) {
+                            referredBy = inviter.uid;
+                            // Increment inviter's referralCount
+                            const inviterRef = doc(db, 'users', inviter.uid);
+                            const inviterData = await getDoc(inviterRef);
+                            if (inviterData.exists()) {
+                                await updateDoc(inviterRef, {
+                                    referralCount: (inviterData.data().referralCount || 0) + 1
+                                });
+                            }
+                        } else {
+                            showToast('Invalid referral code, proceeding without it.', 'info');
+                        }
+                    }
+                    
                     const userData = {
                         fullName: name,
                         email: email,
                         phone: phone,
                         balance: 0,
+                        referralCode: referralCode,
+                        referredBy: referredBy,
+                        referralCount: 0,
+                        referralDepositTotal: 0,
+                        referralBonusEarned: 0,
                         createdAt: Date.now()
                     };
                     await saveUserDataToFirestore(user.uid, userData);
@@ -1170,7 +1290,6 @@
                         updateBalanceDisplay();
                     } else {
                         showToast('User data not found!', 'error');
-                        // Optionally sign out
                         await signOut(auth);
                     }
                 } catch (error) {
@@ -1207,10 +1326,8 @@
                 time: new Date().toLocaleString(),
                 timestamp: Date.now()
             };
-            // Save locally
             window.appState.deposits.push(dep);
             saveToLocal(DEPOSITS_KEY, window.appState.deposits);
-            // Firebase
             await saveDepositToFirestore(dep);
             showToast('Deposit submitted!', 'success');
             document.getElementById('deposit-trx-input').value = '';
@@ -1263,6 +1380,15 @@
             document.getElementById('admin-dashboard').classList.add('hidden'); 
             document.getElementById('admin-login-box').classList.remove('hidden'); 
         };
+        
+        window.saveReferralBonus = () => {
+            const val = parseFloat(document.getElementById('admin-ref-bonus').value);
+            if (isNaN(val) || val < 0 || val > 100) { showToast('Enter 0-100', 'error'); return; }
+            window.appState.referralBonusPercentage = val;
+            saveToLocal(REF_BONUS_KEY, val);
+            showToast(`Referral bonus set to ${val}%`, 'success');
+        };
+
         window.renderAdminData = () => {
             document.getElementById('admin-users-count').innerText = window.appState.users.length;
             document.getElementById('admin-users-list').innerHTML = window.appState.users.map(u => `
@@ -1270,6 +1396,7 @@
                     <div>
                         <div class="font-bold text-sm">${u.fullName} (${u.email})</div>
                         <div class="text-yellow-400 font-bold">Rs ${u.balance.toFixed(2)}</div>
+                        ${u.referredBy ? `<div class="text-[10px] text-gray-500">Referred by: ${u.referredBy}</div>` : ''}
                     </div>
                     <div class="flex gap-1">
                         <input type="number" id="adj-${u.uid}" placeholder="Amt" class="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs w-20">
@@ -1299,6 +1426,22 @@
                     </div>
                     <button onclick="adminApproveWds('${w.id}')" class="neon-btn-green px-3 py-1 rounded-lg text-xs font-bold">APPROVE</button>
                 </div>`).join('') || '<p class="text-xs text-gray-500">No pending</p>';
+
+            // Referral report
+            const refReport = window.appState.users.map(u => `
+                <div class="bg-black/30 p-2 rounded-lg">
+                    <div class="flex justify-between">
+                        <span class="font-bold text-sm">${u.fullName}</span>
+                        <span class="text-xs text-gray-400">Code: ${u.referralCode || 'N/A'}</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mt-1 text-center">
+                        <div><div class="text-yellow-400 font-bold">${u.referralCount || 0}</div><div class="text-[9px]">Invites</div></div>
+                        <div><div class="text-green-400 font-bold">Rs ${(u.referralDepositTotal || 0).toFixed(2)}</div><div class="text-[9px]">Deposits</div></div>
+                        <div><div class="text-purple-400 font-bold">Rs ${(u.referralBonusEarned || 0).toFixed(2)}</div><div class="text-[9px]">Bonus</div></div>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-xs text-gray-500">No users</p>';
+            document.getElementById('admin-ref-report').innerHTML = refReport;
         };
         
         window.adminModifyBalance = async (uid, factor) => {
@@ -1312,12 +1455,10 @@
                     const data = snap.data();
                     const newBalance = Math.max(0, data.balance + amt * factor);
                     await updateDoc(userRef, { balance: newBalance });
-                    // Update local state if admin is editing own account (unlikely)
                     if (window.appState.activeUser?.uid === uid) {
                         window.appState.userData.balance = newBalance;
                         updateBalanceDisplay();
                     }
-                    // Reload users list
                     window.appState.users = await loadAllUsersFromFirestore();
                     renderAdminData();
                     showToast('Balance updated!', 'success');
@@ -1331,7 +1472,6 @@
             const v = document.getElementById('admin-aviator-val').value.trim();
             if (v) {
                 window.appState.aviator.override = v;
-                // Optionally save to settings collection, not necessary now
                 showToast('Aviator override set!', 'success');
             }
         };
@@ -1341,6 +1481,7 @@
             window.appState.wingoRooms[rk].override = v;
             showToast(`Win Go ${rk} set to ${v}`, 'success');
         };
+        
         window.adminApproveDep = async (id) => {
             const d = window.appState.deposits.find(x => x.id === id);
             if (d && d.status === 'Pending') {
@@ -1354,19 +1495,41 @@
                     if (snap.exists()) {
                         const data = snap.data();
                         await updateDoc(userRef, { balance: data.balance + d.amount });
-                        // Update local if current user
                         if (window.appState.activeUser?.uid === d.userUid) {
                             window.appState.userData.balance += d.amount;
                             updateBalanceDisplay();
                         }
+                        // Referral bonus logic
+                        if (data.referredBy) {
+                            const inviterRef = doc(db, 'users', data.referredBy);
+                            const inviterSnap = await getDoc(inviterRef);
+                            if (inviterSnap.exists()) {
+                                const inviterData = inviterSnap.data();
+                                const bonus = d.amount * (window.appState.referralBonusPercentage / 100);
+                                const newInviterBalance = inviterData.balance + bonus;
+                                const newDepositTotal = (inviterData.referralDepositTotal || 0) + d.amount;
+                                const newBonusEarned = (inviterData.referralBonusEarned || 0) + bonus;
+                                await updateDoc(inviterRef, {
+                                    balance: newInviterBalance,
+                                    referralDepositTotal: newDepositTotal,
+                                    referralBonusEarned: newBonusEarned
+                                });
+                                // Update local if inviter is current user (unlikely in admin)
+                                if (window.appState.activeUser?.uid === data.referredBy) {
+                                    window.appState.userData.balance = newInviterBalance;
+                                    updateBalanceDisplay();
+                                }
+                            }
+                        }
                     }
-                } catch(e) {}
+                } catch(e) { console.error(e); }
                 // Refresh users
                 window.appState.users = await loadAllUsersFromFirestore();
                 renderAdminData();
                 showToast('Deposit approved!', 'success');
             }
         };
+        
         window.adminApproveWds = async (id) => {
             const w = window.appState.withdrawals.find(x => x.id === id);
             if (w && w.status === 'Pending') {
@@ -1434,6 +1597,10 @@
             startRoomTimers();
             initAviatorEngine();
 
+            // Load referral bonus from local storage
+            const savedRefBonus = loadFromLocal(REF_BONUS_KEY);
+            if (savedRefBonus) window.appState.referralBonusPercentage = savedRefBonus;
+
             // Load local backups
             const localDeps = loadFromLocal(DEPOSITS_KEY);
             if (localDeps) window.appState.deposits = localDeps;
@@ -1449,7 +1616,6 @@
                         window.appState.userData = userData;
                         window.appState.authenticated = true;
                     } else {
-                        // Should not happen, but handle gracefully
                         window.appState.authenticated = false;
                         await signOut(auth);
                     }
@@ -1462,7 +1628,7 @@
                 renderContent();
             });
 
-            // Firestore listeners for deposits/withdrawals/users
+            // Firestore listeners
             onSnapshot(collection(db, 'deposits'), (snap) => {
                 const list = [];
                 snap.forEach(d => list.push(d.data()));
@@ -1484,12 +1650,12 @@
                 snap.forEach(d => list.push({ ...d.data(), uid: d.id }));
                 window.appState.users = list;
                 renderAdminData();
-                // Update current user data if needed
                 if (window.appState.activeUser) {
                     const updated = list.find(u => u.uid === window.appState.activeUser.uid);
                     if (updated) {
                         window.appState.userData = updated;
                         updateBalanceDisplay();
+                        if (window.appState.currentTab === 'account') renderContent();
                     }
                 }
             });
@@ -1499,4 +1665,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
