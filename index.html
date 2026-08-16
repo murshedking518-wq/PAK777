@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pak777 Casino | Premium Gaming</title>
+    <title>Halal PK | Premium Gaming</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -283,7 +283,7 @@
             <div class="loader-ring"></div>
             <div class="loader-inner"></div>
         </div>
-        <p class="font-orbitron text-lg mt-6 text-yellow-400 animate-pulse-neon tracking-wider">LOADING PAK777...</p>
+        <p class="font-orbitron text-lg mt-6 text-yellow-400 animate-pulse-neon tracking-wider">LOADING HALAL PK...</p>
     </div>
 
     <!-- PARTICLES -->
@@ -295,7 +295,7 @@
         <!-- HEADER -->
         <header class="sticky top-0 z-30 px-4 py-3 flex justify-between items-center" style="background: rgba(10,10,30,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(168,85,247,0.3);">
             <div onclick="switchTab('home')" class="cursor-pointer flex items-center gap-2">
-                <span class="font-orbitron text-xl font-black" style="background: linear-gradient(135deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PAK<span style="color:#ff3333; -webkit-text-fill-color: #ff3333;">777</span></span>
+                <span class="font-orbitron text-xl font-black" style="background: linear-gradient(135deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">HALAL<span style="color:#ff3333; -webkit-text-fill-color: #ff3333;">PK</span></span>
                 <i class="fa-solid fa-crown text-yellow-400 text-sm"></i>
             </div>
             <div class="flex items-center gap-2">
@@ -456,18 +456,18 @@
         const db = getFirestore(app);
 
         // ============ LOCAL STORAGE KEYS ============
-        const SESSION_KEY = 'pak777_session'; // Only to store UID locally if needed
-        const USERS_KEY = 'pak777_users_local'; // Backup of users (not used for auth)
-        const DEPOSITS_KEY = 'pak777_deposits_local';
-        const WITHDRAWALS_KEY = 'pak777_withdrawals_local';
+        const SESSION_KEY = 'halalpk_session';
+        const USERS_KEY = 'halalpk_users_local';
+        const DEPOSITS_KEY = 'halalpk_deposits_local';
+        const WITHDRAWALS_KEY = 'halalpk_withdrawals_local';
 
         // ============ GLOBAL STATE ============
         window.appState = {
             authenticated: false,
-            activeUser: null, // Firebase user object
-            userData: null,   // Firestore user document (balance, name, phone, etc.)
-            users: [],        // All Firestore users (for admin)
-            adminCreds: { email: 'admin@pak777.com', pass: 'admin123' },
+            activeUser: null,
+            userData: null,
+            users: [],
+            adminCreds: { email: 'admin@halalpk.com', pass: 'admin123' },
             currentTab: 'home',
             authMode: 'signup',
             jazzcashNumber: '03082836422',
@@ -488,6 +488,20 @@
             },
             deposits: [],
             withdrawals: []
+        };
+
+        // ============ DEPOSIT AMOUNT SELECTION ============
+        window.selectedDepositAmount = 500;
+
+        window.updateDepositButtons = () => {
+            document.querySelectorAll('.deposit-amount-btn').forEach(btn => {
+                const amt = parseInt(btn.getAttribute('data-amt'));
+                if (amt === window.selectedDepositAmount) {
+                    btn.className = 'deposit-amount-btn neon-btn neon-btn-gold py-2 rounded-lg font-bold text-sm';
+                } else {
+                    btn.className = 'deposit-amount-btn glass-card py-2 rounded-lg font-bold text-sm';
+                }
+            });
         };
 
         // ============ LOCALSTORAGE HELPERS ============
@@ -1018,7 +1032,14 @@
                                 <button onclick="window.copyToClipboard('${window.appState.jazzcashNumber}')" class="neon-btn neon-btn-purple px-3 py-1 rounded-lg text-xs font-bold">COPY</button>
                             </div>
                         </div>
-                        <input type="number" id="deposit-amount-input" value="500" placeholder="Amount (Min 300)" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-yellow-400 font-bold">
+                        <div>
+                            <label class="text-xs text-gray-400">SELECT AMOUNT</label>
+                            <div class="grid grid-cols-3 gap-2 mt-2">
+                                ${[300,500,1000,2000,5000,10000].map(amt => 
+                                    `<button onclick="window.selectedDepositAmount=${amt};updateDepositButtons();" data-amt="${amt}" class="deposit-amount-btn ${window.selectedDepositAmount === amt ? 'neon-btn neon-btn-gold' : 'glass-card'} py-2 rounded-lg font-bold text-sm">Rs ${amt}</button>`
+                                ).join('')}
+                            </div>
+                        </div>
                         <input type="text" id="deposit-trx-input" placeholder="Transaction ID (TID)" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white">
                         <button onclick="submitDeposit()" class="w-full neon-btn neon-btn-gold py-3 rounded-xl font-orbitron font-bold">SUBMIT</button>
                     </div>
@@ -1172,7 +1193,7 @@
         // ============ DEPOSIT/WITHDRAW ============
         window.submitDeposit = async () => {
             if (!window.appState.authenticated) { showToast('Login required!', 'error'); return; }
-            const amt = parseFloat(document.getElementById('deposit-amount-input').value);
+            const amt = window.selectedDepositAmount;
             const trx = document.getElementById('deposit-trx-input').value.trim();
             if (isNaN(amt) || amt < 300) { showToast('Minimum Rs 300', 'error'); return; }
             if (!trx) { showToast('TID required!', 'error'); return; }
@@ -1231,7 +1252,7 @@
             if (!m.classList.contains('hidden')) renderAdminData(); 
         };
         window.handleAdminLogin = () => {
-            if (document.getElementById('admin-email').value === 'admin@pak777.com' && 
+            if (document.getElementById('admin-email').value === 'admin@halalpk.com' && 
                 document.getElementById('admin-pass').value === 'admin123') {
                 document.getElementById('admin-login-box').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
