@@ -30,7 +30,6 @@
       overflow-x: hidden;
       position: relative;
     }
-    /* Floating background blobs */
     .blob {
       position: fixed;
       border-radius: 50%;
@@ -317,16 +316,30 @@
       animation: rotate 8s linear infinite;
     }
 
-    /* Investments table */
-    .investments-container {
+    /* History Section */
+    .history-tabs {
+      display: flex;
+      gap: 10px;
+      margin: 30px 0 15px;
+      flex-wrap: wrap;
+    }
+    .history-tabs button {
+      padding: 10px 20px;
+      background: var(--light);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .history-tabs button.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(76,175,80,0.4); }
+    .history-content {
       background: white;
       border-radius: 20px;
       padding: 20px;
-      margin-top: 30px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
-    .investments-container h3 { margin-bottom: 15px; color: var(--dark); }
-    .investment-item {
+    .history-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -335,7 +348,7 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .investment-item:last-child { border-bottom: none; }
+    .history-item:last-child { border-bottom: none; }
     .badge {
       padding: 5px 12px;
       border-radius: 20px;
@@ -344,6 +357,9 @@
     }
     .badge.active { background: #e8f5e9; color: #388E3C; }
     .badge.completed { background: #f5f5f5; color: #777; }
+    .badge.pending { background: #fff3e0; color: #E65100; }
+    .badge.approved { background: #e8f5e9; color: #388E3C; }
+    .badge.rejected { background: #ffebee; color: #c62828; }
 
     /* Modal */
     .modal-overlay {
@@ -510,10 +526,13 @@
       <h3 style="margin-bottom:15px; color:var(--dark);">Choose Investment Package</h3>
       <div class="package-grid" id="packageGrid"></div>
 
-      <div class="investments-container">
-        <h3>My Investments</h3>
-        <div id="investmentsList">Loading...</div>
+      <!-- User History Section -->
+      <div class="history-tabs">
+        <button class="active" onclick="switchHistoryTab('activePlans')">Active Plans</button>
+        <button onclick="switchHistoryTab('deposits')">Deposits</button>
+        <button onclick="switchHistoryTab('withdrawals')">Withdrawals</button>
       </div>
+      <div class="history-content" id="historyContent">Loading...</div>
     </div>
 
     <!-- Admin Dashboard -->
@@ -576,8 +595,9 @@
     let adminTab = 'pending';
     let adminUnsubscribe = null;
     let activeInvestmentListener = null;
+    let historyTab = 'activePlans';
+    let historyUnsubscribe = null;
 
-    // Packages data
     const packages = [
       { id: 'starter', name: 'Starter', amount: 300, dailyReturn: 75, durationDays: 30, totalReturn: 2250, color: '#4CAF50' },
       { id: 'silver', name: 'Silver', amount: 800, dailyReturn: 250, durationDays: 30, totalReturn: 7500, color: '#9E9E9E' },
@@ -610,6 +630,7 @@
       document.getElementById('logoutBtn').classList.add('hidden');
       document.getElementById('adminLoginBtn').classList.remove('hidden');
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
+      if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
     }
 
     function showUserDashboard(user) {
@@ -631,7 +652,6 @@
       initAdminDashboard();
     }
 
-    // Toggle Auth Tabs
     function toggleAuth(type) {
       const signupForm = document.getElementById('signupForm');
       const loginForm = document.getElementById('loginForm');
@@ -650,7 +670,6 @@
       }
     }
 
-    // Signup User
     async function signupUser() {
       const email = document.getElementById('signupEmail').value.trim();
       const password = document.getElementById('signupPassword').value;
@@ -669,7 +688,6 @@
       }
     }
 
-    // Login User
     async function loginUser() {
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
@@ -681,14 +699,13 @@
       }
     }
 
-    // Logout
     function logout() {
       if (adminUnsubscribe) { adminUnsubscribe(); adminUnsubscribe = null; }
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
+      if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
       auth.signOut();
     }
 
-    // Render Packages
     function renderPackages() {
       const grid = document.getElementById('packageGrid');
       grid.innerHTML = packages.map(pkg => `
@@ -702,26 +719,21 @@
       `).join('');
     }
 
-    // Initialize User Dashboard
     async function initUserDashboard(user) {
-      // Real-time balance
+      // Real-time balance (show integer)
       db.collection('users').doc(user.uid).onSnapshot((doc) => {
         if (doc.exists) {
-          document.getElementById('balanceDisplay').innerText = doc.data().balance || 0;
+          const balance = doc.data().balance || 0;
+          document.getElementById('balanceDisplay').innerText = Math.floor(balance);
         }
       });
 
-      // Process daily earnings
       await processInvestments(user);
-
-      // Load investments list
       loadInvestments(user);
-
-      // Set up active investment listener for 3D box and countdown
       setupActiveInvestment(user);
+      setupHistory(user);
     }
 
-    // Process daily earnings for all active investments
     async function processInvestments(user) {
       const userRef = db.collection('users').doc(user.uid);
       const invSnapshot = await db.collection('investments')
@@ -761,10 +773,8 @@
       await batch.commit();
     }
 
-    // Setup active investment real-time listener
     function setupActiveInvestment(user) {
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
-
       activeInvestmentListener = db.collection('investments')
         .where('userId', '==', user.uid)
         .where('active', '==', true)
@@ -780,7 +790,6 @@
           const inv = doc.data();
           box.classList.remove('hidden');
 
-          // Details
           const detailsHtml = `
             <div class="detail-item">
               <div class="label">Package</div>
@@ -808,13 +817,10 @@
             </div>
           `;
           document.getElementById('activeInvestmentDetails').innerHTML = detailsHtml;
-
-          // Start countdown timer
           startCountdown(inv);
         });
     }
 
-    // Countdown timer to next payout (24 hours after last payout)
     function startCountdown(inv) {
       const startMillis = inv.startDate ? inv.startDate.toMillis() : Date.now();
       const paidAmount = inv.paidAmount || 0;
@@ -822,35 +828,26 @@
       const paidDays = dailyReturn > 0 ? Math.floor(paidAmount / dailyReturn) : 0;
       const nextPayoutMillis = startMillis + (paidDays + 1) * 24 * 60 * 60 * 1000;
 
+      if (window.countdownInterval) clearInterval(window.countdownInterval);
+
       function updateTimer() {
         const now = Date.now();
         let diff = nextPayoutMillis - now;
-        if (diff < 0) {
-          diff = 0;
-        }
+        if (diff < 0) diff = 0;
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
         document.getElementById('countdownTimer').innerText =
           `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         if (diff === 0) {
-          // Timer reached zero, maybe earnings will be processed on next dashboard open
-          // But we can auto-refresh by calling processInvestments again
-          processInvestments(currentUser).then(() => {
-            // The onSnapshot will update automatically
-          });
+          processInvestments(currentUser).then(() => {});
         }
       }
 
       updateTimer();
-      // Update every second
-      window.countdownInterval = setInterval(updateTimer, 1000);
-      // Clear interval when investment changes? We'll store interval and clear on new listener
-      if (window.countdownInterval) clearInterval(window.countdownInterval);
       window.countdownInterval = setInterval(updateTimer, 1000);
     }
 
-    // Load investments list
     function loadInvestments(user) {
       db.collection('investments')
         .where('userId', '==', user.uid)
@@ -888,7 +885,140 @@
         });
     }
 
-    // Withdrawal Submission
+    // History Section
+    function setupHistory(user) {
+      if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
+      const historyContent = document.getElementById('historyContent');
+      historyContent.innerHTML = 'Loading...';
+      const userId = user.uid;
+
+      // We'll set up snapshots for active plans, deposits, withdrawals and update based on tab
+      let activePlansUnsub = db.collection('investments')
+        .where('userId', '==', userId)
+        .where('active', '==', true)
+        .orderBy('startDate', 'desc')
+        .onSnapshot(() => {
+          if (historyTab === 'activePlans') renderHistory(userId);
+        });
+
+      let depositsUnsub = db.collection('deposits')
+        .where('userId', '==', userId)
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(() => {
+          if (historyTab === 'deposits') renderHistory(userId);
+        });
+
+      let withdrawalsUnsub = db.collection('withdrawals')
+        .where('userId', '==', userId)
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(() => {
+          if (historyTab === 'withdrawals') renderHistory(userId);
+        });
+
+      historyUnsubscribe = () => {
+        if (activePlansUnsub) activePlansUnsub();
+        if (depositsUnsub) depositsUnsub();
+        if (withdrawalsUnsub) withdrawalsUnsub();
+      };
+    }
+
+    function switchHistoryTab(tab) {
+      historyTab = tab;
+      document.querySelectorAll('.history-tabs button').forEach((btn) => {
+        btn.classList.remove('active');
+      });
+      if (tab === 'activePlans') document.querySelector('.history-tabs button:nth-child(1)').classList.add('active');
+      else if (tab === 'deposits') document.querySelector('.history-tabs button:nth-child(2)').classList.add('active');
+      else if (tab === 'withdrawals') document.querySelector('.history-tabs button:nth-child(3)').classList.add('active');
+      renderHistory(currentUser.uid);
+    }
+
+    async function renderHistory(userId) {
+      const container = document.getElementById('historyContent');
+      if (!container) return;
+      container.innerHTML = 'Loading...';
+
+      if (historyTab === 'activePlans') {
+        const snapshot = await db.collection('investments')
+          .where('userId', '==', userId)
+          .where('active', '==', true)
+          .orderBy('startDate', 'desc')
+          .get();
+        if (snapshot.empty) {
+          container.innerHTML = '<p>No active plans.</p>';
+          return;
+        }
+        let html = '';
+        snapshot.docs.forEach(doc => {
+          const inv = doc.data();
+          const startMillis = inv.startDate ? inv.startDate.toMillis() : Date.now();
+          const now = Date.now();
+          let days = Math.floor((now - startMillis) / (1000 * 60 * 60 * 24));
+          if (days < 0) days = 0;
+          if (days > inv.durationDays) days = inv.durationDays;
+          html += `
+            <div class="history-item">
+              <div>
+                <strong>${inv.packageName}</strong><br>
+                <small>PKR ${inv.amount} | Daily: PKR ${inv.dailyReturn} | Elapsed: ${days}/${inv.durationDays} days</small>
+              </div>
+              <span class="badge active">ACTIVE</span>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      } else if (historyTab === 'deposits') {
+        const snapshot = await db.collection('deposits')
+          .where('userId', '==', userId)
+          .orderBy('createdAt', 'desc')
+          .get();
+        if (snapshot.empty) {
+          container.innerHTML = '<p>No deposits.</p>';
+          return;
+        }
+        let html = '';
+        snapshot.docs.forEach(doc => {
+          const dep = doc.data();
+          const statusClass = dep.status === 'approved' ? 'approved' : dep.status === 'rejected' ? 'rejected' : 'pending';
+          html += `
+            <div class="history-item">
+              <div>
+                <strong>${dep.packageName}</strong><br>
+                <small>PKR ${dep.amount} | TID: ${dep.tid}</small>
+              </div>
+              <span class="badge ${statusClass}">${dep.status.toUpperCase()}</span>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      } else if (historyTab === 'withdrawals') {
+        const snapshot = await db.collection('withdrawals')
+          .where('userId', '==', userId)
+          .orderBy('createdAt', 'desc')
+          .get();
+        if (snapshot.empty) {
+          container.innerHTML = '<p>No withdrawals.</p>';
+          return;
+        }
+        let html = '';
+        snapshot.docs.forEach(doc => {
+          const wd = doc.data();
+          const statusClass = wd.status === 'approved' ? 'approved' : wd.status === 'rejected' ? 'rejected' : 'pending';
+          html += `
+            <div class="history-item">
+              <div>
+                <strong>PKR ${wd.amount}</strong><br>
+                <small>${wd.accountType} - ${wd.accountNumber} | ${wd.accountHolderName}</small>
+              </div>
+              <span class="badge ${statusClass}">${wd.status.toUpperCase()}</span>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+    }
+
+    // Withdrawal Submission - immediate balance deduction
     async function submitWithdrawal() {
       const amount = parseFloat(document.getElementById('withdrawAmount').value);
       const holderName = document.getElementById('accountHolderName').value.trim();
@@ -910,29 +1040,30 @@
       }
 
       try {
-        // Check balance
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const userDoc = await userRef.get();
-        const balance = userDoc.data().balance || 0;
-        if (amount > balance) {
-          alert('Insufficient balance');
-          return;
-        }
-
-        // Create withdrawal request
-        await db.collection('withdrawals').add({
-          userId: currentUser.uid,
-          userEmail: currentUser.email,
-          amount: amount,
-          accountHolderName: holderName,
-          accountType: accountType,
-          accountNumber: accountNumber,
-          cnic: cnic,
-          status: 'pending',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        // Use transaction to check balance, deduct amount, and create withdrawal request
+        await db.runTransaction(async (transaction) => {
+          const userRef = db.collection('users').doc(currentUser.uid);
+          const userDoc = await transaction.get(userRef);
+          const balance = userDoc.data().balance || 0;
+          if (amount > balance) {
+            throw new Error('Insufficient balance');
+          }
+          // Deduct balance immediately
+          transaction.update(userRef, { balance: firebase.firestore.FieldValue.increment(-amount) });
+          // Create withdrawal request
+          transaction.set(db.collection('withdrawals').doc(), {
+            userId: currentUser.uid,
+            userEmail: currentUser.email,
+            amount: amount,
+            accountHolderName: holderName,
+            accountType: accountType,
+            accountNumber: accountNumber,
+            cnic: cnic,
+            status: 'pending',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
         });
-        alert('Withdrawal request submitted. Wait for admin approval.');
-        // Clear form
+        alert('Withdrawal request submitted. Balance deducted.');
         document.getElementById('withdrawAmount').value = '';
         document.getElementById('accountHolderName').value = '';
         document.getElementById('accountNumber').value = '';
@@ -942,7 +1073,6 @@
       }
     }
 
-    // Deposit Modal
     function openDepositModal(packageId) {
       const pkg = packages.find(p => p.id === packageId);
       if (!pkg) return;
@@ -969,7 +1099,6 @@
       selectedPackage = null;
     }
 
-    // Submit Deposit Request
     async function submitDeposit() {
       if (!selectedPackage) return;
       const tid = document.getElementById('tidInput').value.trim();
@@ -995,7 +1124,6 @@
       }
     }
 
-    // Admin Login
     async function adminLogin() {
       const email = document.getElementById('adminEmail').value.trim();
       const password = document.getElementById('adminPassword').value;
@@ -1020,7 +1148,6 @@
       document.getElementById('adminLoginModal').classList.add('hidden');
     }
 
-    // Admin Dashboard Init
     function initAdminDashboard() {
       if (adminUnsubscribe) { adminUnsubscribe(); }
       adminUnsubscribe = db.collection('deposits').orderBy('createdAt', 'desc').onSnapshot(() => {
@@ -1120,7 +1247,7 @@
             <div class="admin-item">
               <div>
                 <strong>${userData.email || 'No Email'}</strong><br>
-                <small>Balance: PKR ${userData.balance || 0}</small>
+                <small>Balance: PKR ${Math.floor(userData.balance || 0)}</small>
               </div>
               <div>
                 <button class="approve-btn" onclick="viewUserInvestments('${doc.id}')">View Investments</button>
@@ -1197,7 +1324,21 @@
       }
     }
 
+    // Withdrawal approval: do NOT deduct balance again (already deducted on request)
     async function approveWithdrawal(wdId) {
+      try {
+        await db.collection('withdrawals').doc(wdId).update({
+          status: 'approved',
+          approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Withdrawal approved.');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    // Withdrawal rejection: refund amount to user balance
+    async function rejectWithdrawal(wdId) {
       try {
         await db.runTransaction(async (transaction) => {
           const wdRef = db.collection('withdrawals').doc(wdId);
@@ -1206,32 +1347,12 @@
           const wd = wdDoc.data();
           if (wd.status !== 'pending') return;
 
-          // Deduct from user balance
+          // Refund amount
           const userRef = db.collection('users').doc(wd.userId);
-          const userDoc = await transaction.get(userRef);
-          const currentBalance = userDoc.data().balance || 0;
-          if (currentBalance < wd.amount) {
-            throw new Error('Insufficient user balance');
-          }
-
-          transaction.update(userRef, { balance: currentBalance - wd.amount });
-          transaction.update(wdRef, {
-            status: 'approved',
-            approvedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
+          transaction.update(userRef, { balance: firebase.firestore.FieldValue.increment(wd.amount) });
+          transaction.update(wdRef, { status: 'rejected', rejectedAt: firebase.firestore.FieldValue.serverTimestamp() });
         });
-        alert('Withdrawal approved and balance deducted.');
-      } catch (error) {
-        alert(error.message);
-      }
-    }
-
-    async function rejectWithdrawal(wdId) {
-      try {
-        await db.collection('withdrawals').doc(wdId).update({
-          status: 'rejected'
-        });
-        alert('Withdrawal rejected.');
+        alert('Withdrawal rejected. Amount refunded to user.');
       } catch (error) {
         alert(error.message);
       }
@@ -1254,4 +1375,4 @@
     }
   </script>
 </body>
-  </html>
+            </html>
