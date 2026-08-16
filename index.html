@@ -1,1668 +1,900 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Halal PK | Premium Gaming</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        neon: {
-                            gold: '#ffd700',
-                            purple: '#a855f7',
-                            green: '#00ff66',
-                            red: '#ff3333',
-                            blue: '#00d4ff',
-                            pink: '#ff006e',
-                            dark: '#0a0a1a',
-                            darker: '#050510'
-                        }
-                    },
-                    animation: {
-                        'glow': 'glow 2s ease-in-out infinite alternate',
-                        'float': 'float 3s ease-in-out infinite',
-                        'pulse-neon': 'pulseNeon 1.5s ease-in-out infinite',
-                        'fade-in': 'fadeIn 0.3s ease-out',
-                        'spin-slow': 'spin 3s linear infinite'
-                    },
-                    keyframes: {
-                        glow: {
-                            '0%': { boxShadow: '0 0 5px rgba(255,215,0,0.5), 0 0 20px rgba(255,215,0,0.3)' },
-                            '100%': { boxShadow: '0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,215,0,0.5)' }
-                        },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-10px)' }
-                        },
-                        pulseNeon: {
-                            '0%, 100%': { opacity: '1' },
-                            '50%': { opacity: '0.5' }
-                        },
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600;700;900&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engro Private Solution - Investment Game</title>
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    :root {
+      --primary: #4CAF50;
+      --light: #f0f8f0;
+      --dark: #1e2b1e;
+      --white: #ffffff;
+      --black: #000000;
+      --shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    body {
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+    /* Floating background blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      background: rgba(76,175,80,0.15);
+      animation: float 12s infinite ease-in-out;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .blob:nth-child(1) { width: 300px; height: 300px; top: -100px; left: -100px; }
+    .blob:nth-child(2) { width: 400px; height: 400px; bottom: -150px; right: -150px; animation-delay: 3s; }
+    .blob:nth-child(3) { width: 200px; height: 200px; top: 40%; left: 70%; animation-delay: 6s; }
+    @keyframes float {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-40px) rotate(180deg); }
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 95%;
+      max-width: 1200px;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin: 30px 0;
+      border: 1px solid rgba(255,255,255,0.5);
+      transition: all 0.3s;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--dark);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    .logo span { color: var(--primary); }
+    .nav-buttons button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-left: 10px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(76,175,80,0.4);
+    }
+    .nav-buttons button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(76,175,80,0.6);
+    }
+    .nav-buttons .logout-btn { background: #f44336; box-shadow: 0 4px 15px rgba(244,67,54,0.4); }
+    .nav-buttons .logout-btn:hover { box-shadow: 0 8px 25px rgba(244,67,54,0.6); }
+    .nav-buttons .admin-btn { background: var(--dark); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .nav-buttons .admin-btn:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background: #050510;
-            color: #fff;
-            font-family: 'Poppins', sans-serif;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-        .font-orbitron { font-family: 'Orbitron', monospace; }
+    /* Auth Styles */
+    .auth-tabs { display: flex; gap: 10px; margin-bottom: 25px; }
+    .auth-tabs button {
+      flex: 1;
+      padding: 12px;
+      background: var(--light);
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .auth-tabs button.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(76,175,80,0.4); }
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .auth-form input {
+      padding: 14px 20px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: 0.3s;
+      background: white;
+    }
+    .auth-form input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(76,175,80,0.2);
+      outline: none;
+    }
+    .auth-form button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(76,175,80,0.4);
+    }
+    .auth-form button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(76,175,80,0.6); }
 
-        #loading-screen {
-            position: fixed; inset: 0; z-index: 9999;
-            background: radial-gradient(ellipse at center, #0a0a2e 0%, #050510 70%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
-        #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .loader-ring {
-            width: 80px; height: 80px;
-            border: 3px solid rgba(255,215,0,0.2);
-            border-top: 3px solid #ffd700;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            box-shadow: 0 0 30px rgba(255,215,0,0.4), 0 0 60px rgba(255,215,0,0.2);
-        }
-        .loader-inner {
-            width: 50px; height: 50px;
-            border: 3px solid rgba(168,85,247,0.2);
-            border-bottom: 3px solid #a855f7;
-            border-radius: 50%;
-            animation: spin 1.2s linear infinite reverse;
-            position: absolute;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* Dashboard Styles */
+    .balance-card {
+      background: linear-gradient(135deg, var(--primary), #388E3C);
+      color: white;
+      padding: 25px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 15px 35px rgba(76,175,80,0.5);
+      transform: perspective(1000px) rotateX(0deg);
+      transition: 0.5s;
+    }
+    .balance-card:hover { transform: perspective(1000px) rotateX(5deg); }
+    .balance-amount { font-size: 2.5rem; font-weight: 800; }
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin: 30px 0;
+    }
+    .package-card {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: 0.4s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+    .package-card:hover {
+      transform: translateY(-15px) scale(1.03);
+      box-shadow: 0 25px 50px rgba(76,175,80,0.4);
+    }
+    .package-card .amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--dark);
+    }
+    .package-card .daily {
+      background: var(--light);
+      padding: 8px 15px;
+      border-radius: 20px;
+      display: inline-block;
+      margin: 10px 0;
+      font-weight: 600;
+    }
+    .package-card .duration {
+      color: #777;
+      font-size: 0.9rem;
+    }
+    .package-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(76,175,80,0.1) 0%, transparent 60%);
+      animation: rotate 8s linear infinite;
+    }
+    @keyframes rotate { 100% { transform: rotate(360deg); } }
 
-        #particles-container { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-        .particle {
-            position: absolute; border-radius: 50%;
-            animation: floatParticle linear infinite;
-            pointer-events: none;
-        }
-        @keyframes floatParticle {
-            0% { transform: translateY(100vh) scale(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-        }
+    /* Investments table */
+    .investments-container {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .investments-container h3 { margin-bottom: 15px; color: var(--dark); }
+    .investment-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .investment-item:last-child { border-bottom: none; }
+    .badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge.active { background: #e8f5e9; color: #388E3C; }
+    .badge.completed { background: #f5f5f5; color: #777; }
 
-        .glass-card {
-            background: rgba(20, 20, 50, 0.5);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        .glass-card-strong {
-            background: rgba(30, 30, 70, 0.7);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 24px;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-        }
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+    .modal {
+      background: white;
+      border-radius: 25px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+      animation: slideUp 0.4s;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal h3 { margin-bottom: 20px; color: var(--dark); }
+    .modal .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .modal input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      margin: 15px 0;
+      font-size: 1rem;
+    }
+    .modal button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px 25px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.3s;
+    }
+    .modal button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(76,175,80,0.6); }
 
-        .neon-btn {
-            position: relative; overflow: hidden;
-            font-weight: 700; letter-spacing: 1px;
-            transition: all 0.3s ease;
-        }
-        .neon-btn:active { transform: scale(0.95); }
-        .neon-btn-gold {
-            background: linear-gradient(135deg, #ffd700, #ffaa00);
-            color: #1a0a00;
-            box-shadow: 0 0 20px rgba(255,215,0,0.4), 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .neon-btn-green {
-            background: linear-gradient(135deg, #00ff66, #00cc44);
-            color: #001a00;
-            box-shadow: 0 0 20px rgba(0,255,102,0.4), 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .neon-btn-red {
-            background: linear-gradient(135deg, #ff3333, #cc0000);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(255,51,51,0.4), 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .neon-btn-purple {
-            background: linear-gradient(135deg, #a855f7, #7c3aed);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(168,85,247,0.4), 0 4px 15px rgba(0,0,0,0.3);
-        }
+    /* Admin Dashboard */
+    .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .admin-tabs button {
+      padding: 10px 20px;
+      background: var(--light);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .admin-tabs button.active { background: var(--dark); color: white; }
+    .admin-content { background: white; border-radius: 20px; padding: 20px; }
+    .admin-item {
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .admin-item .actions button {
+      margin-left: 5px;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .approve-btn { background: var(--primary); color: white; }
+    .reject-btn { background: #f44336; color: white; }
+    .approve-btn:hover, .reject-btn:hover { transform: translateY(-2px); }
 
-        .game-card-3d { perspective: 1000px; cursor: pointer; }
-        .game-card-3d-inner { transition: transform 0.3s ease; transform-style: preserve-3d; }
-        .game-card-3d:hover .game-card-3d-inner { transform: rotateY(5deg) rotateX(3deg) translateY(-5px); }
-
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(168,85,247,0.5); border-radius: 10px; }
-
-        #toast {
-            position: fixed; top: 20px; left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            z-index: 9999; padding: 12px 24px; border-radius: 30px;
-            font-weight: 700; font-size: 13px;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        }
-        #toast.show { transform: translateX(-50%) translateY(0); }
-        #toast.success { background: #00ff66; color: #000; }
-        #toast.error { background: #ff3333; color: #fff; }
-        #toast.info { background: #ffd700; color: #000; }
-
-        /* AVIATOR */
-        .av-container {
-            background: #020210;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(168,85,247,0.2);
-        }
-        .av-history-bar {
-            display: flex; gap: 8px; padding: 12px;
-            background: #000; overflow-x: auto;
-        }
-        .av-history-chip {
-            padding: 5px 14px; border-radius: 20px;
-            font-size: 11px; font-weight: 700;
-            font-family: 'Orbitron', monospace;
-            background: rgba(0,0,0,0.8);
-            border: 1px solid rgba(0,229,255,0.3);
-            color: #00e5ff; white-space: nowrap; flex-shrink: 0;
-        }
-        .av-history-chip.high { color: #bf5af2; border-color: rgba(191,90,242,0.4); }
-        .av-history-chip.huge { color: #ff0055; border-color: rgba(255,0,85,0.5); }
-        .av-screen-container {
-            position: relative; width: 100%; height: 280px;
-            background: #000; overflow: hidden;
-        }
-        .av-screen-container canvas { width: 100%; height: 100%; display: block; }
-        .av-toast {
-            position: absolute; top: 15px; left: 50%;
-            transform: translateX(-50%) translateY(-60px);
-            background: rgba(0,255,102,0.95); color: #000;
-            padding: 10px 24px; border-radius: 25px;
-            font-weight: 800; font-size: 14px;
-            font-family: 'Orbitron', monospace;
-            box-shadow: 0 0 30px rgba(0,255,102,0.7);
-            opacity: 0; transition: all 0.3s ease;
-            z-index: 10; pointer-events: none;
-        }
-        .av-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .av-controls {
-            display: grid; gap: 10px; padding: 10px;
-            background: #050510;
-        }
-        .av-bet-box {
-            background: rgba(10,10,30,0.8);
-            border-radius: 16px; padding: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-        .av-bet-inputs { display: flex; gap: 10px; align-items: center; }
-        .av-amount-control { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-        .av-input-wrapper {
-            display: flex; align-items: center;
-            background: #000; border-radius: 12px;
-            padding: 8px 12px; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .av-btn-step {
-            background: none; border: none;
-            color: rgba(255,255,255,0.5);
-            font-size: 20px; font-weight: 700;
-            cursor: pointer; padding: 0 10px;
-        }
-        .av-bet-input {
-            width: 100%; background: transparent; border: none;
-            color: #fff; text-align: center;
-            font-weight: 800; font-size: 17px;
-            font-family: 'Orbitron', monospace; outline: none;
-        }
-        .av-preset-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
-        .av-btn-preset {
-            background: rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.7);
-            padding: 7px 4px; border-radius: 8px;
-            font-size: 11px; cursor: pointer; font-weight: 700;
-            transition: all 0.2s;
-        }
-        .av-btn-preset:hover:not(:disabled) { background: rgba(168,85,247,0.3); }
-        .av-btn-action {
-            flex: 1.1; height: 68px; border: none;
-            border-radius: 14px; font-size: 15px;
-            font-weight: 900; font-family: 'Orbitron', monospace;
-            cursor: pointer; letter-spacing: 1px;
-            transition: all 0.2s ease;
-        }
-        .av-btn-action:active { transform: scale(0.95); }
-        .av-btn-action.bet {
-            background: linear-gradient(180deg, #00ff66, #00b347);
-            color: #000; box-shadow: 0 0 20px rgba(0,255,102,0.3);
-        }
-        .av-btn-action.cashout {
-            background: linear-gradient(180deg, #ff9900, #cc7a00);
-            color: #000; box-shadow: 0 0 25px rgba(255,153,0,0.5);
-            animation: pulseCashout 0.5s infinite alternate;
-        }
-        .av-btn-action.queued {
-            background: linear-gradient(180deg, #ff0055, #b3003b);
-            color: #fff; box-shadow: 0 0 20px rgba(255,0,85,0.4);
-        }
-        @keyframes pulseCashout {
-            0% { box-shadow: 0 0 25px rgba(255,153,0,0.5); }
-            100% { box-shadow: 0 0 40px rgba(255,153,0,0.8); }
-        }
-        .av-sub-text { font-size: 10px; font-weight: 600; opacity: 0.9; }
-    </style>
+    .hidden { display: none !important; }
+    @media (max-width: 768px) {
+      .container { padding: 15px; }
+      .logo { font-size: 1.4rem; }
+    }
+  </style>
 </head>
 <body>
+  <div class="blob"></div>
+  <div class="blob"></div>
+  <div class="blob"></div>
 
-    <!-- LOADING SCREEN -->
-    <div id="loading-screen">
-        <div style="position: relative; display: flex; align-items: center; justify-content: center;">
-            <div class="loader-ring"></div>
-            <div class="loader-inner"></div>
-        </div>
-        <p class="font-orbitron text-lg mt-6 text-yellow-400 animate-pulse-neon tracking-wider">LOADING HALAL PK...</p>
+  <div class="container" id="mainContainer">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">Engro <span>Private Solution</span></div>
+      <div class="nav-buttons">
+        <button class="admin-btn" id="adminLoginBtn" onclick="openAdminLoginModal()">Admin</button>
+        <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Logout</button>
+      </div>
     </div>
 
-    <!-- PARTICLES -->
-    <div id="particles-container"></div>
-
-    <!-- MAIN APP -->
-    <div id="app-container" class="w-full max-w-md mx-auto min-h-screen relative flex flex-col z-10" style="display: none;">
-        
-        <!-- HEADER -->
-        <header class="sticky top-0 z-30 px-4 py-3 flex justify-between items-center" style="background: rgba(10,10,30,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(168,85,247,0.3);">
-            <div onclick="switchTab('home')" class="cursor-pointer flex items-center gap-2">
-                <span class="font-orbitron text-xl font-black" style="background: linear-gradient(135deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">HALAL<span style="color:#ff3333; -webkit-text-fill-color: #ff3333;">PK</span></span>
-                <i class="fa-solid fa-crown text-yellow-400 text-sm"></i>
-            </div>
-            <div class="flex items-center gap-2">
-                <div onclick="requireAuth(() => switchTab('deposit'))" class="glass-card px-3 py-1.5 rounded-full flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-wallet text-yellow-400 text-xs"></i>
-                    <span class="text-xs font-bold">Rs <span id="user-balance-display">0.00</span></span>
-                </div>
-                <button onclick="toggleAdminModal()" class="bg-red-600/80 text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-red-400/50">
-                    <i class="fa-solid fa-lock"></i>
-                </button>
-            </div>
-        </header>
-
-        <!-- MAIN CONTENT -->
-        <main id="main-content" class="flex-1 overflow-y-auto pb-20"></main>
-
-        <!-- BOTTOM NAV -->
-        <nav class="fixed bottom-0 w-full max-w-md z-30 flex justify-around items-center py-2" style="background: rgba(10,10,30,0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(168,85,247,0.3);">
-            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-yellow-400">
-                <i class="fa-solid fa-gamepad text-lg"></i><span class="text-[9px]">Home</span>
-            </button>
-            <button onclick="requireAuth(() => switchTab('deposit'))" id="nav-deposit" class="flex flex-col items-center text-gray-400">
-                <i class="fa-solid fa-money-bill text-lg"></i><span class="text-[9px]">Deposit</span>
-            </button>
-            <div onclick="showToast('Spin Wheel Coming Soon!','info')" class="relative -top-4 cursor-pointer">
-                <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500 p-1 shadow-2xl animate-float flex items-center justify-center">
-                    <div class="w-full h-full rounded-full flex items-center justify-center border-2 border-yellow-200" style="background: rgba(10,10,30,0.9);">
-                        <i class="fa-solid fa-dharmachakra text-yellow-400 text-xl animate-spin-slow"></i>
-                    </div>
-                </div>
-            </div>
-            <button onclick="requireAuth(() => switchTab('withdraw'))" id="nav-withdraw" class="flex flex-col items-center text-gray-400">
-                <i class="fa-solid fa-wallet text-lg"></i><span class="text-[9px]">Withdraw</span>
-            </button>
-            <button onclick="requireAuth(() => switchTab('account'))" id="nav-account" class="flex flex-col items-center text-gray-400">
-                <i class="fa-solid fa-user text-lg"></i><span class="text-[9px]">Account</span>
-            </button>
-        </nav>
+    <!-- Auth Section -->
+    <div id="authSection">
+      <div class="auth-tabs">
+        <button id="signupTab" class="active" onclick="toggleAuth('signup')">Sign Up</button>
+        <button id="loginTab" onclick="toggleAuth('login')">Login</button>
+      </div>
+      <div class="auth-form" id="signupForm">
+        <input type="email" id="signupEmail" placeholder="Email address">
+        <input type="password" id="signupPassword" placeholder="Password">
+        <button onclick="signupUser()">Create Account</button>
+      </div>
+      <div class="auth-form hidden" id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email address">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button onclick="loginUser()">Login</button>
+      </div>
     </div>
 
-    <!-- TOAST -->
-    <div id="toast"><span id="toast-msg"></span></div>
+    <!-- User Dashboard -->
+    <div id="dashboardSection" class="hidden">
+      <div class="balance-card">
+        <div>Available Balance</div>
+        <div class="balance-amount">PKR <span id="balanceDisplay">0</span></div>
+      </div>
 
-    <!-- AUTH MODAL -->
-    <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" style="background: rgba(0,0,0,0.9);">
-        <div class="glass-card-strong w-full max-w-sm p-6 space-y-4">
-            <div class="flex justify-between items-center border-b border-white/10 pb-3">
-                <h3 id="auth-modal-title" class="font-orbitron font-bold text-yellow-400 text-base">SIGN UP</h3>
-                <button onclick="closeAuthModal()" class="text-gray-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3">
-                <div id="auth-name-container">
-                    <label class="text-xs text-gray-300">FULL NAME</label>
-                    <input type="text" id="auth-fullname" placeholder="Enter your name" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white mt-1">
-                </div>
-                <div id="auth-email-container">
-                    <label class="text-xs text-gray-300">EMAIL</label>
-                    <input type="email" id="auth-email" placeholder="Enter your email" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white mt-1">
-                </div>
-                <div id="auth-phone-container">
-                    <label class="text-xs text-gray-300">PHONE NUMBER</label>
-                    <div class="flex items-center mt-1 bg-black/50 border border-white/10 rounded-xl overflow-hidden">
-                        <span class="bg-purple-900/50 px-3 py-3 text-yellow-400 font-bold text-sm">+92</span>
-                        <input type="text" id="auth-phone" placeholder="3001234567" maxlength="10" class="w-full bg-transparent px-3 py-3 text-white text-sm">
-                    </div>
-                </div>
-                <div id="auth-referral-container">
-                    <label class="text-xs text-gray-300">REFERRAL CODE (OPTIONAL)</label>
-                    <input type="text" id="auth-referral" placeholder="Enter invite code" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white mt-1">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-300">PASSWORD</label>
-                    <input type="password" id="auth-pass" placeholder="Min 6 characters" maxlength="12" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white mt-1">
-                </div>
-                <button onclick="processAuthSubmit()" id="auth-action-btn" class="w-full neon-btn neon-btn-gold py-3 rounded-xl font-orbitron font-bold text-sm">SIGN UP & PLAY</button>
-            </div>
-            <p class="text-center text-xs text-gray-400">
-                <span id="auth-switch-text">Already have an account?</span>
-                <button onclick="switchAuthMode()" id="auth-switch-btn" class="text-yellow-400 font-bold ml-1">LOGIN</button>
-            </p>
-        </div>
+      <h3 style="margin-bottom:15px; color:var(--dark);">Choose Investment Package</h3>
+      <div class="package-grid" id="packageGrid"></div>
+
+      <div class="investments-container">
+        <h3>My Investments</h3>
+        <div id="investmentsList">Loading...</div>
+      </div>
     </div>
 
-    <!-- ADMIN MODAL -->
-    <div id="admin-modal" class="fixed inset-0 z-50 hidden flex flex-col overflow-y-auto p-4 max-w-md mx-auto" style="background: rgba(0,0,0,0.95);">
-        <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-shield-halved text-red-500 text-xl"></i>
-                <h2 class="font-orbitron font-bold text-white">ADMIN PANEL</h2>
-            </div>
-            <button onclick="toggleAdminModal()" class="text-gray-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div id="admin-login-box" class="glass-card-strong p-5 space-y-4 my-auto">
-            <div class="text-center">
-                <i class="fa-solid fa-lock text-yellow-400 text-3xl mb-2"></i>
-                <h3 class="font-orbitron font-bold text-yellow-400">RESTRICTED AREA</h3>
-            </div>
-            <input type="email" id="admin-email" placeholder="Admin Email" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm">
-            <input type="password" id="admin-pass" placeholder="Password" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm">
-            <button onclick="handleAdminLogin()" class="w-full neon-btn neon-btn-gold py-3 rounded-xl font-bold text-sm">LOGIN</button>
-        </div>
-        <div id="admin-dashboard" class="hidden space-y-4 text-sm">
-            <div class="glass-card p-4 space-y-2">
-                <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-users mr-2"></i>PLAYERS (<span id="admin-users-count">0</span>)</span>
-                <div id="admin-users-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
-            </div>
-            <div class="glass-card p-4 space-y-2">
-                <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-money-bill-transfer mr-2"></i>DEPOSITS (<span id="admin-dep-badge">0</span>)</span>
-                <div id="admin-deposit-list" class="space-y-2 max-h-40 overflow-y-auto"></div>
-            </div>
-            <div class="glass-card p-4 space-y-2">
-                <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-hand-holding-dollar mr-2"></i>WITHDRAWALS (<span id="admin-wds-badge">0</span>)</span>
-                <div id="admin-withdraw-list" class="space-y-2 max-h-40 overflow-y-auto"></div>
-            </div>
-            <!-- Referral Settings -->
-            <div class="glass-card p-4 space-y-2">
-                <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-gift mr-2"></i>REFERRAL BONUS %</span>
-                <div class="flex gap-2">
-                    <input type="number" id="admin-ref-bonus" value="5" min="0" max="100" step="0.5" class="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm">
-                    <button onclick="saveReferralBonus()" class="neon-btn neon-btn-green px-4 py-2 rounded-lg font-bold text-xs">SET</button>
-                </div>
-            </div>
-            <!-- Referral Report -->
-            <div class="glass-card p-4 space-y-2">
-                <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-chart-bar mr-2"></i>REFERRAL REPORT</span>
-                <div id="admin-ref-report" class="space-y-2 max-h-60 overflow-y-auto"></div>
-            </div>
-            <div class="glass-card p-4 space-y-2">
-                <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-plane-up mr-2"></i>AVIATOR OVERRIDE</span>
-                <div class="flex gap-2">
-                    <input type="text" id="admin-aviator-val" placeholder="AUTO" class="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm">
-                    <button onclick="saveAdminAviator()" class="neon-btn neon-btn-red px-4 py-2 rounded-lg font-bold text-xs">SET</button>
-                </div>
-            </div>
-            <div class="glass-card p-4 space-y-2">
-                <span class="font-orbitron font-bold text-yellow-400"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>WIN GO OVERRIDE</span>
-                <select id="admin-room-select" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm">
-                    <option value="30Sec">30 Seconds</option>
-                    <option value="1Min">1 Minute</option>
-                    <option value="3Min">3 Minutes</option>
-                    <option value="5Min">5 Minutes</option>
-                </select>
-                <div class="flex gap-2">
-                    <select id="admin-override-val" class="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm">
-                        <option value="AUTO">AUTO</option>
-                        <option value="0">0</option><option value="1">1</option><option value="2">2</option>
-                        <option value="3">3</option><option value="4">4</option><option value="5">5</option>
-                        <option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                    </select>
-                    <button onclick="saveAdminOverride()" class="neon-btn neon-btn-gold px-4 py-2 rounded-lg font-bold text-xs">SET</button>
-                </div>
-            </div>
-            <button onclick="adminLogout()" class="w-full bg-red-600/20 border border-red-500/50 text-red-400 font-bold py-3 rounded-xl">EXIT</button>
-        </div>
+    <!-- Admin Dashboard -->
+    <div id="adminDashboardSection" class="hidden">
+      <h2 style="margin-bottom:20px; color:var(--dark);">Admin Panel</h2>
+      <div class="admin-tabs">
+        <button class="active" onclick="switchAdminTab('pending')">Pending Deposits</button>
+        <button onclick="switchAdminTab('all')">All Deposits</button>
+        <button onclick="switchAdminTab('users')">Users</button>
+        <button onclick="switchAdminTab('investments')">Investments</button>
+      </div>
+      <div class="admin-content" id="adminContent">Loading...</div>
     </div>
+  </div>
 
-    <script type="module">
-        // ============ FIREBASE IMPORTS ============
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, getDocs, collection, onSnapshot, updateDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+  <!-- Deposit Modal -->
+  <div id="depositModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Deposit Details</h3>
+      <div id="depositDetails"></div>
+      <input type="text" id="tidInput" placeholder="Enter TID / Transaction ID">
+      <button onclick="submitDeposit()">Submit Deposit Request</button>
+      <button style="margin-top:10px; background:#777;" onclick="closeDepositModal()">Cancel</button>
+    </div>
+  </div>
 
-        // ============ FIREBASE CONFIG ============
-        const firebaseConfig = {
-            apiKey: "AIzaSyBUUvgeDFSWUYZEg7QdmXRMGSe8okAEXrc",
-            authDomain: "halal-pk.firebaseapp.com",
-            projectId: "halal-pk",
-            storageBucket: "halal-pk.firebasestorage.app",
-            messagingSenderId: "806259174926",
-            appId: "1:806259174926:web:79147c363c041cdf16d65f"
-        };
+  <!-- Admin Login Modal -->
+  <div id="adminLoginModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Admin Login</h3>
+      <input type="email" id="adminEmail" placeholder="Admin Email">
+      <input type="password" id="adminPassword" placeholder="Admin Password">
+      <button onclick="adminLogin()">Login as Admin</button>
+      <button style="margin-top:10px; background:#777;" onclick="closeAdminLoginModal()">Cancel</button>
+    </div>
+  </div>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+  <script>
+    // Firebase Config (provided)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUUvgeDFSWUYZEg7QdmXRMGSe8okAEXrc",
+      authDomain: "halal-pk.firebaseapp.com",
+      projectId: "halal-pk",
+      storageBucket: "halal-pk.firebasestorage.app",
+      messagingSenderId: "806259174926",
+      appId: "1:806259174926:web:79147c363c041cdf16d65f"
+    };
 
-        // ============ LOCAL STORAGE KEYS ============
-        const SESSION_KEY = 'halalpk_session';
-        const USERS_KEY = 'halalpk_users_local';
-        const DEPOSITS_KEY = 'halalpk_deposits_local';
-        const WITHDRAWALS_KEY = 'halalpk_withdrawals_local';
-        const REF_BONUS_KEY = 'halalpk_ref_bonus';
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-        // ============ GLOBAL STATE ============
-        window.appState = {
-            authenticated: false,
-            activeUser: null,
-            userData: null,
-            users: [],
-            adminCreds: { email: 'admin@halalpk.com', pass: 'admin123' },
-            currentTab: 'home',
-            authMode: 'signup',
-            jazzcashNumber: '03082836422',
-            referralBonusPercentage: 5, // default 5%
-            wingoRooms: {
-                '30Sec': { totalSec: 30, timerSec: 30, period: Date.now(), override: 'AUTO', history: [], myBets: [] },
-                '1Min': { totalSec: 60, timerSec: 60, period: Date.now(), override: 'AUTO', history: [], myBets: [] },
-                '3Min': { totalSec: 180, timerSec: 180, period: Date.now(), override: 'AUTO', history: [], myBets: [] },
-                '5Min': { totalSec: 300, timerSec: 300, period: Date.now(), override: 'AUTO', history: [], myBets: [] }
-            },
-            activeWinGoRoom: '30Sec',
-            aviator: {
-                override: 'AUTO',
-                history: [1.23, 1.51, 2.24, 1.06, 2.80, 2.01, 37.60],
-                bets: {
-                    1: { state: 'IDLE', amount: 50, autoCash: true, autoCashVal: 2.00 },
-                    2: { state: 'IDLE', amount: 100, autoCash: false, autoCashVal: 1.50 }
-                }
-            },
-            deposits: [],
-            withdrawals: []
-        };
+    const ADMIN_EMAIL = 'admin@engro.com';
+    const PHONE_NUMBER = '0300-1234567'; // change if needed
 
-        // ============ DEPOSIT AMOUNT SELECTION ============
-        window.selectedDepositAmount = 500;
+    let currentUser = null;
+    let isAdmin = false;
+    let selectedPackage = null;
+    let adminTab = 'pending';
+    let adminUnsubscribe = null;
 
-        window.updateDepositButtons = () => {
-            document.querySelectorAll('.deposit-amount-btn').forEach(btn => {
-                const amt = parseInt(btn.getAttribute('data-amt'));
-                if (amt === window.selectedDepositAmount) {
-                    btn.className = 'deposit-amount-btn neon-btn neon-btn-gold py-2 rounded-lg font-bold text-sm';
-                } else {
-                    btn.className = 'deposit-amount-btn glass-card py-2 rounded-lg font-bold text-sm';
-                }
-            });
-        };
+    // Packages data
+    const packages = [
+      { id: 'starter', name: 'Starter', amount: 300, dailyReturn: 75, durationDays: 30, totalReturn: 2250, color: '#4CAF50' },
+      { id: 'silver', name: 'Silver', amount: 800, dailyReturn: 250, durationDays: 30, totalReturn: 7500, color: '#9E9E9E' },
+      { id: 'gold', name: 'Gold', amount: 1400, dailyReturn: 440, durationDays: 30, totalReturn: 13200, color: '#FFD700' },
+      { id: 'diamond', name: 'Diamond', amount: 2500, dailyReturn: 880, durationDays: 30, totalReturn: 26400, color: '#B9F2FF' }
+    ];
 
-        // ============ LOCALSTORAGE HELPERS ============
-        function saveToLocal(key, data) {
-            try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) { console.error('Save error:', e); }
+    // Auth State Listener
+    auth.onAuthStateChanged(async (user) => {
+      currentUser = user;
+      if (user) {
+        if (user.email === ADMIN_EMAIL) {
+          isAdmin = true;
+          showAdminDashboard();
+        } else {
+          isAdmin = false;
+          showUserDashboard(user);
         }
-        function loadFromLocal(key) {
-            try { 
-                const data = localStorage.getItem(key);
-                return data ? JSON.parse(data) : null;
-            } catch(e) { return null; }
-        }
+      } else {
+        currentUser = null;
+        isAdmin = false;
+        showAuthSection();
+      }
+    });
 
-        // ============ FIREBASE HELPERS ============
-        async function saveUserDataToFirestore(uid, userData) {
-            try {
-                await setDoc(doc(db, 'users', uid), userData, { merge: true });
-            } catch(e) { console.error('Firestore save error:', e); }
-        }
-        async function getUserDataFromFirestore(uid) {
-            try {
-                const snap = await getDoc(doc(db, 'users', uid));
-                return snap.exists() ? snap.data() : null;
-            } catch(e) { return null; }
-        }
-        async function loadAllUsersFromFirestore() {
-            try {
-                const snap = await getDocs(collection(db, 'users'));
-                const list = [];
-                snap.forEach(d => list.push({ ...d.data(), uid: d.id }));
-                return list;
-            } catch(e) { return []; }
-        }
-        async function saveDepositToFirestore(dep) {
-            try { await setDoc(doc(db, 'deposits', dep.id), dep); } catch(e) {}
-        }
-        async function saveWithdrawalToFirestore(wds) {
-            try { await setDoc(doc(db, 'withdrawals', wds.id), wds); } catch(e) {}
-        }
-        async function updateUserBalance(uid, newBalance) {
-            try {
-                const userRef = doc(db, 'users', uid);
-                await updateDoc(userRef, { balance: newBalance });
-            } catch(e) {}
-        }
+    function showAuthSection() {
+      document.getElementById('authSection').classList.remove('hidden');
+      document.getElementById('dashboardSection').classList.add('hidden');
+      document.getElementById('adminDashboardSection').classList.add('hidden');
+      document.getElementById('logoutBtn').classList.add('hidden');
+      document.getElementById('adminLoginBtn').classList.remove('hidden');
+    }
 
-        // ============ REFERRAL HELPERS ============
-        function generateReferralCode(uid) {
-            // Generate a unique code from uid (remove non-alphanumeric, take first 8 chars)
-            return uid.replace(/[^a-zA-Z0-9]/g, '').substring(0,8).toUpperCase();
-        }
+    function showUserDashboard(user) {
+      document.getElementById('authSection').classList.add('hidden');
+      document.getElementById('dashboardSection').classList.remove('hidden');
+      document.getElementById('adminDashboardSection').classList.add('hidden');
+      document.getElementById('logoutBtn').classList.remove('hidden');
+      document.getElementById('adminLoginBtn').classList.remove('hidden');
+      renderPackages();
+      initUserDashboard(user);
+    }
 
-        async function findUserByReferralCode(code) {
-            if (!code) return null;
-            code = code.trim().toUpperCase();
-            // First check in-memory users list (fast)
-            const found = window.appState.users.find(u => u.referralCode && u.referralCode.toUpperCase() === code);
-            if (found) return found;
-            // If not found in memory, query Firestore (slower but works)
-            try {
-                const usersSnapshot = await getDocs(collection(db, 'users'));
-                for (const docSnap of usersSnapshot.docs) {
-                    const data = docSnap.data();
-                    if (data.referralCode && data.referralCode.toUpperCase() === code) {
-                        return { ...data, uid: docSnap.id };
-                    }
-                }
-            } catch(e) { console.error(e); }
-            return null;
-        }
+    function showAdminDashboard() {
+      document.getElementById('authSection').classList.add('hidden');
+      document.getElementById('dashboardSection').classList.add('hidden');
+      document.getElementById('adminDashboardSection').classList.remove('hidden');
+      document.getElementById('logoutBtn').classList.remove('hidden');
+      document.getElementById('adminLoginBtn').classList.add('hidden');
+      initAdminDashboard();
+    }
 
-        // ============ TOAST ============
-        window.showToast = (msg, type = 'info') => {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.className = `show ${type}`;
-            setTimeout(() => toast.classList.remove('show'), 2500);
-        };
+    // Toggle Auth Tabs
+    function toggleAuth(type) {
+      const signupForm = document.getElementById('signupForm');
+      const loginForm = document.getElementById('loginForm');
+      const signupTab = document.getElementById('signupTab');
+      const loginTab = document.getElementById('loginTab');
+      if (type === 'signup') {
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        signupTab.classList.add('active');
+        loginTab.classList.remove('active');
+      } else {
+        signupForm.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+        signupTab.classList.remove('active');
+        loginTab.classList.add('active');
+      }
+    }
 
-        // ============ BALANCE ============
-        window.updateBalanceDisplay = () => {
-            const bal = window.appState.authenticated && window.appState.userData ? window.appState.userData.balance : 0;
-            const el = document.getElementById('user-balance-display');
-            if(el) el.innerText = bal.toFixed(2);
-        };
-
-        // ============ NAVIGATION ============
-        window.requireAuth = (cb) => {
-            if (!window.appState.authenticated) { openAuthModal('signup'); showToast('Please login first!', 'info'); }
-            else cb();
-        };
-        window.switchTab = (tab) => {
-            window.appState.currentTab = tab;
-            const tabs = ['home', 'deposit', 'withdraw', 'account'];
-            tabs.forEach(t => {
-                const btn = document.getElementById(`nav-${t}`);
-                if(btn) btn.className = t === tab ? 'flex flex-col items-center text-yellow-400' : 'flex flex-col items-center text-gray-400';
-            });
-            renderContent();
-            if (tab === 'aviator') setTimeout(avResizeCanvas, 100);
-        };
-
-        // ============ RENDER ============
-        window.renderContent = () => {
-            const main = document.getElementById('main-content');
-            if(!main) return;
-            const tab = window.appState.currentTab;
-            if (tab === 'home') main.innerHTML = getHomeHTML();
-            else if (tab === 'deposit') main.innerHTML = getDepositHTML();
-            else if (tab === 'withdraw') main.innerHTML = getWithdrawHTML();
-            else if (tab === 'account') main.innerHTML = getAccountHTML();
-            else if (tab === 'aviator') main.innerHTML = getAviatorHTML();
-            else if (tab === 'wingo') main.innerHTML = getWinGoHTML();
-            else main.innerHTML = getHomeHTML();
-        };
-
-        function getHomeHTML() {
-            const u = window.appState.userData;
-            const isAuth = window.appState.authenticated;
-            return `
-                <div class="p-4 space-y-4">
-                    ${isAuth ? `
-                    <div class="glass-card-strong p-4 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center font-black text-black text-xl">${u.fullName.charAt(0)}</div>
-                            <div>
-                                <div class="font-bold text-sm">${u.fullName}</div>
-                                <div class="text-xs text-gray-400">+92${u.phone}</div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-xs text-gray-400">Balance</div>
-                            <div class="font-orbitron font-black text-yellow-400 text-lg">Rs ${u.balance.toFixed(2)}</div>
-                        </div>
-                    </div>` : `
-                    <div class="glass-card-strong p-4 text-center">
-                        <p class="text-sm text-gray-300">Login to play!</p>
-                        <button onclick="openAuthModal('signup')" class="mt-2 neon-btn neon-btn-gold px-6 py-2 rounded-full font-bold text-sm">SIGN UP</button>
-                    </div>`}
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        <div onclick="requireAuth(() => switchTab('wingo'))" class="game-card-3d">
-                            <div class="game-card-3d-inner glass-card-strong p-4 text-center cursor-pointer" style="background: linear-gradient(135deg, rgba(255,51,51,0.3), rgba(255,153,0,0.2));">
-                                <i class="fa-solid fa-fire text-4xl mb-2 text-yellow-400"></i>
-                                <h3 class="font-orbitron font-black text-sm">WIN GO</h3>
-                                <p class="text-[10px] text-gray-400">Lottery Game</p>
-                            </div>
-                        </div>
-                        <div onclick="requireAuth(() => switchTab('aviator'))" class="game-card-3d">
-                            <div class="game-card-3d-inner glass-card-strong p-4 text-center cursor-pointer" style="background: linear-gradient(135deg, rgba(168,85,247,0.3), rgba(0,212,255,0.2));">
-                                <i class="fa-solid fa-rocket text-4xl mb-2 text-cyan-400"></i>
-                                <h3 class="font-orbitron font-black text-sm">AVIATOR</h3>
-                                <p class="text-[10px] text-gray-400">Crash Game</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="requireAuth(() => switchTab('deposit'))" class="glass-card-strong p-4 text-center">
-                            <i class="fa-solid fa-money-bill text-2xl text-green-400 mb-1"></i>
-                            <div class="font-bold text-xs">DEPOSIT</div>
-                        </button>
-                        <button onclick="requireAuth(() => switchTab('withdraw'))" class="glass-card-strong p-4 text-center">
-                            <i class="fa-solid fa-wallet text-2xl text-yellow-400 mb-1"></i>
-                            <div class="font-bold text-xs">WITHDRAW</div>
-                        </button>
-                    </div>
-                </div>`;
-        }
-
-        // ============ AVIATOR ENGINE ============
-        function getAviatorHTML() {
-            return `
-                <div class="p-3">
-                    <div class="av-container">
-                        <div class="av-history-bar" id="avHistoryBar">
-                            ${window.appState.aviator.history.map(m => `<div class="av-history-chip ${m>=10?'huge':(m>=2?'high':'')}">${m.toFixed(2)}x</div>`).join('')}
-                        </div>
-                        <div class="av-screen-container">
-                            <div class="av-toast" id="avToastMessage">CASHED OUT!</div>
-                            <canvas id="avGameCanvas"></canvas>
-                        </div>
-                        <div class="av-controls">
-                            ${[1,2].map(i => {
-                                const b = window.appState.aviator.bets[i];
-                                return `
-                                <div class="av-bet-box">
-                                    <div class="av-bet-inputs">
-                                        <div class="av-amount-control">
-                                            <div class="av-input-wrapper">
-                                                <button class="av-btn-step" onclick="avAdjustBet(${i},-50)">−</button>
-                                                <input type="number" id="avBetInput${i}" class="av-bet-input" value="${b.amount}" onchange="avUpdateLocalState(${i})">
-                                                <button class="av-btn-step" onclick="avAdjustBet(${i},50)">+</button>
-                                            </div>
-                                            <div class="av-preset-btns">
-                                                <button class="av-btn-preset av-btn-preset-${i}" onclick="avSetBet(${i},50)">50</button>
-                                                <button class="av-btn-preset av-btn-preset-${i}" onclick="avSetBet(${i},100)">100</button>
-                                                <button class="av-btn-preset av-btn-preset-${i}" onclick="avSetBet(${i},200)">200</button>
-                                                <button class="av-btn-preset av-btn-preset-${i}" onclick="avSetBet(${i},500)">500</button>
-                                            </div>
-                                        </div>
-                                        <button id="avBtnAction${i}" class="av-btn-action bet" onclick="avHandleAction(${i})">BET<span class="av-sub-text" id="avBtnSub${i}">${b.amount} PKR</span></button>
-                                    </div>
-                                    <div style="display:flex;gap:8px;align-items:center;font-size:10px;color:#888;margin-top:4px;">
-                                        <label style="display:flex;align-items:center;gap:4px;">
-                                            <input type="checkbox" id="avAutoCashToggle${i}" ${b.autoCash?'checked':''} onchange="avUpdateLocalState(${i})"> Auto Cash
-                                        </label>
-                                        <input type="number" id="avAutoCashVal${i}" value="${b.autoCashVal.toFixed(2)}" step="0.1" min="1.1" style="width:50px;background:#000;border:1px solid #333;color:#0f0;text-align:center;border-radius:4px;font-size:10px;" onchange="avUpdateLocalState(${i})"> x
-                                    </div>
-                                </div>`;
-                            }).join('')}
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-        let avEngine = { status: 'WAITING', multiplier: 1.00, target: 1.00, startTime: null, waitingProgress: 0, flightPath: [], particles: [], shockwave: 0 };
-
-        function initAviatorEngine() { avPrepareNextRound(); requestAnimationFrame(avGameLoop); }
-
-        function avGenerateCrashPoint() {
-            if (window.appState.aviator.override !== 'AUTO') {
-                const v = parseFloat(window.appState.aviator.override);
-                if (!isNaN(v) && v >= 1.0) return v;
-            }
-            const hash = CryptoJS.SHA256(CryptoJS.lib.WordArray.random(16).toString() + Math.random()).toString();
-            const h = parseInt(hash.substring(0, 8), 16);
-            if (h % 33 === 0) return 1.00;
-            return Math.max(1.01, Math.min(Math.floor((100 * Math.pow(2,32) - h) / (Math.pow(2,32) - h)) / 100, 100));
-        }
-
-        function avPrepareNextRound() {
-            avEngine.status = 'WAITING'; avEngine.multiplier = 1.00; avEngine.waitingProgress = 0;
-            avEngine.flightPath = []; avEngine.particles = []; avEngine.shockwave = 0;
-            avEngine.startTime = performance.now();
-            for (let i of [1,2]) {
-                const b = window.appState.aviator.bets[i];
-                if (b.state !== 'QUEUED') b.state = 'IDLE';
-                avUpdateButtonUI(i);
-            }
-        }
-
-        function avStartRound() {
-            avEngine.status = 'IN_FLIGHT'; avEngine.multiplier = 1.00;
-            avEngine.target = avGenerateCrashPoint(); avEngine.startTime = performance.now(); avEngine.flightPath = [];
-            for (let i of [1,2]) {
-                const b = window.appState.aviator.bets[i];
-                if (b.state === 'QUEUED') {
-                    if (window.appState.userData && window.appState.userData.balance >= b.amount) {
-                        window.appState.userData.balance -= b.amount;
-                        saveUserDataToFirestore(window.appState.activeUser.uid, { balance: window.appState.userData.balance });
-                        updateBalanceDisplay();
-                        b.state = 'ACTIVE';
-                    } else { b.state = 'IDLE'; showToast('Insufficient balance!', 'error'); }
-                }
-                avUpdateButtonUI(i);
-            }
-        }
-
-        function avTriggerCashOut(boxId) {
-            const b = window.appState.aviator.bets[boxId];
-            if (b.state !== 'ACTIVE') return;
-            b.winAmount = b.amount * avEngine.multiplier;
-            if (window.appState.userData) {
-                window.appState.userData.balance += b.winAmount;
-                saveUserDataToFirestore(window.appState.activeUser.uid, { balance: window.appState.userData.balance });
-                updateBalanceDisplay();
-            }
-            avShowToast(`CASHED OUT ${b.winAmount.toFixed(2)} PKR`);
-            b.state = 'IDLE'; avUpdateButtonUI(boxId);
-        }
-
-        function avTriggerCrash() {
-            avEngine.status = 'CRASHED'; avEngine.startTime = performance.now();
-            for (let i of [1,2]) { 
-                if (window.appState.aviator.bets[i].state === 'ACTIVE') window.appState.aviator.bets[i].state = 'IDLE'; 
-                avUpdateButtonUI(i); 
-            }
-            window.appState.aviator.history.unshift(avEngine.target);
-            if (window.appState.aviator.history.length > 20) window.appState.aviator.history.pop();
-            const bar = document.getElementById('avHistoryBar');
-            if(bar) bar.innerHTML = window.appState.aviator.history.map(m => `<div class="av-history-chip ${m>=10?'huge':(m>=2?'high':'')}">${m.toFixed(2)}x</div>`).join('');
-            if(avEngine.flightPath.length > 0) { const lp = avEngine.flightPath[avEngine.flightPath.length-1]; avCreateExplosion(lp.x, lp.y); }
-        }
-
-        function avGameLoop(ts) {
-            if (avEngine.status === 'WAITING') { 
-                avEngine.waitingProgress = (ts - avEngine.startTime) / 2500; 
-                if (avEngine.waitingProgress >= 1) avStartRound(); 
-            }
-            else if (avEngine.status === 'IN_FLIGHT') {
-                avEngine.multiplier = Math.pow(Math.E, 0.08 * ((ts - avEngine.startTime) / 1000));
-                for (let i of [1,2]) { 
-                    const b = window.appState.aviator.bets[i]; 
-                    if (b.state === 'ACTIVE' && b.autoCash && avEngine.multiplier >= b.autoCashVal) avTriggerCashOut(i); 
-                }
-                if (avEngine.multiplier >= avEngine.target) { avEngine.multiplier = avEngine.target; avTriggerCrash(); }
-                else { 
-                    for (let i of [1,2]) { 
-                        if (window.appState.aviator.bets[i].state === 'ACTIVE') { 
-                            const s = document.getElementById(`avBtnSub${i}`); 
-                            if(s) s.innerText = `${(window.appState.aviator.bets[i].amount * avEngine.multiplier).toFixed(2)} PKR`; 
-                        } 
-                    } 
-                }
-            }
-            else if (avEngine.status === 'CRASHED') { if (ts - avEngine.startTime >= 2200) avPrepareNextRound(); }
-            avDrawCanvas(); requestAnimationFrame(avGameLoop);
-        }
-
-        window.avUpdateLocalState = (boxId) => {
-            const b = window.appState.aviator.bets[boxId];
-            const ac = document.getElementById(`avAutoCashToggle${boxId}`);
-            const acv = document.getElementById(`avAutoCashVal${boxId}`);
-            const bi = document.getElementById(`avBetInput${boxId}`);
-            if(ac) b.autoCash = ac.checked;
-            if(acv) b.autoCashVal = Math.max(1.1, parseFloat(acv.value) || 1.1);
-            if(bi) b.amount = Math.max(10, parseFloat(bi.value) || 10);
-        };
-        window.avAdjustBet = (boxId, ch) => { 
-            const b = window.appState.aviator.bets[boxId]; 
-            if(b.state !== 'IDLE') return; 
-            b.amount = Math.max(10, b.amount + ch); 
-            const inp = document.getElementById(`avBetInput${boxId}`); 
-            if(inp) inp.value = b.amount; 
-            avUpdateButtonUI(boxId); 
-        };
-        window.avSetBet = (boxId, v) => { 
-            const b = window.appState.aviator.bets[boxId]; 
-            if(b.state !== 'IDLE') return; 
-            b.amount = v; 
-            const inp = document.getElementById(`avBetInput${boxId}`); 
-            if(inp) inp.value = v; 
-            avUpdateButtonUI(boxId); 
-        };
-        window.avHandleAction = (boxId) => {
-            if (!window.appState.authenticated) { showToast('Login required!', 'error'); return; }
-            const b = window.appState.aviator.bets[boxId];
-            if (b.state === 'ACTIVE') avTriggerCashOut(boxId);
-            else if (b.state === 'QUEUED') { b.state = 'IDLE'; avUpdateButtonUI(boxId); showToast('Cancelled', 'info'); }
-            else if (b.state === 'IDLE') {
-                avUpdateLocalState(boxId);
-                if (window.appState.userData.balance >= b.amount) { 
-                    b.state = 'QUEUED'; avUpdateButtonUI(boxId); showToast(`Bet: ${b.amount} PKR`, 'success'); 
-                }
-                else showToast('Insufficient balance!', 'error');
-            }
-        };
-
-        function avUpdateButtonUI(boxId) {
-            const btn = document.getElementById(`avBtnAction${boxId}`), sub = document.getElementById(`avBtnSub${boxId}`);
-            if(!btn||!sub) return;
-            const b = window.appState.aviator.bets[boxId];
-            const disable = b.state !== 'IDLE';
-            const inp = document.getElementById(`avBetInput${boxId}`);
-            if(inp) inp.disabled = disable;
-            document.querySelectorAll(`.av-btn-preset-${boxId}`).forEach(p => p.disabled = disable);
-            if (b.state === 'ACTIVE') { 
-                btn.className = 'av-btn-action cashout'; 
-                btn.childNodes[0].nodeValue = 'CASH OUT'; 
-                sub.innerText = `${(b.amount * avEngine.multiplier).toFixed(2)} PKR`; 
-            }
-            else if (b.state === 'QUEUED') { 
-                btn.className = 'av-btn-action queued'; 
-                btn.childNodes[0].nodeValue = 'CANCEL'; 
-                sub.innerText = 'Waiting...'; 
-            }
-            else { 
-                btn.className = 'av-btn-action bet'; 
-                btn.childNodes[0].nodeValue = 'BET'; 
-                sub.innerText = `${b.amount} PKR`; 
-            }
-        }
-
-        function avShowToast(t) { 
-            const el = document.getElementById('avToastMessage'); 
-            if(el) { el.innerText = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); } 
-            else showToast(t, 'success'); 
-        }
-        function avCreateExplosion(x, y) {
-            avEngine.particles = []; avEngine.shockwave = 5;
-            for (let i = 0; i < 65; i++) {
-                const a = Math.random() * Math.PI * 2, s = Math.random() * 8 + 2;
-                avEngine.particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, size: Math.random()*6+3, color: ['#ff0055','#ff9900','#ffd700','#fff'][Math.floor(Math.random()*4)], alpha:1, decay: Math.random()*0.02+0.015 });
-            }
-        }
-        window.avResizeCanvas = () => { 
-            const c = document.getElementById('avGameCanvas'); 
-            if(c && c.parentElement) { c.width = c.parentElement.clientWidth; c.height = c.parentElement.clientHeight; } 
-        };
-        window.addEventListener('resize', () => { if(window.appState.currentTab==='aviator') avResizeCanvas(); });
-
-        function avDrawCanvas() {
-            const canvas = document.getElementById('avGameCanvas');
-            if(!canvas) return;
-            if(canvas.width===0) avResizeCanvas();
-            const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
-            ctx.fillStyle = '#000'; ctx.fillRect(0,0,w,h);
-            
-            if(avEngine.status==='WAITING') {
-                ctx.fillStyle='#fff'; ctx.font='700 20px Orbitron'; ctx.textAlign='center'; ctx.fillText('WAITING...',w/2,h/2-15);
-                const bw=200,bh=4;
-                ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.roundRect((w-bw)/2,h/2+10,bw,bh,2); ctx.fill();
-                ctx.fillStyle='#ff0055'; ctx.shadowColor='#ff0055'; ctx.shadowBlur=12;
-                ctx.roundRect((w-bw)/2,h/2+10,bw*Math.min(1,avEngine.waitingProgress),bh,2); ctx.fill(); ctx.shadowBlur=0;
-                return;
-            }
-
-            const fp = Math.min(1,(performance.now()-avEngine.startTime)/1800);
-            const px = Math.pow(fp,0.5)*0.85, py = Math.pow(fp,0.65)*0.82;
-            const planeX = 35+px*(w-100), planeY = (h-35)-py*(h-100);
-            if(avEngine.status==='IN_FLIGHT') avEngine.flightPath.push({x:planeX,y:planeY});
-
-            if(avEngine.flightPath.length>1) {
-                ctx.beginPath(); ctx.moveTo(0,h); avEngine.flightPath.forEach(p=>ctx.lineTo(p.x,p.y)); ctx.lineTo(avEngine.flightPath[avEngine.flightPath.length-1].x,h); ctx.closePath();
-                const g=ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'rgba(255,0,85,0.6)'); g.addColorStop(1,'rgba(255,0,85,0)'); ctx.fillStyle=g; ctx.fill();
-                ctx.beginPath(); ctx.moveTo(avEngine.flightPath[0].x,avEngine.flightPath[0].y); avEngine.flightPath.forEach(p=>ctx.lineTo(p.x,p.y));
-                ctx.strokeStyle='#ff0055'; ctx.lineWidth=4; ctx.shadowColor='#ff0055'; ctx.shadowBlur=15; ctx.stroke(); ctx.shadowBlur=0;
-            }
-
-            if(avEngine.status==='IN_FLIGHT') {
-                ctx.save(); ctx.translate(planeX,planeY); ctx.rotate(-0.3+fp*0.2);
-                ctx.fillStyle='#ff0055'; ctx.shadowColor='#ff0055'; ctx.shadowBlur=15;
-                ctx.beginPath(); ctx.moveTo(26,0);ctx.lineTo(8,-5);ctx.lineTo(-2,-20);ctx.lineTo(3,-20);ctx.lineTo(12,-4);ctx.lineTo(-14,-3);
-                ctx.lineTo(-24,-13);ctx.lineTo(-20,-13);ctx.lineTo(-8,-2);ctx.lineTo(-20,0);ctx.lineTo(-8,2);ctx.lineTo(-20,13);ctx.lineTo(-24,13);
-                ctx.lineTo(-14,3);ctx.lineTo(12,4);ctx.lineTo(3,20);ctx.lineTo(-2,20);ctx.lineTo(8,5);ctx.closePath();ctx.fill();
-                ctx.fillStyle='#fff';ctx.shadowBlur=0;ctx.beginPath();ctx.ellipse(12,0,7,2,0,0,Math.PI*2);ctx.fill();
-                ctx.fillStyle='#ff9900';ctx.shadowColor='#ff9900';ctx.shadowBlur=10;ctx.beginPath();ctx.ellipse(-24,0,18,3,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.restore();
-            } else if(avEngine.status==='CRASHED'&&avEngine.flightPath.length>0) {
-                const lp=avEngine.flightPath[avEngine.flightPath.length-1];
-                if(avEngine.shockwave<80){avEngine.shockwave+=4;ctx.strokeStyle=`rgba(255,0,85,${1-avEngine.shockwave/80})`;ctx.lineWidth=3;ctx.beginPath();ctx.arc(lp.x,lp.y,avEngine.shockwave,0,Math.PI*2);ctx.stroke();}
-                avEngine.particles.forEach(p=>{if(p.alpha<=0)return;p.x+=p.vx;p.y+=p.vy;p.alpha-=p.decay;ctx.fillStyle=p.color;ctx.globalAlpha=Math.max(0,p.alpha);ctx.shadowColor=p.color;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();});
-                ctx.globalAlpha=1;ctx.shadowBlur=0;
-            }
-
-            ctx.textAlign='center';
-            if(avEngine.status==='CRASHED'){
-                ctx.fillStyle='#ff0055';ctx.font='900 36px Orbitron';ctx.shadowColor='#ff0055';ctx.shadowBlur=20;
-                ctx.fillText('FLEW AWAY!',w/2,h/2-20);
-                ctx.fillStyle='#fff';ctx.font='700 28px Orbitron';ctx.shadowBlur=0;ctx.fillText(avEngine.multiplier.toFixed(2)+'x',w/2,h/2+25);
-            } else {
-                ctx.fillStyle='#fff';ctx.font='900 48px Orbitron';ctx.shadowColor='rgba(255,0,85,0.4)';ctx.shadowBlur=20;
-                ctx.fillText(avEngine.multiplier.toFixed(2)+'x',w/2,h/2);ctx.shadowBlur=0;
-            }
-        }
-
-        // ============ WINGO ENGINE ============
-        function getWinGoHTML() {
-            const room = window.appState.wingoRooms[window.appState.activeWinGoRoom];
-            return `
-                <div class="p-4 space-y-3">
-                    <div class="glass-card-strong p-4 flex justify-between items-center">
-                        <span class="font-orbitron text-yellow-400 text-sm">WIN GO</span>
-                        <span class="text-xs text-gray-400">Period: ${room.period}</span>
-                    </div>
-                    <div class="grid grid-cols-4 gap-2">
-                        ${['30Sec','1Min','3Min','5Min'].map(r => 
-                            `<button onclick="window.appState.activeWinGoRoom='${r}';renderContent();" class="${window.appState.activeWinGoRoom === r ? 'neon-btn-gold' : 'glass-card'} py-2 rounded-lg font-bold text-xs">${r}</button>`).join('')}
-                    </div>
-                    <div class="glass-card-strong p-4 text-center">
-                        <div class="font-orbitron font-black text-3xl text-red-400" id="active-room-timer">00:30</div>
-                        <div class="flex justify-center gap-1 mt-3">
-                            ${room.history.slice(0,5).map(h => `<div class="w-8 h-8 rounded-full ${getBallColor(h.number)} flex items-center justify-center font-bold text-sm">${h.number}</div>`).join('')}
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="openBetModal('Green')" class="neon-btn-green py-3 rounded-xl font-bold">GREEN</button>
-                        <button onclick="openBetModal('Violet')" class="neon-btn-purple py-3 rounded-xl font-bold text-white">VIOLET</button>
-                        <button onclick="openBetModal('Red')" class="neon-btn-red py-3 rounded-xl font-bold">RED</button>
-                    </div>
-                    <div class="grid grid-cols-5 gap-2">
-                        ${[0,1,2,3,4,5,6,7,8,9].map(n => `<button onclick="openBetModal(${n})" class="h-10 rounded-lg font-black text-white ${getBallColor(n)}">${n}</button>`).join('')}
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="openBetModal('Big')" class="bg-amber-500 py-2.5 rounded-lg font-black text-black">BIG (5-9)</button>
-                        <button onclick="openBetModal('Small')" class="bg-sky-500 py-2.5 rounded-lg font-black text-black">SMALL (0-4)</button>
-                    </div>
-                </div>
-                <div id="bet-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-end justify-center">
-                    <div class="glass-card-strong w-full max-w-md p-5 space-y-3">
-                        <h3 class="font-orbitron text-yellow-400 text-sm">CONFIRM BET</h3>
-                        <div class="bg-black/50 rounded-xl p-3 text-center">
-                            <span class="text-xs text-gray-400">Target:</span>
-                            <span id="bet-target-val" class="font-bold text-yellow-400 text-lg ml-2">Green</span>
-                        </div>
-                        <input type="number" id="bet-amount-val" value="50" min="10" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-yellow-400 font-bold text-center">
-                        <div class="flex gap-2">
-                            <button onclick="closeBetModal()" class="w-1/2 bg-gray-800 py-2.5 rounded-lg font-bold">Cancel</button>
-                            <button onclick="processBetSubmit()" class="w-1/2 neon-btn neon-btn-gold py-2.5 rounded-lg font-bold">Place</button>
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-        let currentBetTarget = null;
-        window.openBetModal = (v) => { currentBetTarget = v; document.getElementById('bet-target-val').innerText = v; document.getElementById('bet-modal').classList.remove('hidden'); };
-        window.closeBetModal = () => document.getElementById('bet-modal').classList.add('hidden');
-        window.processBetSubmit = () => {
-            if(!window.appState.authenticated){showToast('Login required!','error');return;}
-            const amt = parseFloat(document.getElementById('bet-amount-val').value) || 10;
-            if(window.appState.userData.balance < amt){showToast('Insufficient balance!','error');return;}
-            window.appState.userData.balance -= amt;
-            saveUserDataToFirestore(window.appState.activeUser.uid, { balance: window.appState.userData.balance });
-            updateBalanceDisplay();
-            const room = window.appState.wingoRooms[window.appState.activeWinGoRoom];
-            room.myBets.push({period: String(room.period), target: currentBetTarget, amount: amt});
-            showToast(`Bet: Rs ${amt} on ${currentBetTarget}`,'success');
-            closeBetModal();
-        };
-
-        function getBallColor(n) {
-            if (n === 0) return 'bg-gradient-to-r from-red-600 to-purple-600';
-            if (n === 5) return 'bg-gradient-to-r from-green-600 to-purple-600';
-            if ([1,3,7,9].includes(n)) return 'bg-green-600';
-            if ([2,4,6,8].includes(n)) return 'bg-red-600';
-            return 'bg-purple-600';
-        }
-
-        function calculateRoomOutcome(rk) {
-            const r = window.appState.wingoRooms[rk];
-            const num = r.override !== 'AUTO' ? parseInt(r.override) : Math.floor(Math.random() * 10);
-            const size = num >= 5 ? 'Big' : 'Small';
-            const color = [1,3,7,9].includes(num) ? 'Green' : ([2,4,6,8].includes(num) ? 'Red' : 'Violet');
-            r.history.unshift({period: String(r.period), number: num, size, color});
-            if (window.appState.authenticated) {
-                r.myBets.forEach(b => {
-                    if (b.period === String(r.period)) {
-                        const win = (typeof b.target === 'number' && b.target === num) || b.target === size || b.target === color;
-                        if (win) {
-                            const payout = b.amount * 2.95;
-                            window.appState.userData.balance += payout;
-                            saveUserDataToFirestore(window.appState.activeUser.uid, { balance: window.appState.userData.balance });
-                            showToast(`WIN! +Rs ${payout.toFixed(2)}`,'success');
-                        }
-                    }
-                });
-            }
-            r.period += 1;
-            updateBalanceDisplay();
-            if (window.appState.currentTab === 'wingo') renderContent();
-        }
-
-        // ============ DEPOSIT & WITHDRAW ============
-        function getDepositHTML() {
-            return `
-                <div class="p-4 space-y-3">
-                    <div class="glass-card-strong p-4 space-y-2">
-                        <h3 class="font-orbitron text-yellow-400 text-sm">DEPOSIT</h3>
-                        <div class="bg-black/50 p-3 rounded-xl">
-                            <p class="text-xs text-gray-400">Send to JazzCash:</p>
-                            <div class="flex justify-between items-center mt-1">
-                                <span class="font-orbitron font-black text-yellow-400 text-lg">${window.appState.jazzcashNumber}</span>
-                                <button onclick="window.copyToClipboard('${window.appState.jazzcashNumber}')" class="neon-btn neon-btn-purple px-3 py-1 rounded-lg text-xs font-bold">COPY</button>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-400">SELECT AMOUNT</label>
-                            <div class="grid grid-cols-3 gap-2 mt-2">
-                                ${[300,500,1000,2000,5000,10000].map(amt => 
-                                    `<button onclick="window.selectedDepositAmount=${amt};updateDepositButtons();" data-amt="${amt}" class="deposit-amount-btn ${window.selectedDepositAmount === amt ? 'neon-btn neon-btn-gold' : 'glass-card'} py-2 rounded-lg font-bold text-sm">Rs ${amt}</button>`
-                                ).join('')}
-                            </div>
-                        </div>
-                        <input type="text" id="deposit-trx-input" placeholder="Transaction ID (TID)" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white">
-                        <button onclick="submitDeposit()" class="w-full neon-btn neon-btn-gold py-3 rounded-xl font-orbitron font-bold">SUBMIT</button>
-                    </div>
-                    <div class="glass-card p-4 space-y-2 max-h-60 overflow-y-auto">
-                        <h4 class="font-orbitron text-yellow-400 text-sm">HISTORY</h4>
-                        ${window.appState.deposits.filter(d => d.userPhone === window.appState.userData?.phone).length === 0 ? 
-                            '<p class="text-xs text-gray-500">No deposits yet</p>' : 
-                            window.appState.deposits.filter(d => d.userPhone === window.appState.userData?.phone).map(d => 
-                            `<div class="bg-black/30 p-2 rounded-lg flex justify-between items-center">
-                                <div><div class="font-bold text-green-400">Rs ${d.amount}</div><div class="text-[10px] text-gray-400">${d.time}</div></div>
-                                <span class="text-[10px] px-2 py-1 rounded ${d.status === 'Completed' ? 'bg-green-600/30 text-green-400' : 'bg-yellow-600/30 text-yellow-400'}">${d.status}</span>
-                            </div>`).join('')}
-                    </div>
-                </div>`;
-        }
-
-        function getWithdrawHTML() {
-            return `
-                <div class="p-4 space-y-3">
-                    <div class="glass-card-strong p-4 text-center">
-                        <span class="text-xs text-gray-400">Available</span>
-                        <div class="font-orbitron font-black text-yellow-400 text-2xl">Rs ${window.appState.userData?.balance.toFixed(2) || '0.00'}</div>
-                    </div>
-                    <div class="glass-card-strong p-4 space-y-3">
-                        <h3 class="font-orbitron text-yellow-400 text-sm">WITHDRAW</h3>
-                        <input type="text" id="wds-account-name" placeholder="Account Title" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white">
-                        <input type="text" id="wds-account-num" placeholder="JazzCash Number" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white">
-                        <input type="number" id="wds-amount-input" placeholder="Amount (Min 500)" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-yellow-400 font-bold">
-                        <button onclick="submitWithdrawal()" class="w-full neon-btn neon-btn-red py-3 rounded-xl font-orbitron font-bold">SUBMIT</button>
-                    </div>
-                    <div class="glass-card p-4 space-y-2 max-h-60 overflow-y-auto">
-                        <h4 class="font-orbitron text-yellow-400 text-sm">HISTORY</h4>
-                        ${window.appState.withdrawals.filter(w => w.userPhone === window.appState.userData?.phone).length === 0 ? 
-                            '<p class="text-xs text-gray-500">No withdrawals yet</p>' : 
-                            window.appState.withdrawals.filter(w => w.userPhone === window.appState.userData?.phone).map(w => 
-                            `<div class="bg-black/30 p-2 rounded-lg flex justify-between items-center">
-                                <div><div class="font-bold text-yellow-400">Rs ${w.amount}</div><div class="text-[10px] text-gray-400">${w.time}</div></div>
-                                <span class="text-[10px] px-2 py-1 rounded ${w.status === 'Completed' ? 'bg-green-600/30 text-green-400' : 'bg-yellow-600/30 text-yellow-400'}">${w.status}</span>
-                            </div>`).join('')}
-                    </div>
-                </div>`;
-        }
-
-        function getAccountHTML() {
-            const u = window.appState.userData;
-            if (!u) return '<div class="p-4 text-center"><p class="text-gray-400">Please login</p></div>';
-            const refLink = `${window.location.origin}${window.location.pathname}?ref=${u.referralCode || ''}`;
-            return `
-                <div class="p-4 space-y-3">
-                    <div class="glass-card-strong p-5 flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center font-black text-black text-2xl">${u.fullName.charAt(0)}</div>
-                        <div>
-                            <div class="font-bold">${u.fullName}</div>
-                            <div class="text-xs text-gray-400">${u.email}</div>
-                            <div class="text-xs text-gray-400">+92${u.phone}</div>
-                        </div>
-                    </div>
-                    <div class="glass-card-strong p-4 text-center">
-                        <span class="text-xs text-gray-400">Balance</span>
-                        <div class="font-orbitron font-black text-yellow-400 text-2xl">Rs ${u.balance.toFixed(2)}</div>
-                    </div>
-                    <!-- Referral Section -->
-                    <div class="glass-card-strong p-4 space-y-3">
-                        <h3 class="font-orbitron text-yellow-400 text-sm">REFERRAL PROGRAM</h3>
-                        <div class="bg-black/50 p-3 rounded-xl">
-                            <p class="text-xs text-gray-400">Your Code:</p>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="font-orbitron font-black text-yellow-400 text-lg">${u.referralCode || 'N/A'}</span>
-                                <button onclick="copyReferralCode('${u.referralCode}')" class="neon-btn neon-btn-purple px-3 py-1 rounded-lg text-xs font-bold">COPY</button>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-2">Referral Link:</p>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="text-[10px] text-gray-300 break-all">${refLink}</span>
-                                <button onclick="copyReferralLink('${refLink}')" class="neon-btn neon-btn-green px-3 py-1 rounded-lg text-xs font-bold">COPY</button>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="bg-black/30 p-3 rounded-lg">
-                                <div class="text-xl font-black text-yellow-400">${u.referralCount || 0}</div>
-                                <div class="text-[10px] text-gray-400">Invites</div>
-                            </div>
-                            <div class="bg-black/30 p-3 rounded-lg">
-                                <div class="text-xl font-black text-green-400">Rs ${(u.referralDepositTotal || 0).toFixed(2)}</div>
-                                <div class="text-[10px] text-gray-400">Ref Deposits</div>
-                            </div>
-                            <div class="bg-black/30 p-3 rounded-lg">
-                                <div class="text-xl font-black text-purple-400">Rs ${(u.referralBonusEarned || 0).toFixed(2)}</div>
-                                <div class="text-[10px] text-gray-400">Bonus Earned</div>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="handleUserLogout()" class="w-full bg-red-600/20 border border-red-500/50 text-red-400 py-3 rounded-xl font-bold">LOGOUT</button>
-                </div>`;
-        }
-
-        window.copyReferralCode = (code) => {
-            if (code) {
-                navigator.clipboard.writeText(code).then(() => showToast('Code copied!', 'success')).catch(() => showToast('Copy failed', 'error'));
-            }
-        };
-        window.copyReferralLink = (link) => {
-            if (link) {
-                navigator.clipboard.writeText(link).then(() => showToast('Link copied!', 'success')).catch(() => showToast('Copy failed', 'error'));
-            }
-        };
-
-        // ============ AUTH FUNCTIONS ============
-        window.openAuthModal = (mode) => {
-            window.appState.authMode = mode;
-            document.getElementById('auth-modal-title').innerText = mode === 'signup' ? 'SIGN UP' : 'LOGIN';
-            document.getElementById('auth-action-btn').innerText = mode === 'signup' ? 'SIGN UP & PLAY' : 'LOGIN';
-            document.getElementById('auth-switch-text').innerText = mode === 'signup' ? 'Already registered?' : 'No account?';
-            document.getElementById('auth-switch-btn').innerText = mode === 'signup' ? 'LOGIN' : 'SIGN UP';
-            // Show/hide signup-only fields
-            document.getElementById('auth-name-container').style.display = mode === 'signup' ? 'block' : 'none';
-            document.getElementById('auth-phone-container').style.display = mode === 'signup' ? 'block' : 'none';
-            document.getElementById('auth-referral-container').style.display = mode === 'signup' ? 'block' : 'none';
-            // Prefill referral from URL if available
-            if (mode === 'signup') {
-                const params = new URLSearchParams(window.location.search);
-                const ref = params.get('ref');
-                if (ref) {
-                    document.getElementById('auth-referral').value = ref;
-                }
-            }
-            document.getElementById('auth-modal').classList.remove('hidden');
-        };
-        window.closeAuthModal = () => document.getElementById('auth-modal').classList.add('hidden');
-        window.switchAuthMode = () => openAuthModal(window.appState.authMode === 'signup' ? 'login' : 'signup');
-
-        window.processAuthSubmit = async () => {
-            const email = document.getElementById('auth-email').value.trim();
-            const pass = document.getElementById('auth-pass').value.trim();
-            const name = document.getElementById('auth-fullname').value.trim();
-            const phone = document.getElementById('auth-phone').value.trim();
-            const referralCodeInput = document.getElementById('auth-referral').value.trim();
-
-            if (!email) { showToast('Email required!', 'error'); return; }
-            if (pass.length < 6) { showToast('Password min 6 chars!', 'error'); return; }
-
-            if (window.appState.authMode === 'signup') {
-                if (!name) { showToast('Enter name!', 'error'); return; }
-                if (!/^\d{10}$/.test(phone)) { showToast('Valid phone required!', 'error'); return; }
-                try {
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                    const user = userCredential.user;
-                    const referralCode = generateReferralCode(user.uid);
-                    
-                    let referredBy = null;
-                    if (referralCodeInput) {
-                        const inviter = await findUserByReferralCode(referralCodeInput);
-                        if (inviter) {
-                            referredBy = inviter.uid;
-                            // Increment inviter's referralCount
-                            const inviterRef = doc(db, 'users', inviter.uid);
-                            const inviterData = await getDoc(inviterRef);
-                            if (inviterData.exists()) {
-                                await updateDoc(inviterRef, {
-                                    referralCount: (inviterData.data().referralCount || 0) + 1
-                                });
-                            }
-                        } else {
-                            showToast('Invalid referral code, proceeding without it.', 'info');
-                        }
-                    }
-                    
-                    const userData = {
-                        fullName: name,
-                        email: email,
-                        phone: phone,
-                        balance: 0,
-                        referralCode: referralCode,
-                        referredBy: referredBy,
-                        referralCount: 0,
-                        referralDepositTotal: 0,
-                        referralBonusEarned: 0,
-                        createdAt: Date.now()
-                    };
-                    await saveUserDataToFirestore(user.uid, userData);
-                    window.appState.activeUser = user;
-                    window.appState.userData = userData;
-                    window.appState.authenticated = true;
-                    closeAuthModal();
-                    showToast(`Welcome ${name}!`, 'success');
-                    renderContent();
-                    updateBalanceDisplay();
-                } catch (error) {
-                    console.error(error);
-                    showToast(error.message, 'error');
-                }
-            } else {
-                // Login mode
-                try {
-                    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-                    const user = userCredential.user;
-                    const userData = await getUserDataFromFirestore(user.uid);
-                    if (userData) {
-                        window.appState.activeUser = user;
-                        window.appState.userData = userData;
-                        window.appState.authenticated = true;
-                        closeAuthModal();
-                        showToast('Welcome back!', 'success');
-                        renderContent();
-                        updateBalanceDisplay();
-                    } else {
-                        showToast('User data not found!', 'error');
-                        await signOut(auth);
-                    }
-                } catch (error) {
-                    console.error(error);
-                    showToast(error.message, 'error');
-                }
-            }
-        };
-
-        window.handleUserLogout = async () => {
-            await signOut(auth);
-            window.appState.authenticated = false;
-            window.appState.activeUser = null;
-            window.appState.userData = null;
-            updateBalanceDisplay();
-            switchTab('home');
-            showToast('Logged out', 'info');
-        };
-
-        // ============ DEPOSIT/WITHDRAW ============
-        window.submitDeposit = async () => {
-            if (!window.appState.authenticated) { showToast('Login required!', 'error'); return; }
-            const amt = window.selectedDepositAmount;
-            const trx = document.getElementById('deposit-trx-input').value.trim();
-            if (isNaN(amt) || amt < 300) { showToast('Minimum Rs 300', 'error'); return; }
-            if (!trx) { showToast('TID required!', 'error'); return; }
-            const dep = {
-                id: 'DEP_' + Date.now(),
-                userUid: window.appState.activeUser.uid,
-                userPhone: window.appState.userData.phone,
-                userName: window.appState.userData.fullName,
-                amount: amt, trxId: trx,
-                status: 'Pending',
-                time: new Date().toLocaleString(),
-                timestamp: Date.now()
-            };
-            window.appState.deposits.push(dep);
-            saveToLocal(DEPOSITS_KEY, window.appState.deposits);
-            await saveDepositToFirestore(dep);
-            showToast('Deposit submitted!', 'success');
-            document.getElementById('deposit-trx-input').value = '';
-            renderContent();
-        };
-
-        window.submitWithdrawal = async () => {
-            if (!window.appState.authenticated) { showToast('Login required!', 'error'); return; }
-            const title = document.getElementById('wds-account-name').value.trim();
-            const num = document.getElementById('wds-account-num').value.trim();
-            const amt = parseFloat(document.getElementById('wds-amount-input').value);
-            if (!title || !num) { showToast('Complete all fields!', 'error'); return; }
-            if (isNaN(amt) || amt < 500) { showToast('Min Rs 500', 'error'); return; }
-            if (window.appState.userData.balance < amt) { showToast('Insufficient!', 'error'); return; }
-            window.appState.userData.balance -= amt;
-            await saveUserDataToFirestore(window.appState.activeUser.uid, { balance: window.appState.userData.balance });
-            updateBalanceDisplay();
-            const wds = {
-                id: 'WDS_' + Date.now(),
-                userUid: window.appState.activeUser.uid,
-                userPhone: window.appState.userData.phone,
-                userName: window.appState.userData.fullName,
-                accountTitle: title, accountNum: num,
-                amount: amt, status: 'Pending',
-                time: new Date().toLocaleString(),
-                timestamp: Date.now()
-            };
-            window.appState.withdrawals.push(wds);
-            saveToLocal(WITHDRAWALS_KEY, window.appState.withdrawals);
-            await saveWithdrawalToFirestore(wds);
-            showToast('Withdrawal submitted!', 'success');
-            renderContent();
-        };
-
-        // ============ ADMIN ============
-        window.toggleAdminModal = () => { 
-            const m = document.getElementById('admin-modal'); 
-            m.classList.toggle('hidden'); 
-            if (!m.classList.contains('hidden')) renderAdminData(); 
-        };
-        window.handleAdminLogin = () => {
-            if (document.getElementById('admin-email').value === 'admin@halalpk.com' && 
-                document.getElementById('admin-pass').value === 'admin123') {
-                document.getElementById('admin-login-box').classList.add('hidden');
-                document.getElementById('admin-dashboard').classList.remove('hidden');
-                renderAdminData();
-            } else showToast('Invalid!', 'error');
-        };
-        window.adminLogout = () => { 
-            document.getElementById('admin-dashboard').classList.add('hidden'); 
-            document.getElementById('admin-login-box').classList.remove('hidden'); 
-        };
-        
-        window.saveReferralBonus = () => {
-            const val = parseFloat(document.getElementById('admin-ref-bonus').value);
-            if (isNaN(val) || val < 0 || val > 100) { showToast('Enter 0-100', 'error'); return; }
-            window.appState.referralBonusPercentage = val;
-            saveToLocal(REF_BONUS_KEY, val);
-            showToast(`Referral bonus set to ${val}%`, 'success');
-        };
-
-        window.renderAdminData = () => {
-            document.getElementById('admin-users-count').innerText = window.appState.users.length;
-            document.getElementById('admin-users-list').innerHTML = window.appState.users.map(u => `
-                <div class="bg-black/30 p-2 rounded-lg flex justify-between items-center">
-                    <div>
-                        <div class="font-bold text-sm">${u.fullName} (${u.email})</div>
-                        <div class="text-yellow-400 font-bold">Rs ${u.balance.toFixed(2)}</div>
-                        ${u.referredBy ? `<div class="text-[10px] text-gray-500">Referred by: ${u.referredBy}</div>` : ''}
-                    </div>
-                    <div class="flex gap-1">
-                        <input type="number" id="adj-${u.uid}" placeholder="Amt" class="bg-black/50 border border-white/10 rounded px-2 py-1 text-xs w-20">
-                        <button onclick="adminModifyBalance('${u.uid}',1)" class="neon-btn-green text-xs px-2 py-1 rounded">+</button>
-                        <button onclick="adminModifyBalance('${u.uid}',-1)" class="neon-btn-red text-xs px-2 py-1 rounded">-</button>
-                    </div>
-                </div>`).join('') || '<p class="text-xs text-gray-500">No users</p>';
-            
-            const pd = window.appState.deposits.filter(d => d.status === 'Pending');
-            document.getElementById('admin-dep-badge').innerText = pd.length;
-            document.getElementById('admin-deposit-list').innerHTML = pd.map(d => `
-                <div class="bg-black/30 p-2 rounded-lg flex justify-between items-center">
-                    <div>
-                        <div class="font-bold text-green-400">Rs ${d.amount}</div>
-                        <div class="text-[10px]">${d.userName} | ${d.trxId}</div>
-                    </div>
-                    <button onclick="adminApproveDep('${d.id}')" class="neon-btn-green px-3 py-1 rounded-lg text-xs font-bold">APPROVE</button>
-                </div>`).join('') || '<p class="text-xs text-gray-500">No pending</p>';
-            
-            const pw = window.appState.withdrawals.filter(w => w.status === 'Pending');
-            document.getElementById('admin-wds-badge').innerText = pw.length;
-            document.getElementById('admin-withdraw-list').innerHTML = pw.map(w => `
-                <div class="bg-black/30 p-2 rounded-lg flex justify-between items-center">
-                    <div>
-                        <div class="font-bold text-yellow-400">Rs ${w.amount}</div>
-                        <div class="text-[10px]">${w.userName} | ${w.accountNum}</div>
-                    </div>
-                    <button onclick="adminApproveWds('${w.id}')" class="neon-btn-green px-3 py-1 rounded-lg text-xs font-bold">APPROVE</button>
-                </div>`).join('') || '<p class="text-xs text-gray-500">No pending</p>';
-
-            // Referral report
-            const refReport = window.appState.users.map(u => `
-                <div class="bg-black/30 p-2 rounded-lg">
-                    <div class="flex justify-between">
-                        <span class="font-bold text-sm">${u.fullName}</span>
-                        <span class="text-xs text-gray-400">Code: ${u.referralCode || 'N/A'}</span>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 mt-1 text-center">
-                        <div><div class="text-yellow-400 font-bold">${u.referralCount || 0}</div><div class="text-[9px]">Invites</div></div>
-                        <div><div class="text-green-400 font-bold">Rs ${(u.referralDepositTotal || 0).toFixed(2)}</div><div class="text-[9px]">Deposits</div></div>
-                        <div><div class="text-purple-400 font-bold">Rs ${(u.referralBonusEarned || 0).toFixed(2)}</div><div class="text-[9px]">Bonus</div></div>
-                    </div>
-                </div>
-            `).join('') || '<p class="text-xs text-gray-500">No users</p>';
-            document.getElementById('admin-ref-report').innerHTML = refReport;
-        };
-        
-        window.adminModifyBalance = async (uid, factor) => {
-            const inp = document.getElementById(`adj-${uid}`);
-            const amt = parseFloat(inp?.value);
-            if (isNaN(amt) || amt <= 0) { showToast('Valid amount!', 'error'); return; }
-            const userRef = doc(db, 'users', uid);
-            try {
-                const snap = await getDoc(userRef);
-                if (snap.exists()) {
-                    const data = snap.data();
-                    const newBalance = Math.max(0, data.balance + amt * factor);
-                    await updateDoc(userRef, { balance: newBalance });
-                    if (window.appState.activeUser?.uid === uid) {
-                        window.appState.userData.balance = newBalance;
-                        updateBalanceDisplay();
-                    }
-                    window.appState.users = await loadAllUsersFromFirestore();
-                    renderAdminData();
-                    showToast('Balance updated!', 'success');
-                } else {
-                    showToast('User not found!', 'error');
-                }
-            } catch(e) { showToast('Error updating balance', 'error'); }
-        };
-        
-        window.saveAdminAviator = async () => {
-            const v = document.getElementById('admin-aviator-val').value.trim();
-            if (v) {
-                window.appState.aviator.override = v;
-                showToast('Aviator override set!', 'success');
-            }
-        };
-        window.saveAdminOverride = () => {
-            const rk = document.getElementById('admin-room-select').value;
-            const v = document.getElementById('admin-override-val').value;
-            window.appState.wingoRooms[rk].override = v;
-            showToast(`Win Go ${rk} set to ${v}`, 'success');
-        };
-        
-        window.adminApproveDep = async (id) => {
-            const d = window.appState.deposits.find(x => x.id === id);
-            if (d && d.status === 'Pending') {
-                d.status = 'Completed';
-                saveToLocal(DEPOSITS_KEY, window.appState.deposits);
-                await saveDepositToFirestore(d);
-                // Add balance to user
-                const userRef = doc(db, 'users', d.userUid);
-                try {
-                    const snap = await getDoc(userRef);
-                    if (snap.exists()) {
-                        const data = snap.data();
-                        await updateDoc(userRef, { balance: data.balance + d.amount });
-                        if (window.appState.activeUser?.uid === d.userUid) {
-                            window.appState.userData.balance += d.amount;
-                            updateBalanceDisplay();
-                        }
-                        // Referral bonus logic
-                        if (data.referredBy) {
-                            const inviterRef = doc(db, 'users', data.referredBy);
-                            const inviterSnap = await getDoc(inviterRef);
-                            if (inviterSnap.exists()) {
-                                const inviterData = inviterSnap.data();
-                                const bonus = d.amount * (window.appState.referralBonusPercentage / 100);
-                                const newInviterBalance = inviterData.balance + bonus;
-                                const newDepositTotal = (inviterData.referralDepositTotal || 0) + d.amount;
-                                const newBonusEarned = (inviterData.referralBonusEarned || 0) + bonus;
-                                await updateDoc(inviterRef, {
-                                    balance: newInviterBalance,
-                                    referralDepositTotal: newDepositTotal,
-                                    referralBonusEarned: newBonusEarned
-                                });
-                                // Update local if inviter is current user (unlikely in admin)
-                                if (window.appState.activeUser?.uid === data.referredBy) {
-                                    window.appState.userData.balance = newInviterBalance;
-                                    updateBalanceDisplay();
-                                }
-                            }
-                        }
-                    }
-                } catch(e) { console.error(e); }
-                // Refresh users
-                window.appState.users = await loadAllUsersFromFirestore();
-                renderAdminData();
-                showToast('Deposit approved!', 'success');
-            }
-        };
-        
-        window.adminApproveWds = async (id) => {
-            const w = window.appState.withdrawals.find(x => x.id === id);
-            if (w && w.status === 'Pending') {
-                w.status = 'Completed';
-                saveToLocal(WITHDRAWALS_KEY, window.appState.withdrawals);
-                await saveWithdrawalToFirestore(w);
-                renderAdminData();
-                showToast('Withdrawal approved!', 'success');
-            }
-        };
-
-        // ============ HELPERS ============
-        function startRoomTimers() {
-            setInterval(() => {
-                Object.keys(window.appState.wingoRooms).forEach(rk => {
-                    const r = window.appState.wingoRooms[rk];
-                    r.timerSec--;
-                    if (r.timerSec <= 0) {
-                        calculateRoomOutcome(rk);
-                        r.timerSec = r.totalSec;
-                    }
-                });
-                const el = document.getElementById('active-room-timer');
-                if (el) {
-                    const r = window.appState.wingoRooms[window.appState.activeWinGoRoom];
-                    const m = Math.floor(r.timerSec / 60), s = r.timerSec % 60;
-                    el.innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
-                }
-            }, 1000);
-        }
-
-        function initSeedHistory() {
-            Object.keys(window.appState.wingoRooms).forEach(rk => {
-                const r = window.appState.wingoRooms[rk];
-                for (let i = 0; i < 5; i++) {
-                    const n = Math.floor(Math.random() * 10);
-                    r.history.push({ period: String(r.period - i - 1), number: n, size: n >= 5 ? 'Big' : 'Small', color: [1,3,7,9].includes(n) ? 'Green' : ([2,4,6,8].includes(n) ? 'Red' : 'Violet') });
-                }
-            });
-        }
-
-        function createParticles() {
-            const c = document.getElementById('particles-container');
-            const colors = ['#ffd700', '#a855f7', '#00ff66', '#00d4ff'];
-            for (let i = 0; i < 25; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                const s = Math.random() * 4 + 2;
-                p.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${colors[i%4]};box-shadow:0 0 ${s*3}px currentColor;animation-duration:${Math.random()*8+6}s;animation-delay:${Math.random()*8}s;`;
-                c.appendChild(p);
-            }
-        }
-
-        function hideLoadingScreen() {
-            setTimeout(() => {
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('app-container').style.display = 'flex';
-            }, 2000);
-        }
-
-        // ============ INITIALIZATION ============
-        window.addEventListener('DOMContentLoaded', async () => {
-            createParticles();
-            initSeedHistory();
-            startRoomTimers();
-            initAviatorEngine();
-
-            // Load referral bonus from local storage
-            const savedRefBonus = loadFromLocal(REF_BONUS_KEY);
-            if (savedRefBonus) window.appState.referralBonusPercentage = savedRefBonus;
-
-            // Load local backups
-            const localDeps = loadFromLocal(DEPOSITS_KEY);
-            if (localDeps) window.appState.deposits = localDeps;
-            const localWds = loadFromLocal(WITHDRAWALS_KEY);
-            if (localWds) window.appState.withdrawals = localWds;
-
-            // Firebase auth state listener
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    window.appState.activeUser = user;
-                    const userData = await getUserDataFromFirestore(user.uid);
-                    if (userData) {
-                        window.appState.userData = userData;
-                        window.appState.authenticated = true;
-                    } else {
-                        window.appState.authenticated = false;
-                        await signOut(auth);
-                    }
-                } else {
-                    window.appState.authenticated = false;
-                    window.appState.activeUser = null;
-                    window.appState.userData = null;
-                }
-                updateBalanceDisplay();
-                renderContent();
-            });
-
-            // Firestore listeners
-            onSnapshot(collection(db, 'deposits'), (snap) => {
-                const list = [];
-                snap.forEach(d => list.push(d.data()));
-                window.appState.deposits = list.sort((a,b) => b.timestamp - a.timestamp);
-                saveToLocal(DEPOSITS_KEY, window.appState.deposits);
-                if (window.appState.currentTab === 'deposit') renderContent();
-                renderAdminData();
-            });
-            onSnapshot(collection(db, 'withdrawals'), (snap) => {
-                const list = [];
-                snap.forEach(d => list.push(d.data()));
-                window.appState.withdrawals = list.sort((a,b) => b.timestamp - a.timestamp);
-                saveToLocal(WITHDRAWALS_KEY, window.appState.withdrawals);
-                if (window.appState.currentTab === 'withdraw') renderContent();
-                renderAdminData();
-            });
-            onSnapshot(collection(db, 'users'), (snap) => {
-                const list = [];
-                snap.forEach(d => list.push({ ...d.data(), uid: d.id }));
-                window.appState.users = list;
-                renderAdminData();
-                if (window.appState.activeUser) {
-                    const updated = list.find(u => u.uid === window.appState.activeUser.uid);
-                    if (updated) {
-                        window.appState.userData = updated;
-                        updateBalanceDisplay();
-                        if (window.appState.currentTab === 'account') renderContent();
-                    }
-                }
-            });
-
-            renderContent();
-            hideLoadingScreen();
+    // Signup User
+    async function signupUser() {
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      if (!email || !password) return alert('Please fill all fields');
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        await db.collection('users').doc(user.uid).set({
+          email: user.email,
+          balance: 0,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-    </script>
+        alert('Signup successful!');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    // Login User
+    async function loginUser() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        alert('Login successful!');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    // Logout
+    function logout() {
+      if (adminUnsubscribe) { adminUnsubscribe(); adminUnsubscribe = null; }
+      auth.signOut();
+    }
+
+    // Render Packages
+    function renderPackages() {
+      const grid = document.getElementById('packageGrid');
+      grid.innerHTML = packages.map(pkg => `
+        <div class="package-card" onclick="openDepositModal('${pkg.id}')" style="border-top: 5px solid ${pkg.color};">
+          <div class="amount">PKR ${pkg.amount}</div>
+          <div style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">${pkg.name}</div>
+          <div class="daily">Daily Earnings: PKR ${pkg.dailyReturn}</div>
+          <div class="duration">Duration: ${pkg.durationDays} Days</div>
+          <div class="duration">Total Return: PKR ${pkg.totalReturn}</div>
+        </div>
+      `).join('');
+    }
+
+    // Initialize User Dashboard
+    async function initUserDashboard(user) {
+      // Real-time balance
+      db.collection('users').doc(user.uid).onSnapshot((doc) => {
+        if (doc.exists) {
+          document.getElementById('balanceDisplay').innerText = doc.data().balance || 0;
+        }
+      });
+
+      // Process daily earnings
+      await processInvestments(user);
+
+      // Load investments list
+      loadInvestments(user);
+    }
+
+    // Process daily earnings for all active investments
+    async function processInvestments(user) {
+      const userRef = db.collection('users').doc(user.uid);
+      const invSnapshot = await db.collection('investments')
+        .where('userId', '==', user.uid)
+        .where('active', '==', true)
+        .get();
+
+      if (invSnapshot.empty) return;
+
+      const batch = db.batch();
+      let totalToAdd = 0;
+
+      invSnapshot.docs.forEach((doc) => {
+        const inv = doc.data();
+        if (!inv.startDate) return;
+        const startMillis = inv.startDate.toMillis();
+        const now = Date.now();
+        let days = Math.floor((now - startMillis) / (1000 * 60 * 60 * 24));
+        if (days < 0) days = 0;
+        if (days > inv.durationDays) days = inv.durationDays;
+
+        const earned = days * inv.dailyReturn;
+        const oldPaid = inv.paidAmount || 0;
+
+        if (earned > oldPaid) {
+          totalToAdd += earned - oldPaid;
+          batch.update(doc.ref, { paidAmount: earned });
+        }
+        if (days >= inv.durationDays) {
+          batch.update(doc.ref, { active: false });
+        }
+      });
+
+      if (totalToAdd > 0) {
+        batch.update(userRef, { balance: firebase.firestore.FieldValue.increment(totalToAdd) });
+      }
+      await batch.commit();
+    }
+
+    // Load investments list
+    function loadInvestments(user) {
+      db.collection('investments')
+        .where('userId', '==', user.uid)
+        .orderBy('startDate', 'desc')
+        .onSnapshot((snapshot) => {
+          const list = document.getElementById('investmentsList');
+          if (snapshot.empty) {
+            list.innerHTML = '<p>No investments yet. Choose a package above.</p>';
+            return;
+          }
+          let html = '';
+          snapshot.docs.forEach((doc) => {
+            const inv = doc.data();
+            const startMillis = inv.startDate ? inv.startDate.toMillis() : Date.now();
+            const now = Date.now();
+            let days = Math.floor((now - startMillis) / (1000 * 60 * 60 * 24));
+            if (days < 0) days = 0;
+            if (days > inv.durationDays) days = inv.durationDays;
+            const earned = days * inv.dailyReturn;
+            const status = inv.active ? 'active' : 'completed';
+            html += `
+              <div class="investment-item">
+                <div>
+                  <strong>${inv.packageName}</strong> (PKR ${inv.amount})<br>
+                  <small>Daily: PKR ${inv.dailyReturn} | Elapsed: ${days}/${inv.durationDays} days</small>
+                </div>
+                <div style="text-align:right;">
+                  <span class="badge ${status}">${status.toUpperCase()}</span><br>
+                  <small>Earned: PKR ${earned}</small>
+                </div>
+              </div>
+            `;
+          });
+          list.innerHTML = html;
+        });
+    }
+
+    // Deposit Modal
+    function openDepositModal(packageId) {
+      const pkg = packages.find(p => p.id === packageId);
+      if (!pkg) return;
+      selectedPackage = pkg;
+      const details = document.getElementById('depositDetails');
+      details.innerHTML = `
+        <div class="detail-row"><span>Package:</span><strong>${pkg.name}</strong></div>
+        <div class="detail-row"><span>Investment Amount:</span><strong>PKR ${pkg.amount}</strong></div>
+        <div class="detail-row"><span>Daily Earnings:</span><strong>PKR ${pkg.dailyReturn}</strong></div>
+        <div class="detail-row"><span>Duration:</span><strong>${pkg.durationDays} Days</strong></div>
+        <div class="detail-row"><span>Total Return:</span><strong>PKR ${pkg.totalReturn}</strong></div>
+        <div style="margin-top:15px; padding:10px; background:#f5f5f5; border-radius:10px;">
+          <p>Send payment to this number:</p>
+          <h3 style="color:var(--primary); margin:10px 0;">${PHONE_NUMBER}</h3>
+          <p>After payment, enter TID below and submit.</p>
+        </div>
+      `;
+      document.getElementById('tidInput').value = '';
+      document.getElementById('depositModal').classList.remove('hidden');
+    }
+
+    function closeDepositModal() {
+      document.getElementById('depositModal').classList.add('hidden');
+      selectedPackage = null;
+    }
+
+    // Submit Deposit Request
+    async function submitDeposit() {
+      if (!selectedPackage) return;
+      const tid = document.getElementById('tidInput').value.trim();
+      if (!tid) return alert('Please enter TID');
+      if (!currentUser) return alert('Please login first');
+      try {
+        await db.collection('deposits').add({
+          userId: currentUser.uid,
+          userEmail: currentUser.email,
+          packageId: selectedPackage.id,
+          packageName: selectedPackage.name,
+          amount: selectedPackage.amount,
+          dailyReturn: selectedPackage.dailyReturn,
+          durationDays: selectedPackage.durationDays,
+          tid: tid,
+          status: 'pending',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Deposit request submitted. Wait for admin approval.');
+        closeDepositModal();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    // Admin Login
+    async function adminLogin() {
+      const email = document.getElementById('adminEmail').value.trim();
+      const password = document.getElementById('adminPassword').value;
+      if (!email || !password) return alert('Please enter credentials');
+      try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        if (userCredential.user.email !== ADMIN_EMAIL) {
+          await auth.signOut();
+          alert('Not an admin account');
+          return;
+        }
+        closeAdminLoginModal();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    function openAdminLoginModal() {
+      document.getElementById('adminLoginModal').classList.remove('hidden');
+    }
+    function closeAdminLoginModal() {
+      document.getElementById('adminLoginModal').classList.add('hidden');
+    }
+
+    // Admin Dashboard Init
+    function initAdminDashboard() {
+      if (adminUnsubscribe) { adminUnsubscribe(); }
+      adminUnsubscribe = db.collection('deposits').orderBy('createdAt', 'desc').onSnapshot(() => {
+        renderAdminContent();
+      });
+      db.collection('users').onSnapshot(() => {
+        if (adminTab === 'users') renderAdminContent();
+      });
+      db.collection('investments').onSnapshot(() => {
+        if (adminTab === 'investments') renderAdminContent();
+      });
+    }
+
+    function switchAdminTab(tab) {
+      adminTab = tab;
+      document.querySelectorAll('.admin-tabs button').forEach((btn, idx) => {
+        const tabs = ['pending', 'all', 'users', 'investments'];
+        if (tabs[idx] === tab) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+      renderAdminContent();
+    }
+
+    async function renderAdminContent() {
+      const container = document.getElementById('adminContent');
+      container.innerHTML = 'Loading...';
+
+      if (adminTab === 'pending' || adminTab === 'all') {
+        const snapshot = await db.collection('deposits').orderBy('createdAt', 'desc').get();
+        const deposits = snapshot.docs.filter(doc => adminTab === 'all' || doc.data().status === 'pending');
+        if (deposits.length === 0) {
+          container.innerHTML = '<p>No deposits found.</p>';
+          return;
+        }
+        let html = '';
+        deposits.forEach((doc) => {
+          const dep = doc.data();
+          const statusColor = dep.status === 'approved' ? 'green' : dep.status === 'rejected' ? 'red' : 'orange';
+          html += `
+            <div class="admin-item">
+              <div>
+                <strong>${dep.userEmail}</strong><br>
+                <small>${dep.packageName} - PKR ${dep.amount} | TID: ${dep.tid}</small><br>
+                <small>Status: <span style="color:${statusColor};">${dep.status}</span></small>
+              </div>
+              <div class="actions">
+                ${dep.status === 'pending' ? `
+                  <button class="approve-btn" onclick="approveDeposit('${doc.id}')">Approve</button>
+                  <button class="reject-btn" onclick="rejectDeposit('${doc.id}')">Reject</button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      } else if (adminTab === 'users') {
+        const snapshot = await db.collection('users').get();
+        if (snapshot.empty) {
+          container.innerHTML = '<p>No users found.</p>';
+          return;
+        }
+        let html = '';
+        snapshot.docs.forEach((doc) => {
+          const userData = doc.data();
+          html += `
+            <div class="admin-item">
+              <div>
+                <strong>${userData.email || 'No Email'}</strong><br>
+                <small>Balance: PKR ${userData.balance || 0}</small>
+              </div>
+              <div>
+                <button class="approve-btn" onclick="viewUserInvestments('${doc.id}')">View Investments</button>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      } else if (adminTab === 'investments') {
+        const snapshot = await db.collection('investments').orderBy('startDate', 'desc').get();
+        if (snapshot.empty) {
+          container.innerHTML = '<p>No investments found.</p>';
+          return;
+        }
+        let html = '';
+        snapshot.docs.forEach((doc) => {
+          const inv = doc.data();
+          const status = inv.active ? 'Active' : 'Completed';
+          html += `
+            <div class="admin-item">
+              <div>
+                <strong>${inv.userEmail}</strong><br>
+                <small>${inv.packageName} - PKR ${inv.amount} | Daily: PKR ${inv.dailyReturn}</small><br>
+                <small>Status: ${status} | Earned: PKR ${inv.paidAmount || 0}</small>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+    }
+
+    async function approveDeposit(depId) {
+      try {
+        await db.runTransaction(async (transaction) => {
+          const depRef = db.collection('deposits').doc(depId);
+          const depDoc = await transaction.get(depRef);
+          if (!depDoc.exists) return;
+          const dep = depDoc.data();
+          if (dep.status !== 'pending') return;
+
+          transaction.update(depRef, {
+            status: 'approved',
+            approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          transaction.set(db.collection('investments').doc(), {
+            userId: dep.userId,
+            userEmail: dep.userEmail,
+            packageId: dep.packageId,
+            packageName: dep.packageName,
+            amount: dep.amount,
+            dailyReturn: dep.dailyReturn,
+            durationDays: dep.durationDays,
+            startDate: firebase.firestore.FieldValue.serverTimestamp(),
+            paidAmount: 0,
+            active: true
+          });
+        });
+        alert('Deposit approved and investment started!');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function rejectDeposit(depId) {
+      try {
+        await db.collection('deposits').doc(depId).update({
+          status: 'rejected'
+        });
+        alert('Deposit rejected.');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function viewUserInvestments(userId) {
+      const snapshot = await db.collection('investments')
+        .where('userId', '==', userId)
+        .get();
+      if (snapshot.empty) {
+        alert('No investments for this user.');
+        return;
+      }
+      let msg = 'Investments:\n\n';
+      snapshot.docs.forEach(doc => {
+        const inv = doc.data();
+        msg += `${inv.packageName} - PKR ${inv.amount}, Daily: ${inv.dailyReturn}, Status: ${inv.active ? 'Active' : 'Completed'}\n`;
+      });
+      alert(msg);
+    }
+  </script>
 </body>
 </html>
