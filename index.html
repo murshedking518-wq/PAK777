@@ -17,6 +17,8 @@
       --white: #ffffff;
       --black: #000000;
       --shadow: 0 20px 40px rgba(0,0,0,0.2);
+      --orange: #FFA500;
+      --orange-light: #FFF3E0;
     }
     body {
       background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
@@ -154,6 +156,117 @@
     }
     .balance-card:hover { transform: perspective(1000px) rotateX(5deg); }
     .balance-amount { font-size: 2.5rem; font-weight: 800; }
+
+    /* Withdrawal Box */
+    .withdrawal-box {
+      background: var(--orange-light);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 10px 30px rgba(255,165,0,0.3);
+      border-left: 5px solid var(--orange);
+      transition: 0.3s;
+    }
+    .withdrawal-box:hover { box-shadow: 0 15px 40px rgba(255,165,0,0.5); }
+    .withdrawal-box h3 {
+      color: #E65100;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+    .withdrawal-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    .withdrawal-form input,
+    .withdrawal-form select {
+      padding: 12px 15px;
+      border: 2px solid #FFD54F;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: white;
+      transition: 0.3s;
+    }
+    .withdrawal-form input:focus,
+    .withdrawal-form select:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 4px rgba(255,165,0,0.2);
+      outline: none;
+    }
+    .withdrawal-form button {
+      background: var(--orange);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .withdrawal-form button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,165,0,0.5); }
+
+    /* 3D Active Investment Box */
+    .active-investment-3d {
+      background: linear-gradient(145deg, #2e7d32, #1b5e20);
+      color: white;
+      padding: 25px;
+      border-radius: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+      transform: perspective(1000px) rotateX(2deg) rotateY(2deg);
+      transition: 0.5s;
+      position: relative;
+      overflow: hidden;
+    }
+    .active-investment-3d::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+      animation: rotate 10s linear infinite;
+    }
+    .active-investment-3d:hover {
+      transform: perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1.02);
+      box-shadow: 0 35px 70px rgba(0,0,0,0.6);
+    }
+    .active-investment-3d .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+      position: relative;
+      z-index: 1;
+    }
+    .active-investment-3d .detail-item {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 15px;
+      text-align: center;
+    }
+    .active-investment-3d .detail-item .label {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+    .active-investment-3d .detail-item .value {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .countdown-timer {
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+      margin: 15px 0;
+      color: #FFD700;
+      text-shadow: 0 0 20px rgba(255,215,0,0.8);
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes rotate { 100% { transform: rotate(360deg); } }
+
+    /* Package Grid */
     .package-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -203,7 +316,6 @@
       background: radial-gradient(circle, rgba(76,175,80,0.1) 0%, transparent 60%);
       animation: rotate 8s linear infinite;
     }
-    @keyframes rotate { 100% { transform: rotate(360deg); } }
 
     /* Investments table */
     .investments-container {
@@ -371,6 +483,30 @@
         <div class="balance-amount">PKR <span id="balanceDisplay">0</span></div>
       </div>
 
+      <!-- Withdrawal Box -->
+      <div class="withdrawal-box">
+        <h3>💰 Withdraw Funds</h3>
+        <div class="withdrawal-form">
+          <input type="number" id="withdrawAmount" placeholder="Amount (PKR)" min="1">
+          <input type="text" id="accountHolderName" placeholder="Account Holder Name">
+          <select id="accountType">
+            <option value="Easypaisa">Easypaisa</option>
+            <option value="JazzCash">JazzCash</option>
+          </select>
+          <input type="text" id="accountNumber" placeholder="Account Number">
+          <input type="text" id="cnicNumber" placeholder="CNIC No (e.g., 12345-1234567-1)">
+          <button onclick="submitWithdrawal()">Request Withdrawal</button>
+        </div>
+      </div>
+
+      <!-- Active Investment 3D Box -->
+      <div id="activeInvestmentBox" class="active-investment-3d hidden">
+        <h3>📦 Active Investment</h3>
+        <div class="details-grid" id="activeInvestmentDetails"></div>
+        <div class="countdown-timer" id="countdownTimer">--:--:--</div>
+        <div style="text-align:center; position:relative; z-index:1;">Next Earnings In:</div>
+      </div>
+
       <h3 style="margin-bottom:15px; color:var(--dark);">Choose Investment Package</h3>
       <div class="package-grid" id="packageGrid"></div>
 
@@ -386,6 +522,7 @@
       <div class="admin-tabs">
         <button class="active" onclick="switchAdminTab('pending')">Pending Deposits</button>
         <button onclick="switchAdminTab('all')">All Deposits</button>
+        <button onclick="switchAdminTab('withdrawals')">Withdrawals</button>
         <button onclick="switchAdminTab('users')">Users</button>
         <button onclick="switchAdminTab('investments')">Investments</button>
       </div>
@@ -438,6 +575,7 @@
     let selectedPackage = null;
     let adminTab = 'pending';
     let adminUnsubscribe = null;
+    let activeInvestmentListener = null;
 
     // Packages data
     const packages = [
@@ -471,6 +609,7 @@
       document.getElementById('adminDashboardSection').classList.add('hidden');
       document.getElementById('logoutBtn').classList.add('hidden');
       document.getElementById('adminLoginBtn').classList.remove('hidden');
+      if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
     }
 
     function showUserDashboard(user) {
@@ -545,6 +684,7 @@
     // Logout
     function logout() {
       if (adminUnsubscribe) { adminUnsubscribe(); adminUnsubscribe = null; }
+      if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
       auth.signOut();
     }
 
@@ -576,6 +716,9 @@
 
       // Load investments list
       loadInvestments(user);
+
+      // Set up active investment listener for 3D box and countdown
+      setupActiveInvestment(user);
     }
 
     // Process daily earnings for all active investments
@@ -618,6 +761,95 @@
       await batch.commit();
     }
 
+    // Setup active investment real-time listener
+    function setupActiveInvestment(user) {
+      if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
+
+      activeInvestmentListener = db.collection('investments')
+        .where('userId', '==', user.uid)
+        .where('active', '==', true)
+        .orderBy('startDate', 'desc')
+        .limit(1)
+        .onSnapshot(async (snapshot) => {
+          const box = document.getElementById('activeInvestmentBox');
+          if (snapshot.empty) {
+            box.classList.add('hidden');
+            return;
+          }
+          const doc = snapshot.docs[0];
+          const inv = doc.data();
+          box.classList.remove('hidden');
+
+          // Details
+          const detailsHtml = `
+            <div class="detail-item">
+              <div class="label">Package</div>
+              <div class="value">${inv.packageName}</div>
+            </div>
+            <div class="detail-item">
+              <div class="label">Invested</div>
+              <div class="value">PKR ${inv.amount}</div>
+            </div>
+            <div class="detail-item">
+              <div class="label">Daily Earnings</div>
+              <div class="value">PKR ${inv.dailyReturn}</div>
+            </div>
+            <div class="detail-item">
+              <div class="label">Days Elapsed</div>
+              <div class="value" id="daysElapsed">0/${inv.durationDays}</div>
+            </div>
+            <div class="detail-item">
+              <div class="label">Earned So Far</div>
+              <div class="value" id="earnedSoFar">PKR ${inv.paidAmount || 0}</div>
+            </div>
+            <div class="detail-item">
+              <div class="label">Total Expected</div>
+              <div class="value">PKR ${inv.amount + (inv.dailyReturn * inv.durationDays)}</div>
+            </div>
+          `;
+          document.getElementById('activeInvestmentDetails').innerHTML = detailsHtml;
+
+          // Start countdown timer
+          startCountdown(inv);
+        });
+    }
+
+    // Countdown timer to next payout (24 hours after last payout)
+    function startCountdown(inv) {
+      const startMillis = inv.startDate ? inv.startDate.toMillis() : Date.now();
+      const paidAmount = inv.paidAmount || 0;
+      const dailyReturn = inv.dailyReturn || 0;
+      const paidDays = dailyReturn > 0 ? Math.floor(paidAmount / dailyReturn) : 0;
+      const nextPayoutMillis = startMillis + (paidDays + 1) * 24 * 60 * 60 * 1000;
+
+      function updateTimer() {
+        const now = Date.now();
+        let diff = nextPayoutMillis - now;
+        if (diff < 0) {
+          diff = 0;
+        }
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        document.getElementById('countdownTimer').innerText =
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        if (diff === 0) {
+          // Timer reached zero, maybe earnings will be processed on next dashboard open
+          // But we can auto-refresh by calling processInvestments again
+          processInvestments(currentUser).then(() => {
+            // The onSnapshot will update automatically
+          });
+        }
+      }
+
+      updateTimer();
+      // Update every second
+      window.countdownInterval = setInterval(updateTimer, 1000);
+      // Clear interval when investment changes? We'll store interval and clear on new listener
+      if (window.countdownInterval) clearInterval(window.countdownInterval);
+      window.countdownInterval = setInterval(updateTimer, 1000);
+    }
+
     // Load investments list
     function loadInvestments(user) {
       db.collection('investments')
@@ -654,6 +886,60 @@
           });
           list.innerHTML = html;
         });
+    }
+
+    // Withdrawal Submission
+    async function submitWithdrawal() {
+      const amount = parseFloat(document.getElementById('withdrawAmount').value);
+      const holderName = document.getElementById('accountHolderName').value.trim();
+      const accountType = document.getElementById('accountType').value;
+      const accountNumber = document.getElementById('accountNumber').value.trim();
+      const cnic = document.getElementById('cnicNumber').value.trim();
+
+      if (!amount || !holderName || !accountNumber || !cnic) {
+        alert('Please fill all fields');
+        return;
+      }
+      if (amount <= 0) {
+        alert('Amount must be positive');
+        return;
+      }
+      if (!currentUser) {
+        alert('Please login first');
+        return;
+      }
+
+      try {
+        // Check balance
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const userDoc = await userRef.get();
+        const balance = userDoc.data().balance || 0;
+        if (amount > balance) {
+          alert('Insufficient balance');
+          return;
+        }
+
+        // Create withdrawal request
+        await db.collection('withdrawals').add({
+          userId: currentUser.uid,
+          userEmail: currentUser.email,
+          amount: amount,
+          accountHolderName: holderName,
+          accountType: accountType,
+          accountNumber: accountNumber,
+          cnic: cnic,
+          status: 'pending',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Withdrawal request submitted. Wait for admin approval.');
+        // Clear form
+        document.getElementById('withdrawAmount').value = '';
+        document.getElementById('accountHolderName').value = '';
+        document.getElementById('accountNumber').value = '';
+        document.getElementById('cnicNumber').value = '';
+      } catch (error) {
+        alert(error.message);
+      }
     }
 
     // Deposit Modal
@@ -746,12 +1032,15 @@
       db.collection('investments').onSnapshot(() => {
         if (adminTab === 'investments') renderAdminContent();
       });
+      db.collection('withdrawals').onSnapshot(() => {
+        if (adminTab === 'withdrawals') renderAdminContent();
+      });
     }
 
     function switchAdminTab(tab) {
       adminTab = tab;
       document.querySelectorAll('.admin-tabs button').forEach((btn, idx) => {
-        const tabs = ['pending', 'all', 'users', 'investments'];
+        const tabs = ['pending', 'all', 'withdrawals', 'users', 'investments'];
         if (tabs[idx] === tab) btn.classList.add('active');
         else btn.classList.remove('active');
       });
@@ -784,6 +1073,34 @@
                 ${dep.status === 'pending' ? `
                   <button class="approve-btn" onclick="approveDeposit('${doc.id}')">Approve</button>
                   <button class="reject-btn" onclick="rejectDeposit('${doc.id}')">Reject</button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      } else if (adminTab === 'withdrawals') {
+        const snapshot = await db.collection('withdrawals').orderBy('createdAt', 'desc').get();
+        if (snapshot.empty) {
+          container.innerHTML = '<p>No withdrawal requests.</p>';
+          return;
+        }
+        let html = '';
+        snapshot.docs.forEach((doc) => {
+          const wd = doc.data();
+          const statusColor = wd.status === 'approved' ? 'green' : wd.status === 'rejected' ? 'red' : 'orange';
+          html += `
+            <div class="admin-item">
+              <div>
+                <strong>${wd.userEmail}</strong><br>
+                <small>PKR ${wd.amount} | ${wd.accountType} | ${wd.accountNumber}</small><br>
+                <small>Holder: ${wd.accountHolderName} | CNIC: ${wd.cnic}</small><br>
+                <small>Status: <span style="color:${statusColor};">${wd.status}</span></small>
+              </div>
+              <div class="actions">
+                ${wd.status === 'pending' ? `
+                  <button class="approve-btn" onclick="approveWithdrawal('${doc.id}')">Approve</button>
+                  <button class="reject-btn" onclick="rejectWithdrawal('${doc.id}')">Reject</button>
                 ` : ''}
               </div>
             </div>
@@ -880,6 +1197,46 @@
       }
     }
 
+    async function approveWithdrawal(wdId) {
+      try {
+        await db.runTransaction(async (transaction) => {
+          const wdRef = db.collection('withdrawals').doc(wdId);
+          const wdDoc = await transaction.get(wdRef);
+          if (!wdDoc.exists) return;
+          const wd = wdDoc.data();
+          if (wd.status !== 'pending') return;
+
+          // Deduct from user balance
+          const userRef = db.collection('users').doc(wd.userId);
+          const userDoc = await transaction.get(userRef);
+          const currentBalance = userDoc.data().balance || 0;
+          if (currentBalance < wd.amount) {
+            throw new Error('Insufficient user balance');
+          }
+
+          transaction.update(userRef, { balance: currentBalance - wd.amount });
+          transaction.update(wdRef, {
+            status: 'approved',
+            approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+        alert('Withdrawal approved and balance deducted.');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function rejectWithdrawal(wdId) {
+      try {
+        await db.collection('withdrawals').doc(wdId).update({
+          status: 'rejected'
+        });
+        alert('Withdrawal rejected.');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
     async function viewUserInvestments(userId) {
       const snapshot = await db.collection('investments')
         .where('userId', '==', userId)
@@ -897,4 +1254,4 @@
     }
   </script>
 </body>
-</html>
+  </html>
