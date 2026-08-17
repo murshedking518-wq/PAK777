@@ -8,6 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     :root {
@@ -94,6 +95,8 @@
     .nav-buttons .logout-btn:hover { box-shadow: 0 8px 25px rgba(244,67,54,0.6); }
     .nav-buttons .admin-btn { background: var(--dark); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     .nav-buttons .admin-btn:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
+    .nav-buttons .profile-btn { background: #2196F3; box-shadow: 0 4px 15px rgba(33,150,243,0.4); }
+    .nav-buttons .profile-btn:hover { box-shadow: 0 8px 25px rgba(33,150,243,0.6); }
 
     /* Auth Styles */
     .auth-tabs { display: flex; gap: 10px; margin-bottom: 25px; }
@@ -361,6 +364,29 @@
     .badge.approved { background: #e8f5e9; color: #388E3C; }
     .badge.rejected { background: #ffebee; color: #c62828; }
 
+    /* Profile Modal */
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 15px;
+      display: block;
+      background: #f0f0f0;
+      border: 3px solid var(--primary);
+    }
+    .profile-field {
+      margin-bottom: 15px;
+    }
+    .profile-field label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .profile-field input[type="file"] {
+      padding: 8px;
+    }
+
     /* Modal */
     .modal-overlay {
       position: fixed;
@@ -469,6 +495,7 @@
     <div class="header">
       <div class="logo">Engro <span>Private Solution</span></div>
       <div class="nav-buttons">
+        <button class="profile-btn hidden" id="profileBtn" onclick="openProfileModal()">👤 Profile</button>
         <button class="admin-btn" id="adminLoginBtn" onclick="openAdminLoginModal()">Admin</button>
         <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Logout</button>
       </div>
@@ -571,6 +598,28 @@
     </div>
   </div>
 
+  <!-- Profile Modal -->
+  <div id="profileModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>My Profile</h3>
+      <img id="profileAvatar" class="profile-avatar" src="https://via.placeholder.com/100" alt="Profile Picture">
+      <div class="profile-field">
+        <label>Email (read-only)</label>
+        <input type="email" id="profileEmail" disabled>
+      </div>
+      <div class="profile-field">
+        <label>Full Name</label>
+        <input type="text" id="profileName" placeholder="Enter your name">
+      </div>
+      <div class="profile-field">
+        <label>Upload Profile Picture</label>
+        <input type="file" id="profileImageInput" accept="image/*">
+      </div>
+      <button onclick="saveProfile()">Save Profile</button>
+      <button style="margin-top:10px; background:#777;" onclick="closeProfileModal()">Cancel</button>
+    </div>
+  </div>
+
   <script>
     // Firebase Config (provided)
     const firebaseConfig = {
@@ -585,6 +634,7 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const storage = firebase.storage();
 
     const ADMIN_EMAIL = 'admin@engro.com';
     const PHONE_NUMBER = '0300-1234567'; // change if needed
@@ -629,6 +679,7 @@
       document.getElementById('adminDashboardSection').classList.add('hidden');
       document.getElementById('logoutBtn').classList.add('hidden');
       document.getElementById('adminLoginBtn').classList.remove('hidden');
+      document.getElementById('profileBtn').classList.add('hidden');
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
     }
@@ -639,6 +690,7 @@
       document.getElementById('adminDashboardSection').classList.add('hidden');
       document.getElementById('logoutBtn').classList.remove('hidden');
       document.getElementById('adminLoginBtn').classList.remove('hidden');
+      document.getElementById('profileBtn').classList.remove('hidden');
       renderPackages();
       initUserDashboard(user);
     }
@@ -649,6 +701,7 @@
       document.getElementById('adminDashboardSection').classList.remove('hidden');
       document.getElementById('logoutBtn').classList.remove('hidden');
       document.getElementById('adminLoginBtn').classList.add('hidden');
+      document.getElementById('profileBtn').classList.add('hidden');
       initAdminDashboard();
     }
 
@@ -680,6 +733,8 @@
         await db.collection('users').doc(user.uid).set({
           email: user.email,
           balance: 0,
+          name: '',
+          photoURL: '',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         alert('Signup successful!');
@@ -704,6 +759,59 @@
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
       auth.signOut();
+    }
+
+    // Profile Functions
+    function openProfileModal() {
+      if (!currentUser) return;
+      const modal = document.getElementById('profileModal');
+      modal.classList.remove('hidden');
+      // Load current profile data
+      db.collection('users').doc(currentUser.uid).get().then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById('profileEmail').value = data.email || currentUser.email;
+          document.getElementById('profileName').value = data.name || '';
+          const avatar = document.getElementById('profileAvatar');
+          if (data.photoURL) {
+            avatar.src = data.photoURL;
+          } else {
+            avatar.src = 'https://via.placeholder.com/100';
+          }
+        }
+      });
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+    async function saveProfile() {
+      if (!currentUser) return;
+      const name = document.getElementById('profileName').value.trim();
+      const fileInput = document.getElementById('profileImageInput');
+      const file = fileInput.files[0];
+
+      try {
+        let photoURL = null;
+        // If a file is selected, upload to Storage
+        if (file) {
+          const storageRef = storage.ref(`profileImages/${currentUser.uid}`);
+          await storageRef.put(file);
+          photoURL = await storageRef.getDownloadURL();
+        }
+
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const updateData = { name: name };
+        if (photoURL) {
+          updateData.photoURL = photoURL;
+        }
+        await userRef.update(updateData);
+        alert('Profile saved successfully!');
+        closeProfileModal();
+      } catch (error) {
+        alert('Error saving profile: ' + error.message);
+      }
     }
 
     function renderPackages() {
@@ -892,7 +1000,6 @@
       historyContent.innerHTML = 'Loading...';
       const userId = user.uid;
 
-      // We'll set up snapshots for active plans, deposits, withdrawals and update based on tab
       let activePlansUnsub = db.collection('investments')
         .where('userId', '==', userId)
         .where('active', '==', true)
@@ -1040,7 +1147,6 @@
       }
 
       try {
-        // Use transaction to check balance, deduct amount, and create withdrawal request
         await db.runTransaction(async (transaction) => {
           const userRef = db.collection('users').doc(currentUser.uid);
           const userDoc = await transaction.get(userRef);
@@ -1048,9 +1154,7 @@
           if (amount > balance) {
             throw new Error('Insufficient balance');
           }
-          // Deduct balance immediately
           transaction.update(userRef, { balance: firebase.firestore.FieldValue.increment(-amount) });
-          // Create withdrawal request
           transaction.set(db.collection('withdrawals').doc(), {
             userId: currentUser.uid,
             userEmail: currentUser.email,
@@ -1347,7 +1451,6 @@
           const wd = wdDoc.data();
           if (wd.status !== 'pending') return;
 
-          // Refund amount
           const userRef = db.collection('users').doc(wd.userId);
           transaction.update(userRef, { balance: firebase.firestore.FieldValue.increment(wd.amount) });
           transaction.update(wdRef, { status: 'rejected', rejectedAt: firebase.firestore.FieldValue.serverTimestamp() });
@@ -1375,4 +1478,4 @@
     }
   </script>
 </body>
-            </html>
+  </html>
