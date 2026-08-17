@@ -175,6 +175,80 @@
     }
     .withdraw-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,165,0,0.6); }
 
+    /* Referral Box */
+    .referral-box {
+      background: #E3F2FD;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 10px 30px rgba(33,150,243,0.3);
+      border-left: 5px solid #2196F3;
+      transition: 0.3s;
+    }
+    .referral-box h3 {
+      color: #0D47A1;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+    .referral-link-container {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    .referral-link-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 12px 15px;
+      border: 2px solid #90CAF9;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: white;
+    }
+    .copy-btn {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.3s;
+    }
+    .copy-btn:hover { background: #1976D2; transform: translateY(-2px); }
+    .referral-list {
+      margin-top: 15px;
+      background: white;
+      border-radius: 15px;
+      padding: 15px;
+    }
+    .referral-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .referral-item:last-child { border-bottom: none; }
+    .bonus-badge {
+      background: #4CAF50;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .bonus-pending {
+      background: #FFF3E0;
+      color: #E65100;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
     /* 3D Active Investment Box */
     .active-investment-3d {
       background: linear-gradient(145deg, #2e7d32, #1b5e20);
@@ -478,6 +552,7 @@
       <div class="auth-form" id="signupForm">
         <input type="email" id="signupEmail" placeholder="Email address">
         <input type="password" id="signupPassword" placeholder="Password">
+        <input type="text" id="inviteCodeInput" placeholder="Invitation Code (Optional)">
         <button onclick="signupUser()">Create Account</button>
       </div>
       <div class="auth-form hidden" id="loginForm">
@@ -493,6 +568,18 @@
         <div>Available Balance</div>
         <div class="balance-amount">PKR <span id="balanceDisplay">0</span></div>
         <button class="withdraw-btn" onclick="openWithdrawalModal()">💰 Withdraw Funds</button>
+      </div>
+
+      <!-- Referral Box -->
+      <div class="referral-box" id="referralBox">
+        <h3>🔗 Referral Program</h3>
+        <p>Share your referral link and earn <strong>PKR 100</strong> for each friend who activates a package!</p>
+        <div class="referral-link-container">
+          <input type="text" class="referral-link-input" id="referralLinkInput" readonly>
+          <button class="copy-btn" onclick="copyReferralLink()">Copy Link</button>
+        </div>
+        <h4>Your Referrals</h4>
+        <div class="referral-list" id="referralList">Loading...</div>
       </div>
 
       <!-- Active Investment 3D Box -->
@@ -522,6 +609,7 @@
         <button class="active" onclick="switchAdminTab('pending')">Pending Deposits</button>
         <button onclick="switchAdminTab('all')">All Deposits</button>
         <button onclick="switchAdminTab('withdrawals')">Withdrawals</button>
+        <button onclick="switchAdminTab('referrals')">Referrals</button>
         <button onclick="switchAdminTab('users')">Users</button>
         <button onclick="switchAdminTab('investments')">Investments</button>
       </div>
@@ -599,6 +687,7 @@
 
     const ADMIN_EMAIL = 'admin@engro.com';
     const PHONE_NUMBER = '03082836422'; // JazzCash number
+    const REFERRAL_BONUS = 100; // PKR
 
     let currentUser = null;
     let isAdmin = false;
@@ -608,6 +697,7 @@
     let activeInvestmentListener = null;
     let historyTab = 'activePlans';
     let historyUnsubscribe = null;
+    let referralUnsubscribe = null;
 
     const packages = [
       { id: 'starter', name: 'Starter', amount: 300, dailyReturn: 75, durationDays: 30, totalReturn: 2250, color: '#4CAF50' },
@@ -615,6 +705,30 @@
       { id: 'gold', name: 'Gold', amount: 1400, dailyReturn: 440, durationDays: 30, totalReturn: 13200, color: '#FFD700' },
       { id: 'diamond', name: 'Diamond', amount: 2500, dailyReturn: 880, durationDays: 30, totalReturn: 26400, color: '#B9F2FF' }
     ];
+
+    // Generate random referral code
+    function generateReferralCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    // Read URL parameter for referral
+    function getReferralFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('ref') || '';
+    }
+
+    // Set invite code input on load
+    document.addEventListener('DOMContentLoaded', () => {
+      const refCode = getReferralFromURL();
+      if (refCode) {
+        document.getElementById('inviteCodeInput').value = refCode;
+      }
+    });
 
     // Auth State Listener
     auth.onAuthStateChanged(async (user) => {
@@ -643,6 +757,7 @@
       document.getElementById('profileBtn').classList.add('hidden');
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
+      if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
     }
 
     function showUserDashboard(user) {
@@ -687,10 +802,25 @@
     async function signupUser() {
       const email = document.getElementById('signupEmail').value.trim();
       const password = document.getElementById('signupPassword').value;
+      const inviteCode = document.getElementById('inviteCodeInput').value.trim();
       if (!email || !password) return alert('Please fill all fields');
       try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
+
+        const referralCode = generateReferralCode();
+
+        let referredBy = null;
+        if (inviteCode) {
+          const referrerSnapshot = await db.collection('users')
+            .where('referralCode', '==', inviteCode)
+            .limit(1)
+            .get();
+          if (!referrerSnapshot.empty) {
+            referredBy = referrerSnapshot.docs[0].id;
+          }
+        }
+
         await db.collection('users').doc(user.uid).set({
           email: user.email,
           balance: 0,
@@ -700,8 +830,22 @@
           accountType: '',
           accountNumber: '',
           cnic: '',
+          referralCode: referralCode,
+          referredBy: referredBy,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+
+        if (referredBy) {
+          await db.collection('referrals').add({
+            referrerId: referredBy,
+            referredUserId: user.uid,
+            referredEmail: user.email,
+            status: 'pending',
+            bonusGiven: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+
         alert('Signup successful!');
       } catch (error) {
         alert(error.message);
@@ -723,6 +867,7 @@
       if (adminUnsubscribe) { adminUnsubscribe(); adminUnsubscribe = null; }
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
+      if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
       auth.signOut();
     }
 
@@ -796,6 +941,10 @@
         if (doc.exists) {
           const balance = doc.data().balance || 0;
           document.getElementById('balanceDisplay').innerText = Math.floor(balance);
+          const referralCode = doc.data().referralCode;
+          if (referralCode) {
+            document.getElementById('referralLinkInput').value = window.location.origin + window.location.pathname + '?ref=' + referralCode;
+          }
         }
       });
 
@@ -803,6 +952,7 @@
       loadInvestments(user);
       setupActiveInvestment(user);
       setupHistory(user);
+      setupReferralSection(user);
     }
 
     async function processInvestments(user) {
@@ -849,15 +999,19 @@
       activeInvestmentListener = db.collection('investments')
         .where('userId', '==', user.uid)
         .where('active', '==', true)
-        .orderBy('startDate', 'desc')
-        .limit(1)
-        .onSnapshot(async (snapshot) => {
+        .onSnapshot((snapshot) => {
           const box = document.getElementById('activeInvestmentBox');
           if (snapshot.empty) {
             box.classList.add('hidden');
             return;
           }
-          const doc = snapshot.docs[0];
+          let docs = snapshot.docs;
+          docs.sort((a, b) => {
+            const aDate = a.data().startDate ? a.data().startDate.toMillis() : 0;
+            const bDate = b.data().startDate ? b.data().startDate.toMillis() : 0;
+            return bDate - aDate;
+          });
+          const doc = docs[0];
           const inv = doc.data();
           box.classList.remove('hidden');
 
@@ -922,15 +1076,21 @@
     function loadInvestments(user) {
       db.collection('investments')
         .where('userId', '==', user.uid)
-        .orderBy('startDate', 'desc')
         .onSnapshot((snapshot) => {
           const list = document.getElementById('investmentsList');
           if (snapshot.empty) {
             list.innerHTML = '<p>No investments yet. Choose a package above.</p>';
             return;
           }
+          let docs = snapshot.docs;
+          docs.sort((a, b) => {
+            const aDate = a.data().startDate ? a.data().startDate.toMillis() : 0;
+            const bDate = b.data().startDate ? b.data().startDate.toMillis() : 0;
+            return bDate - aDate;
+          });
+
           let html = '';
-          snapshot.docs.forEach((doc) => {
+          docs.forEach((doc) => {
             const inv = doc.data();
             const startMillis = inv.startDate ? inv.startDate.toMillis() : Date.now();
             const now = Date.now();
@@ -956,6 +1116,43 @@
         });
     }
 
+    // Referral Section
+    function setupReferralSection(user) {
+      if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
+      referralUnsubscribe = db.collection('referrals')
+        .where('referrerId', '==', user.uid)
+        .onSnapshot((snapshot) => {
+          const list = document.getElementById('referralList');
+          if (snapshot.empty) {
+            list.innerHTML = '<p>No referrals yet. Share your link to earn bonuses!</p>';
+            return;
+          }
+          let html = '';
+          snapshot.docs.forEach((doc) => {
+            const ref = doc.data();
+            const bonusStatus = ref.bonusGiven ? 'bonus-badge' : 'bonus-pending';
+            const bonusText = ref.bonusGiven ? 'Bonus Given' : 'Pending Activation';
+            html += `
+              <div class="referral-item">
+                <div>
+                  <strong>${ref.referredEmail}</strong><br>
+                  <small>Status: ${ref.status}</small>
+                </div>
+                <span class="${bonusStatus}">${bonusText}</span>
+              </div>
+            `;
+          });
+          list.innerHTML = html;
+        });
+    }
+
+    function copyReferralLink() {
+      const input = document.getElementById('referralLinkInput');
+      input.select();
+      document.execCommand('copy');
+      alert('Referral link copied to clipboard!');
+    }
+
     // History Section
     function setupHistory(user) {
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
@@ -966,21 +1163,18 @@
       let activePlansUnsub = db.collection('investments')
         .where('userId', '==', userId)
         .where('active', '==', true)
-        .orderBy('startDate', 'desc')
         .onSnapshot(() => {
           if (historyTab === 'activePlans') renderHistory(userId);
         });
 
       let depositsUnsub = db.collection('deposits')
         .where('userId', '==', userId)
-        .orderBy('createdAt', 'desc')
         .onSnapshot(() => {
           if (historyTab === 'deposits') renderHistory(userId);
         });
 
       let withdrawalsUnsub = db.collection('withdrawals')
         .where('userId', '==', userId)
-        .orderBy('createdAt', 'desc')
         .onSnapshot(() => {
           if (historyTab === 'withdrawals') renderHistory(userId);
         });
@@ -1012,25 +1206,33 @@
         const snapshot = await db.collection('investments')
           .where('userId', '==', userId)
           .where('active', '==', true)
-          .orderBy('startDate', 'desc')
           .get();
         if (snapshot.empty) {
           container.innerHTML = '<p>No active plans.</p>';
           return;
         }
+        let docs = snapshot.docs;
+        docs.sort((a, b) => {
+          const aDate = a.data().startDate ? a.data().startDate.toMillis() : 0;
+          const bDate = b.data().startDate ? b.data().startDate.toMillis() : 0;
+          return bDate - aDate;
+        });
+
         let html = '';
-        snapshot.docs.forEach(doc => {
+        docs.forEach(doc => {
           const inv = doc.data();
           const startMillis = inv.startDate ? inv.startDate.toMillis() : Date.now();
           const now = Date.now();
           let days = Math.floor((now - startMillis) / (1000 * 60 * 60 * 24));
           if (days < 0) days = 0;
           if (days > inv.durationDays) days = inv.durationDays;
+          const startedAt = inv.startDate ? inv.startDate.toDate().toLocaleString() : 'N/A';
           html += `
             <div class="history-item">
               <div>
                 <strong>${inv.packageName}</strong><br>
-                <small>PKR ${inv.amount} | Daily: PKR ${inv.dailyReturn} | Elapsed: ${days}/${inv.durationDays} days</small>
+                <small>PKR ${inv.amount} | Daily: PKR ${inv.dailyReturn} | Elapsed: ${days}/${inv.durationDays} days</small><br>
+                <small>Started: ${startedAt}</small>
               </div>
               <span class="badge active">ACTIVE</span>
             </div>
@@ -1040,21 +1242,29 @@
       } else if (historyTab === 'deposits') {
         const snapshot = await db.collection('deposits')
           .where('userId', '==', userId)
-          .orderBy('createdAt', 'desc')
           .get();
         if (snapshot.empty) {
           container.innerHTML = '<p>No deposits.</p>';
           return;
         }
+        let docs = snapshot.docs;
+        docs.sort((a, b) => {
+          const aDate = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+          const bDate = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+          return bDate - aDate;
+        });
+
         let html = '';
-        snapshot.docs.forEach(doc => {
+        docs.forEach(doc => {
           const dep = doc.data();
           const statusClass = dep.status === 'approved' ? 'approved' : dep.status === 'rejected' ? 'rejected' : 'pending';
+          const createdTime = dep.createdAt ? dep.createdAt.toDate().toLocaleString() : 'N/A';
           html += `
             <div class="history-item">
               <div>
                 <strong>${dep.packageName}</strong><br>
-                <small>PKR ${dep.amount} | TID: ${dep.tid}</small>
+                <small>PKR ${dep.amount} | TID: ${dep.tid}</small><br>
+                <small>Requested: ${createdTime}</small>
               </div>
               <span class="badge ${statusClass}">${dep.status.toUpperCase()}</span>
             </div>
@@ -1064,21 +1274,29 @@
       } else if (historyTab === 'withdrawals') {
         const snapshot = await db.collection('withdrawals')
           .where('userId', '==', userId)
-          .orderBy('createdAt', 'desc')
           .get();
         if (snapshot.empty) {
           container.innerHTML = '<p>No withdrawals.</p>';
           return;
         }
+        let docs = snapshot.docs;
+        docs.sort((a, b) => {
+          const aDate = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+          const bDate = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+          return bDate - aDate;
+        });
+
         let html = '';
-        snapshot.docs.forEach(doc => {
+        docs.forEach(doc => {
           const wd = doc.data();
           const statusClass = wd.status === 'approved' ? 'approved' : wd.status === 'rejected' ? 'rejected' : 'pending';
+          const createdTime = wd.createdAt ? wd.createdAt.toDate().toLocaleString() : 'N/A';
           html += `
             <div class="history-item">
               <div>
                 <strong>PKR ${wd.amount}</strong><br>
-                <small>${wd.accountType} - ${wd.accountNumber} | ${wd.accountHolderName}</small>
+                <small>${wd.accountType} - ${wd.accountNumber} | ${wd.accountHolderName}</small><br>
+                <small>Requested: ${createdTime}</small>
               </div>
               <span class="badge ${statusClass}">${wd.status.toUpperCase()}</span>
             </div>
@@ -1101,7 +1319,6 @@
         const hasAccount = data.accountHolderName && data.accountType && data.accountNumber && data.cnic;
 
         if (hasAccount) {
-          // Show amount entry + saved details
           content.innerHTML = `
             <div class="withdrawal-details-summary">
               <p><strong>Account Holder:</strong> ${data.accountHolderName}</p>
@@ -1115,7 +1332,6 @@
             <button style="margin-top:10px; background:#777;" onclick="closeWithdrawalModal()">Cancel</button>
           `;
         } else {
-          // Show account details form
           content.innerHTML = `
             <p>Please save your account details first.</p>
             <input type="text" id="wdHolderName" placeholder="Account Holder Name">
@@ -1188,7 +1404,6 @@
       }
 
       try {
-        // Fetch user data for account details
         const userDoc = await db.collection('users').doc(currentUser.uid).get();
         const data = userDoc.data();
         const accountHolderName = data.accountHolderName;
@@ -1201,7 +1416,6 @@
           return;
         }
 
-        // Transaction to check balance and deduct
         await db.runTransaction(async (transaction) => {
           const userRef = db.collection('users').doc(currentUser.uid);
           const currentUserDoc = await transaction.get(userRef);
@@ -1281,7 +1495,7 @@
       }
     }
 
-    // Admin Functions (same as before)
+    // Admin Functions
     async function adminLogin() {
       const email = document.getElementById('adminEmail').value.trim();
       const password = document.getElementById('adminPassword').value;
@@ -1308,7 +1522,7 @@
 
     function initAdminDashboard() {
       if (adminUnsubscribe) { adminUnsubscribe(); }
-      adminUnsubscribe = db.collection('deposits').orderBy('createdAt', 'desc').onSnapshot(() => {
+      adminUnsubscribe = db.collection('deposits').onSnapshot(() => {
         renderAdminContent();
       });
       db.collection('users').onSnapshot(() => {
@@ -1320,12 +1534,15 @@
       db.collection('withdrawals').onSnapshot(() => {
         if (adminTab === 'withdrawals') renderAdminContent();
       });
+      db.collection('referrals').onSnapshot(() => {
+        if (adminTab === 'referrals') renderAdminContent();
+      });
     }
 
     function switchAdminTab(tab) {
       adminTab = tab;
       document.querySelectorAll('.admin-tabs button').forEach((btn, idx) => {
-        const tabs = ['pending', 'all', 'withdrawals', 'users', 'investments'];
+        const tabs = ['pending', 'all', 'withdrawals', 'referrals', 'users', 'investments'];
         if (tabs[idx] === tab) btn.classList.add('active');
         else btn.classList.remove('active');
       });
@@ -1337,8 +1554,14 @@
       container.innerHTML = 'Loading...';
 
       if (adminTab === 'pending' || adminTab === 'all') {
-        const snapshot = await db.collection('deposits').orderBy('createdAt', 'desc').get();
-        const deposits = snapshot.docs.filter(doc => adminTab === 'all' || doc.data().status === 'pending');
+        const snapshot = await db.collection('deposits').get();
+        let deposits = snapshot.docs;
+        deposits.sort((a, b) => {
+          const aDate = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+          const bDate = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+          return bDate - aDate;
+        });
+        if (adminTab === 'pending') deposits = deposits.filter(doc => doc.data().status === 'pending');
         if (deposits.length === 0) {
           container.innerHTML = '<p>No deposits found.</p>';
           return;
@@ -1365,13 +1588,19 @@
         });
         container.innerHTML = html;
       } else if (adminTab === 'withdrawals') {
-        const snapshot = await db.collection('withdrawals').orderBy('createdAt', 'desc').get();
-        if (snapshot.empty) {
+        const snapshot = await db.collection('withdrawals').get();
+        let withdrawals = snapshot.docs;
+        withdrawals.sort((a, b) => {
+          const aDate = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+          const bDate = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+          return bDate - aDate;
+        });
+        if (withdrawals.length === 0) {
           container.innerHTML = '<p>No withdrawal requests.</p>';
           return;
         }
         let html = '';
-        snapshot.docs.forEach((doc) => {
+        withdrawals.forEach((doc) => {
           const wd = doc.data();
           const statusColor = wd.status === 'approved' ? 'green' : wd.status === 'rejected' ? 'red' : 'orange';
           html += `
@@ -1387,6 +1616,36 @@
                   <button class="approve-btn" onclick="approveWithdrawal('${doc.id}')">Approve</button>
                   <button class="reject-btn" onclick="rejectWithdrawal('${doc.id}')">Reject</button>
                 ` : ''}
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      } else if (adminTab === 'referrals') {
+        const snapshot = await db.collection('referrals').get();
+        let referrals = snapshot.docs;
+        referrals.sort((a, b) => {
+          const aDate = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+          const bDate = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+          return bDate - aDate;
+        });
+        if (referrals.length === 0) {
+          container.innerHTML = '<p>No referrals yet.</p>';
+          return;
+        }
+        let html = '';
+        referrals.forEach((doc) => {
+          const ref = doc.data();
+          const statusColor = ref.bonusGiven ? 'green' : 'orange';
+          html += `
+            <div class="admin-item">
+              <div>
+                <strong>${ref.referredEmail}</strong><br>
+                <small>Referrer: ${ref.referrerId}</small><br>
+                <small>Status: ${ref.status} | Bonus: ${ref.bonusGiven ? 'Given' : 'Pending'}</small>
+              </div>
+              <div class="actions">
+                ${!ref.bonusGiven ? `<button class="approve-btn" onclick="giveReferralBonus('${doc.id}')">Give Bonus</button>` : ''}
               </div>
             </div>
           `;
@@ -1415,13 +1674,19 @@
         });
         container.innerHTML = html;
       } else if (adminTab === 'investments') {
-        const snapshot = await db.collection('investments').orderBy('startDate', 'desc').get();
-        if (snapshot.empty) {
+        const snapshot = await db.collection('investments').get();
+        let investments = snapshot.docs;
+        investments.sort((a, b) => {
+          const aDate = a.data().startDate ? a.data().startDate.toMillis() : 0;
+          const bDate = b.data().startDate ? b.data().startDate.toMillis() : 0;
+          return bDate - aDate;
+        });
+        if (investments.length === 0) {
           container.innerHTML = '<p>No investments found.</p>';
           return;
         }
         let html = '';
-        snapshot.docs.forEach((doc) => {
+        investments.forEach((doc) => {
           const inv = doc.data();
           const status = inv.active ? 'Active' : 'Completed';
           html += `
@@ -1464,8 +1729,26 @@
             paidAmount: 0,
             active: true
           });
+
+          const userRef = db.collection('users').doc(dep.userId);
+          const userDoc = await transaction.get(userRef);
+          if (userDoc.exists && userDoc.data().referredBy) {
+            const referrerId = userDoc.data().referredBy;
+            const referralsSnapshot = await db.collection('referrals')
+              .where('referredUserId', '==', dep.userId)
+              .limit(1)
+              .get();
+            referralsSnapshot.docs.forEach((refDoc) => {
+              const refData = refDoc.data();
+              if (!refData.bonusGiven) {
+                const referrerRef = db.collection('users').doc(referrerId);
+                transaction.update(referrerRef, { balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS) });
+                transaction.update(refDoc.ref, { bonusGiven: true, status: 'completed', bonusAmount: REFERRAL_BONUS });
+              }
+            });
+          }
         });
-        alert('Deposit approved and investment started!');
+        alert('Deposit approved, investment started, and referral bonus processed if applicable.');
       } catch (error) {
         alert(error.message);
       }
@@ -1482,7 +1765,6 @@
       }
     }
 
-    // Withdrawal approval: do NOT deduct balance again (already deducted on request)
     async function approveWithdrawal(wdId) {
       try {
         await db.collection('withdrawals').doc(wdId).update({
@@ -1495,7 +1777,6 @@
       }
     }
 
-    // Withdrawal rejection: refund amount to user balance
     async function rejectWithdrawal(wdId) {
       try {
         await db.runTransaction(async (transaction) => {
@@ -1510,6 +1791,25 @@
           transaction.update(wdRef, { status: 'rejected', rejectedAt: firebase.firestore.FieldValue.serverTimestamp() });
         });
         alert('Withdrawal rejected. Amount refunded to user.');
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function giveReferralBonus(referralId) {
+      try {
+        await db.runTransaction(async (transaction) => {
+          const refRef = db.collection('referrals').doc(referralId);
+          const refDoc = await transaction.get(refRef);
+          if (!refDoc.exists) return;
+          const refData = refDoc.data();
+          if (refData.bonusGiven) return;
+
+          const referrerRef = db.collection('users').doc(refData.referrerId);
+          transaction.update(referrerRef, { balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS) });
+          transaction.update(refRef, { bonusGiven: true, status: 'completed', bonusAmount: REFERRAL_BONUS });
+        });
+        alert('Referral bonus given manually.');
       } catch (error) {
         alert(error.message);
       }
@@ -1532,4 +1832,4 @@
     }
   </script>
 </body>
-        </html>
+  </html>
