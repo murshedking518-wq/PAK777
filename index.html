@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Engro Private Solution - Investment Game</title>
+  <title>Jetour Private Solution - Investment Game</title>
   <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
@@ -68,6 +68,11 @@
       gap: 15px;
       margin-bottom: 30px;
     }
+    .logo-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
     .logo {
       font-size: 1.8rem;
       font-weight: 800;
@@ -75,6 +80,20 @@
       text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
     .logo span { color: var(--primary); }
+    .tagline {
+      font-size: 0.9rem;
+      color: var(--dark);
+      margin-top: 5px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .animated-text {
+      animation: glow 2s ease-in-out infinite;
+    }
+    @keyframes glow {
+      0%, 100% { opacity: 0.7; text-shadow: 0 0 5px rgba(76,175,80,0.3); }
+      50% { opacity: 1; text-shadow: 0 0 20px rgba(76,175,80,0.8), 0 0 30px rgba(76,175,80,0.5); }
+    }
     .nav-buttons button {
       background: var(--primary);
       color: white;
@@ -535,7 +554,10 @@
   <div class="container" id="mainContainer">
     <!-- Header -->
     <div class="header">
-      <div class="logo">Engro <span>Private Solution</span></div>
+      <div class="logo-section">
+        <div class="logo">Jetour <span>Private Solution</span></div>
+        <div class="tagline animated-text">Pakistan 🇵🇰 No 1 EV Car Manufacturer Jetour Pakistan</div>
+      </div>
       <div class="nav-buttons">
         <button class="profile-btn hidden" id="profileBtn" onclick="openProfileModal()">👤 Profile</button>
         <button class="admin-btn" id="adminLoginBtn" onclick="openAdminLoginModal()">Admin</button>
@@ -1818,4 +1840,4 @@
     }
   </script>
 </body>
-</html>
+        </html>
