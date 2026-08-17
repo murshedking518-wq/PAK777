@@ -706,7 +706,6 @@
       { id: 'diamond', name: 'Diamond', amount: 2500, dailyReturn: 880, durationDays: 30, totalReturn: 26400, color: '#B9F2FF' }
     ];
 
-    // Generate random referral code
     function generateReferralCode() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let code = '';
@@ -716,13 +715,11 @@
       return code;
     }
 
-    // Read URL parameter for referral
     function getReferralFromURL() {
       const params = new URLSearchParams(window.location.search);
       return params.get('ref') || '';
     }
 
-    // Set invite code input on load
     document.addEventListener('DOMContentLoaded', () => {
       const refCode = getReferralFromURL();
       if (refCode) {
@@ -730,7 +727,6 @@
       }
     });
 
-    // Auth State Listener
     auth.onAuthStateChanged(async (user) => {
       currentUser = user;
       if (user) {
@@ -807,9 +803,7 @@
       try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
-
         const referralCode = generateReferralCode();
-
         let referredBy = null;
         if (inviteCode) {
           const referrerSnapshot = await db.collection('users')
@@ -820,7 +814,6 @@
             referredBy = referrerSnapshot.docs[0].id;
           }
         }
-
         await db.collection('users').doc(user.uid).set({
           email: user.email,
           balance: 0,
@@ -834,7 +827,6 @@
           referredBy: referredBy,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-
         if (referredBy) {
           await db.collection('referrals').add({
             referrerId: referredBy,
@@ -845,7 +837,6 @@
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         }
-
         alert('Signup successful!');
       } catch (error) {
         alert(error.message);
@@ -871,7 +862,6 @@
       auth.signOut();
     }
 
-    // Profile Functions
     function openProfileModal() {
       if (!currentUser) return;
       const modal = document.getElementById('profileModal');
@@ -900,7 +890,6 @@
       const name = document.getElementById('profileName').value.trim();
       const fileInput = document.getElementById('profileImageInput');
       const file = fileInput.files[0];
-
       try {
         let photoURL = null;
         if (file) {
@@ -908,7 +897,6 @@
           await storageRef.put(file);
           photoURL = await storageRef.getDownloadURL();
         }
-
         const userRef = db.collection('users').doc(currentUser.uid);
         const updateData = { name: name };
         if (photoURL) {
@@ -947,7 +935,6 @@
           }
         }
       });
-
       await processInvestments(user);
       loadInvestments(user);
       setupActiveInvestment(user);
@@ -961,12 +948,9 @@
         .where('userId', '==', user.uid)
         .where('active', '==', true)
         .get();
-
       if (invSnapshot.empty) return;
-
       const batch = db.batch();
       let totalToAdd = 0;
-
       invSnapshot.docs.forEach((doc) => {
         const inv = doc.data();
         if (!inv.startDate) return;
@@ -975,10 +959,8 @@
         let days = Math.floor((now - startMillis) / (1000 * 60 * 60 * 24));
         if (days < 0) days = 0;
         if (days > inv.durationDays) days = inv.durationDays;
-
         const earned = days * inv.dailyReturn;
         const oldPaid = inv.paidAmount || 0;
-
         if (earned > oldPaid) {
           totalToAdd += earned - oldPaid;
           batch.update(doc.ref, { paidAmount: earned });
@@ -987,7 +969,6 @@
           batch.update(doc.ref, { active: false });
         }
       });
-
       if (totalToAdd > 0) {
         batch.update(userRef, { balance: firebase.firestore.FieldValue.increment(totalToAdd) });
       }
@@ -1014,7 +995,6 @@
           const doc = docs[0];
           const inv = doc.data();
           box.classList.remove('hidden');
-
           const detailsHtml = `
             <div class="detail-item">
               <div class="label">Package</div>
@@ -1052,9 +1032,7 @@
       const dailyReturn = inv.dailyReturn || 0;
       const paidDays = dailyReturn > 0 ? Math.floor(paidAmount / dailyReturn) : 0;
       const nextPayoutMillis = startMillis + (paidDays + 1) * 24 * 60 * 60 * 1000;
-
       if (window.countdownInterval) clearInterval(window.countdownInterval);
-
       function updateTimer() {
         const now = Date.now();
         let diff = nextPayoutMillis - now;
@@ -1068,7 +1046,6 @@
           processInvestments(currentUser).then(() => {});
         }
       }
-
       updateTimer();
       window.countdownInterval = setInterval(updateTimer, 1000);
     }
@@ -1088,7 +1065,6 @@
             const bDate = b.data().startDate ? b.data().startDate.toMillis() : 0;
             return bDate - aDate;
           });
-
           let html = '';
           docs.forEach((doc) => {
             const inv = doc.data();
@@ -1116,7 +1092,6 @@
         });
     }
 
-    // Referral Section
     function setupReferralSection(user) {
       if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
       referralUnsubscribe = db.collection('referrals')
@@ -1153,32 +1128,27 @@
       alert('Referral link copied to clipboard!');
     }
 
-    // History Section
     function setupHistory(user) {
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
       const historyContent = document.getElementById('historyContent');
       historyContent.innerHTML = 'Loading...';
       const userId = user.uid;
-
       let activePlansUnsub = db.collection('investments')
         .where('userId', '==', userId)
         .where('active', '==', true)
         .onSnapshot(() => {
           if (historyTab === 'activePlans') renderHistory(userId);
         });
-
       let depositsUnsub = db.collection('deposits')
         .where('userId', '==', userId)
         .onSnapshot(() => {
           if (historyTab === 'deposits') renderHistory(userId);
         });
-
       let withdrawalsUnsub = db.collection('withdrawals')
         .where('userId', '==', userId)
         .onSnapshot(() => {
           if (historyTab === 'withdrawals') renderHistory(userId);
         });
-
       historyUnsubscribe = () => {
         if (activePlansUnsub) activePlansUnsub();
         if (depositsUnsub) depositsUnsub();
@@ -1201,7 +1171,6 @@
       const container = document.getElementById('historyContent');
       if (!container) return;
       container.innerHTML = 'Loading...';
-
       if (historyTab === 'activePlans') {
         const snapshot = await db.collection('investments')
           .where('userId', '==', userId)
@@ -1217,7 +1186,6 @@
           const bDate = b.data().startDate ? b.data().startDate.toMillis() : 0;
           return bDate - aDate;
         });
-
         let html = '';
         docs.forEach(doc => {
           const inv = doc.data();
@@ -1253,7 +1221,6 @@
           const bDate = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
           return bDate - aDate;
         });
-
         let html = '';
         docs.forEach(doc => {
           const dep = doc.data();
@@ -1285,7 +1252,6 @@
           const bDate = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
           return bDate - aDate;
         });
-
         let html = '';
         docs.forEach(doc => {
           const wd = doc.data();
@@ -1306,18 +1272,15 @@
       }
     }
 
-    // Withdrawal Modal Functions
     function openWithdrawalModal() {
       if (!currentUser) return;
       const modal = document.getElementById('withdrawalModal');
       const content = document.getElementById('withdrawalContent');
       modal.classList.remove('hidden');
-
       db.collection('users').doc(currentUser.uid).get().then((doc) => {
         if (!doc.exists) return;
         const data = doc.data();
         const hasAccount = data.accountHolderName && data.accountType && data.accountNumber && data.cnic;
-
         if (hasAccount) {
           content.innerHTML = `
             <div class="withdrawal-details-summary">
@@ -1376,12 +1339,10 @@
       const accountType = document.getElementById('wdAccountType').value;
       const accountNumber = document.getElementById('wdAccountNumber').value.trim();
       const cnic = document.getElementById('wdCnic').value.trim();
-
       if (!holderName || !accountNumber || !cnic) {
         alert('Please fill all fields');
         return;
       }
-
       try {
         await db.collection('users').doc(currentUser.uid).update({
           accountHolderName: holderName,
@@ -1402,7 +1363,6 @@
         alert('Please enter valid amount');
         return;
       }
-
       try {
         const userDoc = await db.collection('users').doc(currentUser.uid).get();
         const data = userDoc.data();
@@ -1410,12 +1370,10 @@
         const accountType = data.accountType;
         const accountNumber = data.accountNumber;
         const cnic = data.cnic;
-
         if (!accountHolderName || !accountType || !accountNumber || !cnic) {
           alert('Account details missing. Please save them first.');
           return;
         }
-
         await db.runTransaction(async (transaction) => {
           const userRef = db.collection('users').doc(currentUser.uid);
           const currentUserDoc = await transaction.get(userRef);
@@ -1443,7 +1401,6 @@
       }
     }
 
-    // Deposit Modal Functions
     function openDepositModal(packageId) {
       const pkg = packages.find(p => p.id === packageId);
       if (!pkg) return;
@@ -1495,7 +1452,6 @@
       }
     }
 
-    // Admin Functions
     async function adminLogin() {
       const email = document.getElementById('adminEmail').value.trim();
       const password = document.getElementById('adminPassword').value;
@@ -1705,13 +1661,47 @@
 
     async function approveDeposit(depId) {
       try {
-        await db.runTransaction(async (transaction) => {
-          const depRef = db.collection('deposits').doc(depId);
-          const depDoc = await transaction.get(depRef);
-          if (!depDoc.exists) return;
-          const dep = depDoc.data();
-          if (dep.status !== 'pending') return;
+        // Pehle saari reads (transaction ke bahar)
+        const depRef = db.collection('deposits').doc(depId);
+        const depSnapshot = await depRef.get();
+        if (!depSnapshot.exists) {
+          alert('Deposit not found');
+          return;
+        }
+        const dep = depSnapshot.data();
+        if (dep.status !== 'pending') {
+          alert('Deposit already processed');
+          return;
+        }
 
+        // User doc read
+        const userRef = db.collection('users').doc(dep.userId);
+        const userSnapshot = await userRef.get();
+        const referredBy = userSnapshot.exists ? userSnapshot.data().referredBy : null;
+
+        // Referral query (agar referredBy hai)
+        let referralDocRef = null;
+        let referralDocData = null;
+        if (referredBy) {
+          const referralsSnapshot = await db.collection('referrals')
+            .where('referredUserId', '==', dep.userId)
+            .limit(1)
+            .get();
+          if (!referralsSnapshot.empty) {
+            referralDocRef = referralsSnapshot.docs[0].ref;
+            referralDocData = referralsSnapshot.docs[0].data();
+          }
+        }
+
+        // Ab transaction
+        await db.runTransaction(async (transaction) => {
+          // Re-read deposit doc to ensure still pending
+          const freshDep = await transaction.get(depRef);
+          if (!freshDep.exists || freshDep.data().status !== 'pending') {
+            throw new Error('Deposit already processed');
+          }
+
+          // Writes
           transaction.update(depRef, {
             status: 'approved',
             approvedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1730,24 +1720,20 @@
             active: true
           });
 
-          const userRef = db.collection('users').doc(dep.userId);
-          const userDoc = await transaction.get(userRef);
-          if (userDoc.exists && userDoc.data().referredBy) {
-            const referrerId = userDoc.data().referredBy;
-            const referralsSnapshot = await db.collection('referrals')
-              .where('referredUserId', '==', dep.userId)
-              .limit(1)
-              .get();
-            referralsSnapshot.docs.forEach((refDoc) => {
-              const refData = refDoc.data();
-              if (!refData.bonusGiven) {
-                const referrerRef = db.collection('users').doc(referrerId);
-                transaction.update(referrerRef, { balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS) });
-                transaction.update(refDoc.ref, { bonusGiven: true, status: 'completed', bonusAmount: REFERRAL_BONUS });
-              }
+          // Referral bonus if applicable
+          if (referredBy && referralDocRef && referralDocData && !referralDocData.bonusGiven) {
+            const referrerRef = db.collection('users').doc(referredBy);
+            transaction.update(referrerRef, {
+              balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS)
+            });
+            transaction.update(referralDocRef, {
+              bonusGiven: true,
+              status: 'completed',
+              bonusAmount: REFERRAL_BONUS
             });
           }
         });
+
         alert('Deposit approved, investment started, and referral bonus processed if applicable.');
       } catch (error) {
         alert(error.message);
@@ -1832,4 +1818,4 @@
     }
   </script>
 </body>
-  </html>
+</html>
