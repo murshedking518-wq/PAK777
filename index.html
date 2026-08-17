@@ -155,57 +155,25 @@
       box-shadow: 0 15px 35px rgba(76,175,80,0.5);
       transform: perspective(1000px) rotateX(0deg);
       transition: 0.5s;
+      position: relative;
     }
     .balance-card:hover { transform: perspective(1000px) rotateX(5deg); }
     .balance-amount { font-size: 2.5rem; font-weight: 800; }
-
-    /* Withdrawal Box */
-    .withdrawal-box {
-      background: var(--orange-light);
-      border-radius: 20px;
-      padding: 25px;
-      margin-bottom: 25px;
-      box-shadow: 0 10px 30px rgba(255,165,0,0.3);
-      border-left: 5px solid var(--orange);
-      transition: 0.3s;
-    }
-    .withdrawal-box:hover { box-shadow: 0 15px 40px rgba(255,165,0,0.5); }
-    .withdrawal-box h3 {
-      color: #E65100;
-      margin-bottom: 15px;
-      font-size: 1.5rem;
-    }
-    .withdrawal-form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-    .withdrawal-form input,
-    .withdrawal-form select {
-      padding: 12px 15px;
-      border: 2px solid #FFD54F;
-      border-radius: 10px;
-      font-size: 1rem;
-      background: white;
-      transition: 0.3s;
-    }
-    .withdrawal-form input:focus,
-    .withdrawal-form select:focus {
-      border-color: var(--orange);
-      box-shadow: 0 0 0 4px rgba(255,165,0,0.2);
-      outline: none;
-    }
-    .withdrawal-form button {
+    .withdraw-btn {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
       background: var(--orange);
       color: white;
       border: none;
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 700;
+      padding: 12px 20px;
+      border-radius: 50px;
       cursor: pointer;
+      font-weight: 700;
       transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(255,165,0,0.4);
     }
-    .withdrawal-form button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,165,0,0.5); }
+    .withdraw-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,165,0,0.6); }
 
     /* 3D Active Investment Box */
     .active-investment-3d {
@@ -308,6 +276,21 @@
       color: #777;
       font-size: 0.9rem;
     }
+    .package-card .deposit-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 700;
+      margin-top: 15px;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(76,175,80,0.4);
+      position: relative;
+      z-index: 1;
+    }
+    .package-card .deposit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(76,175,80,0.6); }
     .package-card::before {
       content: '';
       position: absolute;
@@ -364,29 +347,6 @@
     .badge.approved { background: #e8f5e9; color: #388E3C; }
     .badge.rejected { background: #ffebee; color: #c62828; }
 
-    /* Profile Modal */
-    .profile-avatar {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin: 0 auto 15px;
-      display: block;
-      background: #f0f0f0;
-      border: 3px solid var(--primary);
-    }
-    .profile-field {
-      margin-bottom: 15px;
-    }
-    .profile-field label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 5px;
-    }
-    .profile-field input[type="file"] {
-      padding: 8px;
-    }
-
     /* Modal */
     .modal-overlay {
       position: fixed;
@@ -420,12 +380,12 @@
       padding: 10px 0;
       border-bottom: 1px solid #eee;
     }
-    .modal input {
+    .modal input, .modal select {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       border: 2px solid #ddd;
-      border-radius: 12px;
-      margin: 15px 0;
+      border-radius: 10px;
+      margin: 10px 0;
       font-size: 1rem;
     }
     .modal button {
@@ -441,47 +401,55 @@
     }
     .modal button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(76,175,80,0.6); }
 
-    /* Admin Dashboard */
-    .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .admin-tabs button {
-      padding: 10px 20px;
+    /* Withdrawal Modal Specific */
+    .withdrawal-details-summary {
       background: var(--light);
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: 0.3s;
-    }
-    .admin-tabs button.active { background: var(--dark); color: white; }
-    .admin-content { background: white; border-radius: 20px; padding: 20px; }
-    .admin-item {
       padding: 15px;
-      border: 1px solid #eee;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
+      border-radius: 10px;
+      margin-bottom: 15px;
     }
-    .admin-item .actions button {
-      margin-left: 5px;
-      padding: 8px 15px;
+    .withdrawal-details-summary p {
+      margin: 5px 0;
+    }
+    .edit-details-btn {
+      background: #2196F3;
+      color: white;
       border: none;
+      padding: 8px 15px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
+      margin-top: 10px;
       transition: 0.3s;
     }
-    .approve-btn { background: var(--primary); color: white; }
-    .reject-btn { background: #f44336; color: white; }
-    .approve-btn:hover, .reject-btn:hover { transform: translateY(-2px); }
+    .edit-details-btn:hover { background: #1976D2; }
+
+    /* Profile Modal */
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 15px;
+      display: block;
+      background: #f0f0f0;
+      border: 3px solid var(--primary);
+    }
+    .profile-field {
+      margin-bottom: 15px;
+    }
+    .profile-field label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 5px;
+    }
 
     .hidden { display: none !important; }
     @media (max-width: 768px) {
       .container { padding: 15px; }
       .logo { font-size: 1.4rem; }
+      .balance-card { padding: 15px; }
+      .withdraw-btn { position: static; margin-top: 15px; width: 100%; }
     }
   </style>
 </head>
@@ -524,22 +492,7 @@
       <div class="balance-card">
         <div>Available Balance</div>
         <div class="balance-amount">PKR <span id="balanceDisplay">0</span></div>
-      </div>
-
-      <!-- Withdrawal Box -->
-      <div class="withdrawal-box">
-        <h3>💰 Withdraw Funds</h3>
-        <div class="withdrawal-form">
-          <input type="number" id="withdrawAmount" placeholder="Amount (PKR)" min="1">
-          <input type="text" id="accountHolderName" placeholder="Account Holder Name">
-          <select id="accountType">
-            <option value="Easypaisa">Easypaisa</option>
-            <option value="JazzCash">JazzCash</option>
-          </select>
-          <input type="text" id="accountNumber" placeholder="Account Number">
-          <input type="text" id="cnicNumber" placeholder="CNIC No (e.g., 12345-1234567-1)">
-          <button onclick="submitWithdrawal()">Request Withdrawal</button>
-        </div>
+        <button class="withdraw-btn" onclick="openWithdrawalModal()">💰 Withdraw Funds</button>
       </div>
 
       <!-- Active Investment 3D Box -->
@@ -584,6 +537,14 @@
       <input type="text" id="tidInput" placeholder="Enter TID / Transaction ID">
       <button onclick="submitDeposit()">Submit Deposit Request</button>
       <button style="margin-top:10px; background:#777;" onclick="closeDepositModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Withdrawal Modal -->
+  <div id="withdrawalModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Withdraw Funds</h3>
+      <div id="withdrawalContent"></div>
     </div>
   </div>
 
@@ -637,7 +598,7 @@
     const storage = firebase.storage();
 
     const ADMIN_EMAIL = 'admin@engro.com';
-    const PHONE_NUMBER = '0300-1234567'; // change if needed
+    const PHONE_NUMBER = '03082836422'; // JazzCash number
 
     let currentUser = null;
     let isAdmin = false;
@@ -735,6 +696,10 @@
           balance: 0,
           name: '',
           photoURL: '',
+          accountHolderName: '',
+          accountType: '',
+          accountNumber: '',
+          cnic: '',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         alert('Signup successful!');
@@ -766,7 +731,6 @@
       if (!currentUser) return;
       const modal = document.getElementById('profileModal');
       modal.classList.remove('hidden');
-      // Load current profile data
       db.collection('users').doc(currentUser.uid).get().then((doc) => {
         if (doc.exists) {
           const data = doc.data();
@@ -794,7 +758,6 @@
 
       try {
         let photoURL = null;
-        // If a file is selected, upload to Storage
         if (file) {
           const storageRef = storage.ref(`profileImages/${currentUser.uid}`);
           await storageRef.put(file);
@@ -817,18 +780,18 @@
     function renderPackages() {
       const grid = document.getElementById('packageGrid');
       grid.innerHTML = packages.map(pkg => `
-        <div class="package-card" onclick="openDepositModal('${pkg.id}')" style="border-top: 5px solid ${pkg.color};">
+        <div class="package-card" style="border-top: 5px solid ${pkg.color};">
           <div class="amount">PKR ${pkg.amount}</div>
           <div style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">${pkg.name}</div>
           <div class="daily">Daily Earnings: PKR ${pkg.dailyReturn}</div>
           <div class="duration">Duration: ${pkg.durationDays} Days</div>
           <div class="duration">Total Return: PKR ${pkg.totalReturn}</div>
+          <button class="deposit-btn" onclick="openDepositModal('${pkg.id}')">Deposit</button>
         </div>
       `).join('');
     }
 
     async function initUserDashboard(user) {
-      // Real-time balance (show integer)
       db.collection('users').doc(user.uid).onSnapshot((doc) => {
         if (doc.exists) {
           const balance = doc.data().balance || 0;
@@ -1125,32 +1088,124 @@
       }
     }
 
-    // Withdrawal Submission - immediate balance deduction
-    async function submitWithdrawal() {
-      const amount = parseFloat(document.getElementById('withdrawAmount').value);
-      const holderName = document.getElementById('accountHolderName').value.trim();
-      const accountType = document.getElementById('accountType').value;
-      const accountNumber = document.getElementById('accountNumber').value.trim();
-      const cnic = document.getElementById('cnicNumber').value.trim();
+    // Withdrawal Modal Functions
+    function openWithdrawalModal() {
+      if (!currentUser) return;
+      const modal = document.getElementById('withdrawalModal');
+      const content = document.getElementById('withdrawalContent');
+      modal.classList.remove('hidden');
 
-      if (!amount || !holderName || !accountNumber || !cnic) {
+      db.collection('users').doc(currentUser.uid).get().then((doc) => {
+        if (!doc.exists) return;
+        const data = doc.data();
+        const hasAccount = data.accountHolderName && data.accountType && data.accountNumber && data.cnic;
+
+        if (hasAccount) {
+          // Show amount entry + saved details
+          content.innerHTML = `
+            <div class="withdrawal-details-summary">
+              <p><strong>Account Holder:</strong> ${data.accountHolderName}</p>
+              <p><strong>Account Type:</strong> ${data.accountType}</p>
+              <p><strong>Account Number:</strong> ${data.accountNumber}</p>
+              <p><strong>CNIC:</strong> ${data.cnic}</p>
+              <button class="edit-details-btn" onclick="showEditAccountForm()">Edit Details</button>
+            </div>
+            <input type="number" id="withdrawAmountInput" placeholder="Amount (PKR)" min="1">
+            <button onclick="submitWithdrawal()">Proceed Withdrawal</button>
+            <button style="margin-top:10px; background:#777;" onclick="closeWithdrawalModal()">Cancel</button>
+          `;
+        } else {
+          // Show account details form
+          content.innerHTML = `
+            <p>Please save your account details first.</p>
+            <input type="text" id="wdHolderName" placeholder="Account Holder Name">
+            <select id="wdAccountType">
+              <option value="Easypaisa">Easypaisa</option>
+              <option value="JazzCash">JazzCash</option>
+            </select>
+            <input type="text" id="wdAccountNumber" placeholder="Account Number">
+            <input type="text" id="wdCnic" placeholder="CNIC No (e.g., 12345-1234567-1)">
+            <button onclick="saveAccountDetails()">Save Account Details</button>
+            <button style="margin-top:10px; background:#777;" onclick="closeWithdrawalModal()">Cancel</button>
+          `;
+        }
+      });
+    }
+
+    function closeWithdrawalModal() {
+      document.getElementById('withdrawalModal').classList.add('hidden');
+    }
+
+    function showEditAccountForm() {
+      const content = document.getElementById('withdrawalContent');
+      db.collection('users').doc(currentUser.uid).get().then((doc) => {
+        if (!doc.exists) return;
+        const data = doc.data();
+        content.innerHTML = `
+          <input type="text" id="wdHolderName" placeholder="Account Holder Name" value="${data.accountHolderName || ''}">
+          <select id="wdAccountType">
+            <option value="Easypaisa" ${data.accountType === 'Easypaisa' ? 'selected' : ''}>Easypaisa</option>
+            <option value="JazzCash" ${data.accountType === 'JazzCash' ? 'selected' : ''}>JazzCash</option>
+          </select>
+          <input type="text" id="wdAccountNumber" placeholder="Account Number" value="${data.accountNumber || ''}">
+          <input type="text" id="wdCnic" placeholder="CNIC No" value="${data.cnic || ''}">
+          <button onclick="saveAccountDetails()">Save Account Details</button>
+          <button style="margin-top:10px; background:#777;" onclick="openWithdrawalModal()">Back</button>
+        `;
+      });
+    }
+
+    async function saveAccountDetails() {
+      const holderName = document.getElementById('wdHolderName').value.trim();
+      const accountType = document.getElementById('wdAccountType').value;
+      const accountNumber = document.getElementById('wdAccountNumber').value.trim();
+      const cnic = document.getElementById('wdCnic').value.trim();
+
+      if (!holderName || !accountNumber || !cnic) {
         alert('Please fill all fields');
-        return;
-      }
-      if (amount <= 0) {
-        alert('Amount must be positive');
-        return;
-      }
-      if (!currentUser) {
-        alert('Please login first');
         return;
       }
 
       try {
+        await db.collection('users').doc(currentUser.uid).update({
+          accountHolderName: holderName,
+          accountType: accountType,
+          accountNumber: accountNumber,
+          cnic: cnic
+        });
+        alert('Account details saved!');
+        openWithdrawalModal();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function submitWithdrawal() {
+      const amount = parseFloat(document.getElementById('withdrawAmountInput').value);
+      if (!amount || amount <= 0) {
+        alert('Please enter valid amount');
+        return;
+      }
+
+      try {
+        // Fetch user data for account details
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        const data = userDoc.data();
+        const accountHolderName = data.accountHolderName;
+        const accountType = data.accountType;
+        const accountNumber = data.accountNumber;
+        const cnic = data.cnic;
+
+        if (!accountHolderName || !accountType || !accountNumber || !cnic) {
+          alert('Account details missing. Please save them first.');
+          return;
+        }
+
+        // Transaction to check balance and deduct
         await db.runTransaction(async (transaction) => {
           const userRef = db.collection('users').doc(currentUser.uid);
-          const userDoc = await transaction.get(userRef);
-          const balance = userDoc.data().balance || 0;
+          const currentUserDoc = await transaction.get(userRef);
+          const balance = currentUserDoc.data().balance || 0;
           if (amount > balance) {
             throw new Error('Insufficient balance');
           }
@@ -1159,7 +1214,7 @@
             userId: currentUser.uid,
             userEmail: currentUser.email,
             amount: amount,
-            accountHolderName: holderName,
+            accountHolderName: accountHolderName,
             accountType: accountType,
             accountNumber: accountNumber,
             cnic: cnic,
@@ -1168,15 +1223,13 @@
           });
         });
         alert('Withdrawal request submitted. Balance deducted.');
-        document.getElementById('withdrawAmount').value = '';
-        document.getElementById('accountHolderName').value = '';
-        document.getElementById('accountNumber').value = '';
-        document.getElementById('cnicNumber').value = '';
+        closeWithdrawalModal();
       } catch (error) {
         alert(error.message);
       }
     }
 
+    // Deposit Modal Functions
     function openDepositModal(packageId) {
       const pkg = packages.find(p => p.id === packageId);
       if (!pkg) return;
@@ -1189,7 +1242,7 @@
         <div class="detail-row"><span>Duration:</span><strong>${pkg.durationDays} Days</strong></div>
         <div class="detail-row"><span>Total Return:</span><strong>PKR ${pkg.totalReturn}</strong></div>
         <div style="margin-top:15px; padding:10px; background:#f5f5f5; border-radius:10px;">
-          <p>Send payment to this number:</p>
+          <p>Send payment via JazzCash to this number:</p>
           <h3 style="color:var(--primary); margin:10px 0;">${PHONE_NUMBER}</h3>
           <p>After payment, enter TID below and submit.</p>
         </div>
@@ -1228,6 +1281,7 @@
       }
     }
 
+    // Admin Functions (same as before)
     async function adminLogin() {
       const email = document.getElementById('adminEmail').value.trim();
       const password = document.getElementById('adminPassword').value;
@@ -1478,4 +1532,4 @@
     }
   </script>
 </body>
-  </html>
+        </html>
