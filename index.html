@@ -806,6 +806,10 @@
           dob: '',
           referralCode: referralCode,
           referredBy: referredBy,
+          accountHolderName: '',
+          accountType: '',
+          accountNumber: '',
+          cnic: '',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
@@ -858,7 +862,6 @@
       auth.signOut();
     }
 
-    // Profile Functions
     function openProfileModal() {
       if (!currentUser) return;
       const modal = document.getElementById('profileModal');
@@ -903,9 +906,18 @@
           <div class="daily">Daily Earnings: PKR ${pkg.dailyReturn}</div>
           <div class="duration">Duration: ${pkg.durationDays} Days</div>
           <div class="duration">Total Return: PKR ${pkg.totalReturn}</div>
-          <button class="deposit-btn" onclick="openDepositModal('${pkg.id}')">Deposit</button>
+          <button class="deposit-btn" data-package-id="${pkg.id}">Deposit</button>
         </div>
       `).join('');
+
+      // Event delegation for deposit buttons
+      grid.addEventListener('click', function(e) {
+        const btn = e.target.closest('.deposit-btn');
+        if (btn) {
+          const packageId = btn.dataset.packageId;
+          openDepositModal(packageId);
+        }
+      });
     }
 
     async function initUserDashboard(user) {
@@ -1387,7 +1399,10 @@
 
     function openDepositModal(packageId) {
       const pkg = packages.find(p => p.id === packageId);
-      if (!pkg) return;
+      if (!pkg) {
+        console.error('Package not found!');
+        return;
+      }
       selectedPackage = pkg;
       const details = document.getElementById('depositDetails');
       details.innerHTML = `
@@ -1651,7 +1666,7 @@
           }
         }
 
-        // Fetch active investments of user to deactivate (including free package)
+        // Fetch active investments of user to deactivate
         const activeInvestmentsSnapshot = await db.collection('investments')
           .where('userId', '==', dep.userId)
           .where('active', '==', true)
@@ -1701,7 +1716,7 @@
           }
         });
 
-        alert('Deposit approved, previous free package deactivated, and new investment started!');
+        alert('Deposit approved, previous investments deactivated, and new investment started!');
       } catch (error) {
         alert(error.message);
       }
@@ -1785,4 +1800,4 @@
     }
   </script>
 </body>
-  </html>
+</html>
