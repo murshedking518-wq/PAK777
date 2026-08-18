@@ -848,7 +848,6 @@
       const password = document.getElementById('loginPassword').value;
       try {
         await auth.signInWithEmailAndPassword(email, password);
-        // Auth state listener will handle redirect
       } catch (error) {
         alert(error.message);
       }
@@ -906,18 +905,9 @@
           <div class="daily">Daily Earnings: PKR ${pkg.dailyReturn}</div>
           <div class="duration">Duration: ${pkg.durationDays} Days</div>
           <div class="duration">Total Return: PKR ${pkg.totalReturn}</div>
-          <button class="deposit-btn" data-package-id="${pkg.id}">Deposit</button>
+          <button class="deposit-btn" onclick="openDepositModal('${pkg.id}')">Deposit</button>
         </div>
       `).join('');
-
-      // Event delegation for deposit buttons
-      grid.addEventListener('click', function(e) {
-        const btn = e.target.closest('.deposit-btn');
-        if (btn) {
-          const packageId = btn.dataset.packageId;
-          openDepositModal(packageId);
-        }
-      });
     }
 
     async function initUserDashboard(user) {
@@ -1636,7 +1626,6 @@
 
     async function approveDeposit(depId) {
       try {
-        // Pehle saari reads (transaction ke bahar)
         const depRef = db.collection('deposits').doc(depId);
         const depSnapshot = await depRef.get();
         if (!depSnapshot.exists) {
@@ -1666,7 +1655,6 @@
           }
         }
 
-        // Fetch active investments of user to deactivate
         const activeInvestmentsSnapshot = await db.collection('investments')
           .where('userId', '==', dep.userId)
           .where('active', '==', true)
@@ -1683,12 +1671,10 @@
             approvedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
 
-          // Deactivate all active investments for this user (free package ends)
           activeInvestmentsSnapshot.docs.forEach((invDoc) => {
             transaction.update(invDoc.ref, { active: false });
           });
 
-          // Create new investment
           transaction.set(db.collection('investments').doc(), {
             userId: dep.userId,
             userEmail: dep.userEmail,
@@ -1702,7 +1688,6 @@
             active: true
           });
 
-          // Referral bonus if applicable
           if (referredBy && referralDocRef && referralDocData && !referralDocData.bonusGiven) {
             const referrerRef = db.collection('users').doc(referredBy);
             transaction.update(referrerRef, {
