@@ -8,7 +8,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     :root {
@@ -86,12 +85,10 @@
       margin-top: 5px;
       font-weight: 600;
       letter-spacing: 0.5px;
-    }
-    .animated-text {
       animation: glow 2s ease-in-out infinite;
     }
     @keyframes glow {
-      0%, 100% { opacity: 0.7; text-shadow: 0 0 5px rgba(76,175,80,0.3); }
+      0%,100% { opacity: 0.7; text-shadow: 0 0 5px rgba(76,175,80,0.3); }
       50% { opacity: 1; text-shadow: 0 0 20px rgba(76,175,80,0.8), 0 0 30px rgba(76,175,80,0.5); }
     }
     .nav-buttons button {
@@ -112,8 +109,6 @@
     }
     .nav-buttons .logout-btn { background: #f44336; box-shadow: 0 4px 15px rgba(244,67,54,0.4); }
     .nav-buttons .logout-btn:hover { box-shadow: 0 8px 25px rgba(244,67,54,0.6); }
-    .nav-buttons .admin-btn { background: var(--dark); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-    .nav-buttons .admin-btn:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
     .nav-buttons .profile-btn { background: #2196F3; box-shadow: 0 4px 15px rgba(33,150,243,0.4); }
     .nav-buttons .profile-btn:hover { box-shadow: 0 8px 25px rgba(33,150,243,0.6); }
 
@@ -440,94 +435,71 @@
     .badge.approved { background: #e8f5e9; color: #388E3C; }
     .badge.rejected { background: #ffebee; color: #c62828; }
 
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(5px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      animation: fadeIn 0.3s;
-    }
-    .modal {
-      background: white;
+    /* Admin Panel Styles (Improved) */
+    .admin-panel {
+      background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
       border-radius: 25px;
-      padding: 30px;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-      animation: slideUp 0.4s;
+      padding: 25px;
+      box-shadow: var(--shadow);
     }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .modal h3 { margin-bottom: 20px; color: var(--dark); }
-    .modal .detail-row {
+    .admin-panel h2 {
+      color: var(--dark);
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 2rem;
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .admin-tabs button {
+      padding: 12px 25px;
+      background: var(--light);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .admin-tabs button.active { background: var(--dark); color: white; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    .admin-content {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .admin-item {
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #eee;
-    }
-    .modal input, .modal select {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #ddd;
-      border-radius: 10px;
-      margin: 10px 0;
-      font-size: 1rem;
-    }
-    .modal button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 14px 25px;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #fafafa;
       transition: 0.3s;
     }
-    .modal button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(76,175,80,0.6); }
-
-    /* Withdrawal Modal Specific */
-    .withdrawal-details-summary {
-      background: var(--light);
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-    .withdrawal-details-summary p {
-      margin: 5px 0;
-    }
-    .edit-details-btn {
-      background: #2196F3;
-      color: white;
-      border: none;
+    .admin-item:hover { background: #f0f0f0; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .admin-item .actions button {
+      margin-left: 5px;
       padding: 8px 15px;
+      border: none;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
-      margin-top: 10px;
       transition: 0.3s;
     }
-    .edit-details-btn:hover { background: #1976D2; }
+    .approve-btn { background: var(--primary); color: white; }
+    .reject-btn { background: #f44336; color: white; }
+    .approve-btn:hover, .reject-btn:hover { transform: translateY(-2px); }
 
     /* Profile Modal */
-    .profile-avatar {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin: 0 auto 15px;
-      display: block;
-      background: #f0f0f0;
-      border: 3px solid var(--primary);
-    }
     .profile-field {
       margin-bottom: 15px;
     }
@@ -556,11 +528,10 @@
     <div class="header">
       <div class="logo-section">
         <div class="logo">Jetour <span>Private Solution</span></div>
-        <div class="tagline animated-text">Pakistan 🇵🇰 No 1 EV Car Manufacturer Jetour Pakistan</div>
+        <div class="tagline">Pakistan 🇵🇰 No 1 EV Car Manufacturer Jetour Pakistan</div>
       </div>
       <div class="nav-buttons">
         <button class="profile-btn hidden" id="profileBtn" onclick="openProfileModal()">👤 Profile</button>
-        <button class="admin-btn" id="adminLoginBtn" onclick="openAdminLoginModal()">Admin</button>
         <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Logout</button>
       </div>
     </div>
@@ -626,16 +597,18 @@
 
     <!-- Admin Dashboard -->
     <div id="adminDashboardSection" class="hidden">
-      <h2 style="margin-bottom:20px; color:var(--dark);">Admin Panel</h2>
-      <div class="admin-tabs">
-        <button class="active" onclick="switchAdminTab('pending')">Pending Deposits</button>
-        <button onclick="switchAdminTab('all')">All Deposits</button>
-        <button onclick="switchAdminTab('withdrawals')">Withdrawals</button>
-        <button onclick="switchAdminTab('referrals')">Referrals</button>
-        <button onclick="switchAdminTab('users')">Users</button>
-        <button onclick="switchAdminTab('investments')">Investments</button>
+      <div class="admin-panel">
+        <h2>Admin Panel</h2>
+        <div class="admin-tabs">
+          <button class="active" onclick="switchAdminTab('pending')">Pending Deposits</button>
+          <button onclick="switchAdminTab('all')">All Deposits</button>
+          <button onclick="switchAdminTab('withdrawals')">Withdrawals</button>
+          <button onclick="switchAdminTab('referrals')">Referrals</button>
+          <button onclick="switchAdminTab('users')">Users</button>
+          <button onclick="switchAdminTab('investments')">Investments</button>
+        </div>
+        <div class="admin-content" id="adminContent">Loading...</div>
       </div>
-      <div class="admin-content" id="adminContent">Loading...</div>
     </div>
   </div>
 
@@ -658,22 +631,10 @@
     </div>
   </div>
 
-  <!-- Admin Login Modal -->
-  <div id="adminLoginModal" class="modal-overlay hidden">
-    <div class="modal">
-      <h3>Admin Login</h3>
-      <input type="email" id="adminEmail" placeholder="Admin Email">
-      <input type="password" id="adminPassword" placeholder="Admin Password">
-      <button onclick="adminLogin()">Login as Admin</button>
-      <button style="margin-top:10px; background:#777;" onclick="closeAdminLoginModal()">Cancel</button>
-    </div>
-  </div>
-
   <!-- Profile Modal -->
   <div id="profileModal" class="modal-overlay hidden">
     <div class="modal">
       <h3>My Profile</h3>
-      <img id="profileAvatar" class="profile-avatar" src="https://via.placeholder.com/100" alt="Profile Picture">
       <div class="profile-field">
         <label>Email (read-only)</label>
         <input type="email" id="profileEmail" disabled>
@@ -683,8 +644,12 @@
         <input type="text" id="profileName" placeholder="Enter your name">
       </div>
       <div class="profile-field">
-        <label>Upload Profile Picture</label>
-        <input type="file" id="profileImageInput" accept="image/*">
+        <label>Invitation Code</label>
+        <input type="text" id="profileReferralCode" readonly>
+      </div>
+      <div class="profile-field">
+        <label>Date of Birth</label>
+        <input type="date" id="profileDob">
       </div>
       <button onclick="saveProfile()">Save Profile</button>
       <button style="margin-top:10px; background:#777;" onclick="closeProfileModal()">Cancel</button>
@@ -705,11 +670,12 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const storage = firebase.storage();
 
     const ADMIN_EMAIL = 'admin@engro.com';
     const PHONE_NUMBER = '03082836422'; // JazzCash number
     const REFERRAL_BONUS = 100; // PKR
+    const FREE_PACKAGE_DAILY = 10;
+    const FREE_PACKAGE_DAYS = 60;
 
     let currentUser = null;
     let isAdmin = false;
@@ -771,7 +737,6 @@
       document.getElementById('dashboardSection').classList.add('hidden');
       document.getElementById('adminDashboardSection').classList.add('hidden');
       document.getElementById('logoutBtn').classList.add('hidden');
-      document.getElementById('adminLoginBtn').classList.remove('hidden');
       document.getElementById('profileBtn').classList.add('hidden');
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
@@ -783,7 +748,6 @@
       document.getElementById('dashboardSection').classList.remove('hidden');
       document.getElementById('adminDashboardSection').classList.add('hidden');
       document.getElementById('logoutBtn').classList.remove('hidden');
-      document.getElementById('adminLoginBtn').classList.remove('hidden');
       document.getElementById('profileBtn').classList.remove('hidden');
       renderPackages();
       initUserDashboard(user);
@@ -794,7 +758,6 @@
       document.getElementById('dashboardSection').classList.add('hidden');
       document.getElementById('adminDashboardSection').classList.remove('hidden');
       document.getElementById('logoutBtn').classList.remove('hidden');
-      document.getElementById('adminLoginBtn').classList.add('hidden');
       document.getElementById('profileBtn').classList.add('hidden');
       initAdminDashboard();
     }
@@ -840,15 +803,26 @@
           email: user.email,
           balance: 0,
           name: '',
-          photoURL: '',
-          accountHolderName: '',
-          accountType: '',
-          accountNumber: '',
-          cnic: '',
+          dob: '',
           referralCode: referralCode,
           referredBy: referredBy,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+
+        // Create free package automatically
+        await db.collection('investments').add({
+          userId: user.uid,
+          userEmail: user.email,
+          packageId: 'free',
+          packageName: 'Free Starter',
+          amount: 0,
+          dailyReturn: FREE_PACKAGE_DAILY,
+          durationDays: FREE_PACKAGE_DAYS,
+          startDate: firebase.firestore.FieldValue.serverTimestamp(),
+          paidAmount: 0,
+          active: true
+        });
+
         if (referredBy) {
           await db.collection('referrals').add({
             referrerId: referredBy,
@@ -859,7 +833,7 @@
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         }
-        alert('Signup successful!');
+        alert('Signup successful! Your free package is now active.');
       } catch (error) {
         alert(error.message);
       }
@@ -870,7 +844,7 @@
       const password = document.getElementById('loginPassword').value;
       try {
         await auth.signInWithEmailAndPassword(email, password);
-        alert('Login successful!');
+        // Auth state listener will handle redirect
       } catch (error) {
         alert(error.message);
       }
@@ -884,6 +858,7 @@
       auth.signOut();
     }
 
+    // Profile Functions
     function openProfileModal() {
       if (!currentUser) return;
       const modal = document.getElementById('profileModal');
@@ -893,12 +868,8 @@
           const data = doc.data();
           document.getElementById('profileEmail').value = data.email || currentUser.email;
           document.getElementById('profileName').value = data.name || '';
-          const avatar = document.getElementById('profileAvatar');
-          if (data.photoURL) {
-            avatar.src = data.photoURL;
-          } else {
-            avatar.src = 'https://via.placeholder.com/100';
-          }
+          document.getElementById('profileReferralCode').value = data.referralCode || '';
+          document.getElementById('profileDob').value = data.dob || '';
         }
       });
     }
@@ -910,21 +881,12 @@
     async function saveProfile() {
       if (!currentUser) return;
       const name = document.getElementById('profileName').value.trim();
-      const fileInput = document.getElementById('profileImageInput');
-      const file = fileInput.files[0];
+      const dob = document.getElementById('profileDob').value;
       try {
-        let photoURL = null;
-        if (file) {
-          const storageRef = storage.ref(`profileImages/${currentUser.uid}`);
-          await storageRef.put(file);
-          photoURL = await storageRef.getDownloadURL();
-        }
-        const userRef = db.collection('users').doc(currentUser.uid);
-        const updateData = { name: name };
-        if (photoURL) {
-          updateData.photoURL = photoURL;
-        }
-        await userRef.update(updateData);
+        await db.collection('users').doc(currentUser.uid).update({
+          name: name,
+          dob: dob
+        });
         alert('Profile saved successfully!');
         closeProfileModal();
       } catch (error) {
@@ -1024,7 +986,7 @@
             </div>
             <div class="detail-item">
               <div class="label">Invested</div>
-              <div class="value">PKR ${inv.amount}</div>
+              <div class="value">${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount}</div>
             </div>
             <div class="detail-item">
               <div class="label">Daily Earnings</div>
@@ -1100,7 +1062,7 @@
             html += `
               <div class="investment-item">
                 <div>
-                  <strong>${inv.packageName}</strong> (PKR ${inv.amount})<br>
+                  <strong>${inv.packageName}</strong> (${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount})<br>
                   <small>Daily: PKR ${inv.dailyReturn} | Elapsed: ${days}/${inv.durationDays} days</small>
                 </div>
                 <div style="text-align:right;">
@@ -1220,8 +1182,8 @@
           html += `
             <div class="history-item">
               <div>
-                <strong>${inv.packageName}</strong><br>
-                <small>PKR ${inv.amount} | Daily: PKR ${inv.dailyReturn} | Elapsed: ${days}/${inv.durationDays} days</small><br>
+                <strong>${inv.packageName}</strong> (${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount})<br>
+                <small>PKR ${inv.dailyReturn} daily | Elapsed: ${days}/${inv.durationDays} days</small><br>
                 <small>Started: ${startedAt}</small>
               </div>
               <span class="badge active">ACTIVE</span>
@@ -1474,30 +1436,6 @@
       }
     }
 
-    async function adminLogin() {
-      const email = document.getElementById('adminEmail').value.trim();
-      const password = document.getElementById('adminPassword').value;
-      if (!email || !password) return alert('Please enter credentials');
-      try {
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        if (userCredential.user.email !== ADMIN_EMAIL) {
-          await auth.signOut();
-          alert('Not an admin account');
-          return;
-        }
-        closeAdminLoginModal();
-      } catch (error) {
-        alert(error.message);
-      }
-    }
-
-    function openAdminLoginModal() {
-      document.getElementById('adminLoginModal').classList.remove('hidden');
-    }
-    function closeAdminLoginModal() {
-      document.getElementById('adminLoginModal').classList.add('hidden');
-    }
-
     function initAdminDashboard() {
       if (adminUnsubscribe) { adminUnsubscribe(); }
       adminUnsubscribe = db.collection('deposits').onSnapshot(() => {
@@ -1671,7 +1609,7 @@
             <div class="admin-item">
               <div>
                 <strong>${inv.userEmail}</strong><br>
-                <small>${inv.packageName} - PKR ${inv.amount} | Daily: PKR ${inv.dailyReturn}</small><br>
+                <small>${inv.packageName} - ${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount} | Daily: PKR ${inv.dailyReturn}</small><br>
                 <small>Status: ${status} | Earned: PKR ${inv.paidAmount || 0}</small>
               </div>
             </div>
@@ -1696,12 +1634,10 @@
           return;
         }
 
-        // User doc read
         const userRef = db.collection('users').doc(dep.userId);
         const userSnapshot = await userRef.get();
         const referredBy = userSnapshot.exists ? userSnapshot.data().referredBy : null;
 
-        // Referral query (agar referredBy hai)
         let referralDocRef = null;
         let referralDocData = null;
         if (referredBy) {
@@ -1715,20 +1651,29 @@
           }
         }
 
-        // Ab transaction
+        // Fetch active investments of user to deactivate (including free package)
+        const activeInvestmentsSnapshot = await db.collection('investments')
+          .where('userId', '==', dep.userId)
+          .where('active', '==', true)
+          .get();
+
         await db.runTransaction(async (transaction) => {
-          // Re-read deposit doc to ensure still pending
           const freshDep = await transaction.get(depRef);
           if (!freshDep.exists || freshDep.data().status !== 'pending') {
             throw new Error('Deposit already processed');
           }
 
-          // Writes
           transaction.update(depRef, {
             status: 'approved',
             approvedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
 
+          // Deactivate all active investments for this user (free package ends)
+          activeInvestmentsSnapshot.docs.forEach((invDoc) => {
+            transaction.update(invDoc.ref, { active: false });
+          });
+
+          // Create new investment
           transaction.set(db.collection('investments').doc(), {
             userId: dep.userId,
             userEmail: dep.userEmail,
@@ -1756,7 +1701,7 @@
           }
         });
 
-        alert('Deposit approved, investment started, and referral bonus processed if applicable.');
+        alert('Deposit approved, previous free package deactivated, and new investment started!');
       } catch (error) {
         alert(error.message);
       }
@@ -1834,10 +1779,10 @@
       let msg = 'Investments:\n\n';
       snapshot.docs.forEach(doc => {
         const inv = doc.data();
-        msg += `${inv.packageName} - PKR ${inv.amount}, Daily: ${inv.dailyReturn}, Status: ${inv.active ? 'Active' : 'Completed'}\n`;
+        msg += `${inv.packageName} - ${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount}, Daily: ${inv.dailyReturn}, Status: ${inv.active ? 'Active' : 'Completed'}\n`;
       });
       alert(msg);
     }
   </script>
 </body>
-        </html>
+  </html>
