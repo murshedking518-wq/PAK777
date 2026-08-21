@@ -11,17 +11,18 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     :root {
-      --primary: #4CAF50;
-      --light: #f0f8f0;
-      --dark: #1e2b1e;
+      --primary: #FF8C00;      /* Orange */
+      --primary-dark: #E67E00;
+      --light: #FFF3E0;        /* Light orange */
+      --dark: #1a1a1a;         /* Black */
       --white: #ffffff;
       --black: #000000;
-      --shadow: 0 20px 40px rgba(0,0,0,0.2);
-      --orange: #FFA500;
+      --orange: #FF8C00;
       --orange-light: #FFF3E0;
+      --shadow: 0 20px 40px rgba(0,0,0,0.2);
     }
     body {
-      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      background: linear-gradient(135deg, #fff8f0, #ffe0cc);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -33,7 +34,7 @@
     .blob {
       position: fixed;
       border-radius: 50%;
-      background: rgba(76,175,80,0.15);
+      background: rgba(255, 140, 0, 0.15);
       animation: float 12s infinite ease-in-out;
       z-index: 0;
       pointer-events: none;
@@ -50,13 +51,13 @@
       z-index: 1;
       width: 95%;
       max-width: 1200px;
-      background: rgba(255,255,255,0.7);
+      background: rgba(255, 255, 255, 0.8);
       backdrop-filter: blur(20px);
       border-radius: 30px;
       padding: 30px;
       box-shadow: var(--shadow);
       margin: 30px 0;
-      border: 1px solid rgba(255,255,255,0.5);
+      border: 1px solid rgba(255, 255, 255, 0.6);
       transition: all 0.3s;
     }
     .header {
@@ -75,21 +76,21 @@
     .logo {
       font-size: 1.8rem;
       font-weight: 800;
-      color: var(--dark);
+      color: var(--black);
       text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
     .logo span { color: var(--primary); }
     .tagline {
       font-size: 0.9rem;
-      color: var(--dark);
+      color: var(--black);
       margin-top: 5px;
       font-weight: 600;
       letter-spacing: 0.5px;
       animation: glow 2s ease-in-out infinite;
     }
     @keyframes glow {
-      0%,100% { opacity: 0.7; text-shadow: 0 0 5px rgba(76,175,80,0.3); }
-      50% { opacity: 1; text-shadow: 0 0 20px rgba(76,175,80,0.8), 0 0 30px rgba(76,175,80,0.5); }
+      0%,100% { opacity: 0.7; text-shadow: 0 0 5px rgba(255,140,0,0.3); }
+      50% { opacity: 1; text-shadow: 0 0 20px rgba(255,140,0,0.8), 0 0 30px rgba(255,140,0,0.5); }
     }
     .nav-buttons button {
       background: var(--primary);
@@ -101,16 +102,16 @@
       cursor: pointer;
       font-weight: 600;
       transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(76,175,80,0.4);
+      box-shadow: 0 4px 15px rgba(255,140,0,0.4);
     }
     .nav-buttons button:hover {
       transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(76,175,80,0.6);
+      box-shadow: 0 8px 25px rgba(255,140,0,0.6);
     }
     .nav-buttons .logout-btn { background: #f44336; box-shadow: 0 4px 15px rgba(244,67,54,0.4); }
     .nav-buttons .logout-btn:hover { box-shadow: 0 8px 25px rgba(244,67,54,0.6); }
-    .nav-buttons .profile-btn { background: #2196F3; box-shadow: 0 4px 15px rgba(33,150,243,0.4); }
-    .nav-buttons .profile-btn:hover { box-shadow: 0 8px 25px rgba(33,150,243,0.6); }
+    .nav-buttons .profile-btn { background: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .nav-buttons .profile-btn:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
 
     /* Auth Styles */
     .auth-tabs { display: flex; gap: 10px; margin-bottom: 25px; }
@@ -123,8 +124,9 @@
       font-weight: 600;
       cursor: pointer;
       transition: 0.3s;
+      color: var(--black);
     }
-    .auth-tabs button.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(76,175,80,0.4); }
+    .auth-tabs button.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255,140,0,0.4); }
     .auth-form {
       display: flex;
       flex-direction: column;
@@ -142,7 +144,7 @@
     }
     .auth-form input:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(76,175,80,0.2);
+      box-shadow: 0 0 0 4px rgba(255,140,0,0.2);
       outline: none;
     }
     .auth-form button {
@@ -155,18 +157,18 @@
       font-size: 1.1rem;
       cursor: pointer;
       transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(76,175,80,0.4);
+      box-shadow: 0 4px 15px rgba(255,140,0,0.4);
     }
-    .auth-form button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(76,175,80,0.6); }
+    .auth-form button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,140,0,0.6); }
 
     /* Dashboard Styles */
     .balance-card {
-      background: linear-gradient(135deg, var(--primary), #388E3C);
+      background: linear-gradient(135deg, var(--primary), #cc6600);
       color: white;
       padding: 25px;
       border-radius: 20px;
       margin-bottom: 30px;
-      box-shadow: 0 15px 35px rgba(76,175,80,0.5);
+      box-shadow: 0 15px 35px rgba(255,140,0,0.5);
       transform: perspective(1000px) rotateX(0deg);
       transition: 0.5s;
       position: relative;
@@ -177,7 +179,7 @@
       position: absolute;
       right: 20px;
       bottom: 20px;
-      background: var(--orange);
+      background: var(--black);
       color: white;
       border: none;
       padding: 12px 20px;
@@ -185,22 +187,22 @@
       cursor: pointer;
       font-weight: 700;
       transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(255,165,0,0.4);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     }
-    .withdraw-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,165,0,0.6); }
+    .withdraw-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.6); }
 
     /* Referral Box */
     .referral-box {
-      background: #E3F2FD;
+      background: #fff8f0;
       border-radius: 20px;
       padding: 25px;
       margin-bottom: 25px;
-      box-shadow: 0 10px 30px rgba(33,150,243,0.3);
-      border-left: 5px solid #2196F3;
+      box-shadow: 0 10px 30px rgba(255,140,0,0.2);
+      border-left: 5px solid var(--primary);
       transition: 0.3s;
     }
     .referral-box h3 {
-      color: #0D47A1;
+      color: var(--black);
       margin-bottom: 15px;
       font-size: 1.5rem;
     }
@@ -214,13 +216,13 @@
       flex: 1;
       min-width: 200px;
       padding: 12px 15px;
-      border: 2px solid #90CAF9;
+      border: 2px solid #ffcc80;
       border-radius: 10px;
       font-size: 1rem;
       background: white;
     }
     .copy-btn {
-      background: #2196F3;
+      background: var(--black);
       color: white;
       border: none;
       padding: 12px 20px;
@@ -229,7 +231,7 @@
       font-weight: 700;
       transition: 0.3s;
     }
-    .copy-btn:hover { background: #1976D2; transform: translateY(-2px); }
+    .copy-btn:hover { background: #333; transform: translateY(-2px); }
     .referral-list {
       margin-top: 15px;
       background: white;
@@ -247,7 +249,7 @@
     }
     .referral-item:last-child { border-bottom: none; }
     .bonus-badge {
-      background: #4CAF50;
+      background: var(--primary);
       color: white;
       padding: 5px 12px;
       border-radius: 20px;
@@ -255,8 +257,8 @@
       font-weight: 600;
     }
     .bonus-pending {
-      background: #FFF3E0;
-      color: #E65100;
+      background: #ffe0cc;
+      color: #cc6600;
       padding: 5px 12px;
       border-radius: 20px;
       font-size: 0.8rem;
@@ -265,7 +267,7 @@
 
     /* 3D Active Investment Box */
     .active-investment-3d {
-      background: linear-gradient(145deg, #2e7d32, #1b5e20);
+      background: linear-gradient(145deg, #ff8c00, #cc6600);
       color: white;
       padding: 25px;
       border-radius: 25px;
@@ -299,14 +301,14 @@
       z-index: 1;
     }
     .active-investment-3d .detail-item {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.15);
       padding: 15px;
       border-radius: 15px;
       text-align: center;
     }
     .active-investment-3d .detail-item .label {
       font-size: 0.8rem;
-      opacity: 0.8;
+      opacity: 0.9;
     }
     .active-investment-3d .detail-item .value {
       font-size: 1.3rem;
@@ -317,8 +319,8 @@
       font-weight: 800;
       text-align: center;
       margin: 15px 0;
-      color: #FFD700;
-      text-shadow: 0 0 20px rgba(255,215,0,0.8);
+      color: #fff;
+      text-shadow: 0 0 20px rgba(255,255,255,0.8);
       position: relative;
       z-index: 1;
     }
@@ -342,15 +344,16 @@
       position: relative;
       overflow: hidden;
       transform-style: preserve-3d;
+      border-top: 5px solid var(--primary);
     }
     .package-card:hover {
       transform: translateY(-15px) scale(1.03);
-      box-shadow: 0 25px 50px rgba(76,175,80,0.4);
+      box-shadow: 0 25px 50px rgba(255,140,0,0.4);
     }
     .package-card .amount {
       font-size: 2rem;
       font-weight: 800;
-      color: var(--dark);
+      color: var(--black);
     }
     .package-card .daily {
       background: var(--light);
@@ -359,9 +362,10 @@
       display: inline-block;
       margin: 10px 0;
       font-weight: 600;
+      color: var(--black);
     }
     .package-card .duration {
-      color: #777;
+      color: #666;
       font-size: 0.9rem;
     }
     .package-card .deposit-btn {
@@ -374,11 +378,12 @@
       font-weight: 700;
       margin-top: 15px;
       transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(76,175,80,0.4);
+      box-shadow: 0 4px 15px rgba(255,140,0,0.4);
       position: relative;
       z-index: 1;
+      width: 100%;
     }
-    .package-card .deposit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(76,175,80,0.6); }
+    .package-card .deposit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,140,0,0.6); }
     .package-card::before {
       content: '';
       position: absolute;
@@ -386,7 +391,7 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(76,175,80,0.1) 0%, transparent 60%);
+      background: radial-gradient(circle, rgba(255,140,0,0.1) 0%, transparent 60%);
       animation: rotate 8s linear infinite;
     }
 
@@ -405,8 +410,9 @@
       cursor: pointer;
       font-weight: 600;
       transition: 0.3s;
+      color: var(--black);
     }
-    .history-tabs button.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(76,175,80,0.4); }
+    .history-tabs button.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255,140,0,0.4); }
     .history-content {
       background: white;
       border-radius: 20px;
@@ -429,21 +435,21 @@
       font-size: 0.8rem;
       font-weight: 600;
     }
-    .badge.active { background: #e8f5e9; color: #388E3C; }
+    .badge.active { background: #ffe0cc; color: #cc6600; }
     .badge.completed { background: #f5f5f5; color: #777; }
     .badge.pending { background: #fff3e0; color: #E65100; }
     .badge.approved { background: #e8f5e9; color: #388E3C; }
     .badge.rejected { background: #ffebee; color: #c62828; }
 
-    /* Admin Panel Styles (Improved) */
+    /* Admin Panel Styles */
     .admin-panel {
-      background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+      background: linear-gradient(135deg, #fff8f0, #ffe0cc);
       border-radius: 25px;
       padding: 25px;
       box-shadow: var(--shadow);
     }
     .admin-panel h2 {
-      color: var(--dark);
+      color: var(--black);
       margin-bottom: 20px;
       text-align: center;
       font-size: 2rem;
@@ -464,8 +470,9 @@
       font-weight: 600;
       transition: 0.3s;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      color: var(--black);
     }
-    .admin-tabs button.active { background: var(--dark); color: white; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    .admin-tabs button.active { background: var(--black); color: white; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
     .admin-content {
       background: white;
       border-radius: 20px;
@@ -499,6 +506,84 @@
     .reject-btn { background: #f44336; color: white; }
     .approve-btn:hover, .reject-btn:hover { transform: translateY(-2px); }
 
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+    .modal {
+      background: white;
+      border-radius: 25px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+      animation: slideUp 0.4s;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal h3 { margin-bottom: 20px; color: var(--black); }
+    .modal .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .modal input, .modal select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      margin: 10px 0;
+      font-size: 1rem;
+    }
+    .modal button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px 25px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.3s;
+    }
+    .modal button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,140,0,0.6); }
+
+    /* Withdrawal Modal Specific */
+    .withdrawal-details-summary {
+      background: var(--light);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    .withdrawal-details-summary p {
+      margin: 5px 0;
+      color: var(--black);
+    }
+    .edit-details-btn {
+      background: #333;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+    .edit-details-btn:hover { background: #555; }
+
     /* Profile Modal */
     .profile-field {
       margin-bottom: 15px;
@@ -507,6 +592,7 @@
       font-weight: 600;
       display: block;
       margin-bottom: 5px;
+      color: var(--black);
     }
 
     .hidden { display: none !important; }
@@ -583,7 +669,7 @@
         <div style="text-align:center; position:relative; z-index:1;">Next Earnings In:</div>
       </div>
 
-      <h3 style="margin-bottom:15px; color:var(--dark);">Choose Investment Package</h3>
+      <h3 style="margin-bottom:15px; color:var(--black);">Choose Investment Package</h3>
       <div class="package-grid" id="packageGrid"></div>
 
       <!-- User History Section -->
@@ -688,10 +774,10 @@
     let referralUnsubscribe = null;
 
     const packages = [
-      { id: 'starter', name: 'Starter', amount: 300, dailyReturn: 75, durationDays: 30, totalReturn: 2250, color: '#4CAF50' },
-      { id: 'silver', name: 'Silver', amount: 800, dailyReturn: 250, durationDays: 30, totalReturn: 7500, color: '#9E9E9E' },
-      { id: 'gold', name: 'Gold', amount: 1400, dailyReturn: 440, durationDays: 30, totalReturn: 13200, color: '#FFD700' },
-      { id: 'diamond', name: 'Diamond', amount: 2500, dailyReturn: 880, durationDays: 30, totalReturn: 26400, color: '#B9F2FF' }
+      { id: 'starter', name: 'Starter', amount: 300, dailyReturn: 75, durationDays: 30, totalReturn: 2250, color: '#FF8C00' },
+      { id: 'silver', name: 'Silver', amount: 800, dailyReturn: 250, durationDays: 30, totalReturn: 7500, color: '#FF8C00' },
+      { id: 'gold', name: 'Gold', amount: 1400, dailyReturn: 440, durationDays: 30, totalReturn: 13200, color: '#FF8C00' },
+      { id: 'diamond', name: 'Diamond', amount: 2500, dailyReturn: 880, durationDays: 30, totalReturn: 26400, color: '#FF8C00' }
     ];
 
     function generateReferralCode() {
@@ -1785,4 +1871,4 @@
     }
   </script>
 </body>
-</html>
+  </html>
