@@ -4,17 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jetour Private Solution - Investment Game</title>
+  
+  <!-- PWA Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FF8C00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jetour Private Solution">
+  
   <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     :root {
-      --primary: #FF8C00;      /* Orange */
+      --primary: #FF8C00;
       --primary-dark: #E67E00;
-      --light: #FFF3E0;        /* Light orange */
-      --dark: #1a1a1a;         /* Black */
+      --light: #FFF3E0;
+      --dark: #1a1a1a;
       --white: #ffffff;
       --black: #000000;
       --orange: #FF8C00;
@@ -112,6 +121,23 @@
     .nav-buttons .logout-btn:hover { box-shadow: 0 8px 25px rgba(244,67,54,0.6); }
     .nav-buttons .profile-btn { background: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     .nav-buttons .profile-btn:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
+    .install-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-left: 10px;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      display: none;
+    }
+    .install-btn:hover {
+      background: #333;
+      transform: translateY(-2px);
+    }
 
     /* Auth Styles */
     .auth-tabs { display: flex; gap: 10px; margin-bottom: 25px; }
@@ -617,6 +643,7 @@
         <div class="tagline">Pakistan 🇵🇰 No 1 EV Car Manufacturer Jetour Pakistan</div>
       </div>
       <div class="nav-buttons">
+        <button class="install-btn" id="installBtn" onclick="installApp()">📲 Install App</button>
         <button class="profile-btn hidden" id="profileBtn" onclick="openProfileModal()">👤 Profile</button>
         <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Logout</button>
       </div>
@@ -758,10 +785,13 @@
     const db = firebase.firestore();
 
     const ADMIN_EMAIL = 'admin@engro.com';
-    const PHONE_NUMBER = '03082836422'; // JazzCash number
+    const PHONE_NUMBER = '03162806904'; // Easypaisa number
+    const ACCOUNT_NAME = 'AAREN KHAN'; // Easypaisa account name
     const REFERRAL_BONUS = 100; // PKR
     const FREE_PACKAGE_DAILY = 10;
     const FREE_PACKAGE_DAYS = 60;
+    const DEPOSIT_START_TIME = '12:40 PM';
+    const DEPOSIT_END_TIME = '10:00 PM';
 
     let currentUser = null;
     let isAdmin = false;
@@ -1475,10 +1505,7 @@
 
     function openDepositModal(packageId) {
       const pkg = packages.find(p => p.id === packageId);
-      if (!pkg) {
-        console.error('Package not found!');
-        return;
-      }
+      if (!pkg) return;
       selectedPackage = pkg;
       const details = document.getElementById('depositDetails');
       details.innerHTML = `
@@ -1487,10 +1514,18 @@
         <div class="detail-row"><span>Daily Earnings:</span><strong>PKR ${pkg.dailyReturn}</strong></div>
         <div class="detail-row"><span>Duration:</span><strong>${pkg.durationDays} Days</strong></div>
         <div class="detail-row"><span>Total Return:</span><strong>PKR ${pkg.totalReturn}</strong></div>
-        <div style="margin-top:15px; padding:10px; background:#f5f5f5; border-radius:10px;">
-          <p>Send payment via JazzCash to this number:</p>
-          <h3 style="color:var(--primary); margin:10px 0;">${PHONE_NUMBER}</h3>
-          <p>After payment, enter TID below and submit.</p>
+        <div style="margin-top:15px; padding:15px; background:#FFF3E0; border-radius:10px; border-left: 4px solid #FF8C00;">
+          <p><strong>📱 Easypaisa Payment Instructions:</strong></p>
+          <p><strong>Account Name:</strong> ${ACCOUNT_NAME}</p>
+          <p><strong>Easypaisa Number:</strong> ${PHONE_NUMBER}</p>
+          <hr style="margin:10px 0; border-color:#ffcc80;">
+          <p><strong>🕒 Deposit Timings:</strong> ${DEPOSIT_START_TIME} to ${DEPOSIT_END_TIME}</p>
+          <p style="font-size:0.9rem; color:#666;">Is time window ke bahar payment karne par plan next day active hoga.</p>
+          <hr style="margin:10px 0; border-color:#ffcc80;">
+          <p>1. Send payment via <strong>Easypaisa</strong>.</p>
+          <p>2. Payment ke baad <strong>TID (Transaction ID)</strong> note karein.</p>
+          <p>3. Neeche TID enter karein aur submit karein.</p>
+          <p style="margin-top:10px; font-size:0.85rem; color:#666;">⏱️ Deposit approve hone mein 60 min tak lag sakte hain (admin approval).</p>
         </div>
       `;
       document.getElementById('tidInput').value = '';
@@ -1520,7 +1555,7 @@
           status: 'pending',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert('Deposit request submitted. Wait for admin approval.');
+        alert('Deposit request submitted. Your deposit will be approved within 60 minutes (if within deposit timing).');
         closeDepositModal();
       } catch (error) {
         alert(error.message);
@@ -1869,6 +1904,42 @@
       });
       alert(msg);
     }
+
+    // PWA Script
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('SW registered'))
+          .catch(err => console.log('SW failed', err));
+      });
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installBtn').style.display = 'inline-block';
+    });
+
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choice => {
+          if (choice.outcome === 'accepted') {
+            console.log('User installed');
+          }
+          deferredPrompt = null;
+          document.getElementById('installBtn').style.display = 'none';
+        });
+      } else {
+        alert('Install karne ke liye: Browser menu (⋮) kholo → "Add to Home Screen" / "Install App" chuno.');
+      }
+    }
+
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('installBtn').style.display = 'none';
+      alert('App install ho gayi!');
+    });
   </script>
 </body>
   </html>
