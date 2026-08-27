@@ -792,6 +792,7 @@
     const FREE_PACKAGE_DAYS = 60;
     const DEPOSIT_START_TIME = '12:40 PM';
     const DEPOSIT_END_TIME = '10:00 PM';
+    const MIN_WITHDRAWAL = 500; // Minimum withdrawal limit
 
     let currentUser = null;
     let isAdmin = false;
@@ -1392,7 +1393,8 @@
               <p><strong>CNIC:</strong> ${data.cnic}</p>
               <button class="edit-details-btn" onclick="showEditAccountForm()">Edit Details</button>
             </div>
-            <input type="number" id="withdrawAmountInput" placeholder="Amount (PKR)" min="1">
+            <input type="number" id="withdrawAmountInput" placeholder="Amount (PKR)" min="${MIN_WITHDRAWAL}" required>
+            <p style="font-size:0.85rem; color:#666; margin-top:-5px;">Minimum withdrawal: PKR ${MIN_WITHDRAWAL}</p>
             <button onclick="submitWithdrawal()">Proceed Withdrawal</button>
             <button style="margin-top:10px; background:#777;" onclick="closeWithdrawalModal()">Cancel</button>
           `;
@@ -1460,9 +1462,14 @@
     }
 
     async function submitWithdrawal() {
-      const amount = parseFloat(document.getElementById('withdrawAmountInput').value);
+      const amountInput = document.getElementById('withdrawAmountInput');
+      const amount = parseFloat(amountInput.value);
       if (!amount || amount <= 0) {
-        alert('Please enter valid amount');
+        alert('Please enter a valid amount');
+        return;
+      }
+      if (amount < MIN_WITHDRAWAL) {
+        alert(`Minimum withdrawal amount is PKR ${MIN_WITHDRAWAL}`);
         return;
       }
       try {
