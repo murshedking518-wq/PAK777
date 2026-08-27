@@ -101,52 +101,62 @@
       0%,100% { opacity: 0.7; text-shadow: 0 0 5px rgba(255,140,0,0.3); }
       50% { opacity: 1; text-shadow: 0 0 20px rgba(255,140,0,0.8), 0 0 30px rgba(255,140,0,0.5); }
     }
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+    }
     .nav-buttons button {
       background: var(--primary);
       color: white;
       border: none;
-      padding: 10px 20px;
-      margin-left: 10px;
+      padding: 12px 20px;
       border-radius: 50px;
       cursor: pointer;
-      font-weight: 600;
-      transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(255,140,0,0.4);
+      font-weight: 700;
+      transition: all 0.3s;
+      box-shadow: 0 6px 0 #b35900, 0 8px 20px rgba(0,0,0,0.3);
+      border-bottom: 2px solid rgba(0,0,0,0.2);
+      white-space: nowrap;
+      font-size: 0.9rem;
     }
     .nav-buttons button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(255,140,0,0.6);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #b35900, 0 12px 25px rgba(0,0,0,0.4);
     }
-    .nav-buttons .logout-btn { background: #f44336; box-shadow: 0 4px 15px rgba(244,67,54,0.4); }
-    .nav-buttons .logout-btn:hover { box-shadow: 0 8px 25px rgba(244,67,54,0.6); }
-    .nav-buttons .profile-btn { background: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-    .nav-buttons .profile-btn:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.5); }
+    .nav-buttons .logout-btn {
+      background: #f44336;
+      box-shadow: 0 6px 0 #b71c1c, 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .nav-buttons .logout-btn:hover {
+      box-shadow: 0 8px 0 #b71c1c, 0 12px 25px rgba(0,0,0,0.4);
+    }
+    .nav-buttons .profile-btn {
+      background: #333;
+      box-shadow: 0 6px 0 #111, 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .nav-buttons .profile-btn:hover {
+      box-shadow: 0 8px 0 #111, 0 12px 25px rgba(0,0,0,0.4);
+    }
+    .nav-buttons .privacy-btn,
+    .nav-buttons .whatsapp-btn {
+      background: #555;
+      box-shadow: 0 6px 0 #333, 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .nav-buttons .privacy-btn:hover,
+    .nav-buttons .whatsapp-btn:hover {
+      box-shadow: 0 8px 0 #333, 0 12px 25px rgba(0,0,0,0.4);
+    }
     .install-btn {
       background: #000;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 50px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-left: 10px;
-      transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 6px 0 #333, 0 8px 20px rgba(0,0,0,0.3);
       display: none;
     }
-    .install-btn:hover { background: #333; transform: translateY(-2px); }
-    .privacy-btn, .whatsapp-btn {
-      background: #555;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 50px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    .install-btn:hover {
+      box-shadow: 0 8px 0 #333, 0 12px 25px rgba(0,0,0,0.4);
     }
-    .privacy-btn:hover, .whatsapp-btn:hover { background: #333; transform: translateY(-2px); }
 
     /* Auth Styles */
     .auth-tabs { display: flex; gap: 10px; margin-bottom: 25px; }
@@ -192,9 +202,9 @@
       font-size: 1.1rem;
       cursor: pointer;
       transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(255,140,0,0.4);
+      box-shadow: 0 6px 0 #b35900, 0 8px 20px rgba(0,0,0,0.3);
     }
-    .auth-form button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,140,0,0.6); }
+    .auth-form button:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #b35900, 0 12px 25px rgba(0,0,0,0.4); }
 
     /* Dashboard Styles */
     .balance-card {
@@ -222,9 +232,9 @@
       cursor: pointer;
       font-weight: 700;
       transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 0 #333, 0 8px 20px rgba(0,0,0,0.3);
     }
-    .withdraw-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.6); }
+    .withdraw-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #333, 0 12px 25px rgba(0,0,0,0.4); }
 
     /* Referral Box */
     .referral-box {
@@ -265,40 +275,9 @@
       cursor: pointer;
       font-weight: 700;
       transition: 0.3s;
+      box-shadow: 0 6px 0 #333, 0 8px 20px rgba(0,0,0,0.3);
     }
     .copy-btn:hover { background: #333; transform: translateY(-2px); }
-    .referral-list {
-      margin-top: 15px;
-      background: white;
-      border-radius: 15px;
-      padding: 15px;
-    }
-    .referral-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .referral-item:last-child { border-bottom: none; }
-    .bonus-badge {
-      background: var(--primary);
-      color: white;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .bonus-pending {
-      background: #ffe0cc;
-      color: #cc6600;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
 
     /* 3D Active Investment Box */
     .active-investment-3d {
@@ -413,12 +392,12 @@
       font-weight: 700;
       margin-top: 15px;
       transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(255,140,0,0.4);
+      box-shadow: 0 6px 0 #b35900, 0 8px 20px rgba(0,0,0,0.3);
       position: relative;
       z-index: 1;
       width: 100%;
     }
-    .package-card .deposit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,140,0,0.6); }
+    .package-card .deposit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #b35900, 0 12px 25px rgba(0,0,0,0.4); }
     .package-card::before {
       content: '';
       position: absolute;
@@ -592,8 +571,9 @@
       cursor: pointer;
       width: 100%;
       transition: 0.3s;
+      box-shadow: 0 6px 0 #b35900, 0 8px 20px rgba(0,0,0,0.3);
     }
-    .modal button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,140,0,0.6); }
+    .modal button:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #b35900, 0 12px 25px rgba(0,0,0,0.4); }
 
     /* Privacy Modal */
     .privacy-content {
@@ -607,47 +587,16 @@
       line-height: 1.6;
     }
 
-    /* Withdrawal Modal Specific */
-    .withdrawal-details-summary {
-      background: var(--light);
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-    .withdrawal-details-summary p {
-      margin: 5px 0;
-      color: var(--black);
-    }
-    .edit-details-btn {
-      background: #333;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 10px;
-      transition: 0.3s;
-    }
-    .edit-details-btn:hover { background: #555; }
-
-    /* Profile Modal */
-    .profile-field {
-      margin-bottom: 15px;
-    }
-    .profile-field label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 5px;
-      color: var(--black);
-    }
-
     .hidden { display: none !important; }
     @media (max-width: 768px) {
       .container { padding: 15px; }
       .logo { font-size: 1.4rem; }
       .balance-card { padding: 15px; }
       .withdraw-btn { position: static; margin-top: 15px; width: 100%; }
+      .nav-buttons button {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+      }
     }
   </style>
 </head>
@@ -884,9 +833,7 @@
       const hours = now.getHours();
       const minutes = now.getMinutes();
       const currentMinutes = hours * 60 + minutes;
-      // 12:40 PM = 12*60+40 = 760
-      // 10:00 PM = 22*60 = 1320
-      return currentMinutes >= 760 && currentMinutes <= 1320;
+      return currentMinutes >= 760 && currentMinutes <= 1320; // 12:40 PM to 10:00 PM
     }
 
     function openPrivacyPolicyModal() {
@@ -1789,7 +1736,6 @@
         });
         container.innerHTML = html;
       } else if (adminTab === 'users') {
-        // Only show users with paid active packages (exclude free)
         const snapshot = await db.collection('users').get();
         if (snapshot.empty) {
           container.innerHTML = '<p>No users found.</p>';
@@ -2046,4 +1992,4 @@
     });
   </script>
 </body>
-  </html>
+        </html>
