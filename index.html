@@ -807,11 +807,19 @@
     let historyUnsubscribe = null;
     let referralUnsubscribe = null;
 
+    // Updated Packages Array: 11 paid packages (free is separate)
     const packages = [
       { id: 'starter', name: 'Starter', amount: 300, dailyReturn: 75, durationDays: 30, totalReturn: 2250, color: '#FF8C00' },
-      { id: 'silver', name: 'Silver', amount: 800, dailyReturn: 250, durationDays: 30, totalReturn: 7500, color: '#FF8C00' },
-      { id: 'gold', name: 'Gold', amount: 1400, dailyReturn: 440, durationDays: 30, totalReturn: 13200, color: '#FF8C00' },
-      { id: 'diamond', name: 'Diamond', amount: 2500, dailyReturn: 880, durationDays: 30, totalReturn: 26400, color: '#FF8C00' }
+      { id: 'bronze', name: 'Bronze', amount: 500, dailyReturn: 125, durationDays: 30, totalReturn: 3750, color: '#CD7F32' },
+      { id: 'silver', name: 'Silver', amount: 800, dailyReturn: 200, durationDays: 30, totalReturn: 6000, color: '#C0C0C0' },
+      { id: 'gold', name: 'Gold', amount: 1400, dailyReturn: 350, durationDays: 30, totalReturn: 10500, color: '#FFD700' },
+      { id: 'platinum', name: 'Platinum', amount: 2000, dailyReturn: 500, durationDays: 30, totalReturn: 15000, color: '#E5E4E2' },
+      { id: 'diamond', name: 'Diamond', amount: 2500, dailyReturn: 625, durationDays: 30, totalReturn: 18750, color: '#B9F2FF' },
+      { id: 'royal', name: 'Royal', amount: 4000, dailyReturn: 1000, durationDays: 30, totalReturn: 30000, color: '#4169E1' },
+      { id: 'executive', name: 'Executive', amount: 6000, dailyReturn: 1500, durationDays: 30, totalReturn: 45000, color: '#800080' },
+      { id: 'premium', name: 'Premium', amount: 10000, dailyReturn: 2500, durationDays: 30, totalReturn: 75000, color: '#FF4500' },
+      { id: 'elite', name: 'Elite', amount: 15000, dailyReturn: 3750, durationDays: 30, totalReturn: 112500, color: '#008080' },
+      { id: 'legend', name: 'Legend', amount: 25000, dailyReturn: 6250, durationDays: 30, totalReturn: 187500, color: '#B8860B' }
     ];
 
     function generateReferralCode() {
@@ -1992,4 +2000,4 @@
     });
   </script>
 </body>
-        </html>
+  </html>
