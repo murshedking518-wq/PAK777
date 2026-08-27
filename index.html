@@ -279,16 +279,23 @@
     }
     .copy-btn:hover { background: #333; transform: translateY(-2px); }
 
-    /* 3D Active Investment Box */
+    /* Active Investments Container */
+    .active-investments-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    /* 3D Active Investment Box (used for each card) */
     .active-investment-3d {
       background: linear-gradient(145deg, #ff8c00, #cc6600);
       color: white;
       padding: 25px;
       border-radius: 25px;
-      margin-bottom: 30px;
       box-shadow: 0 25px 50px rgba(0,0,0,0.4);
       transform: perspective(1000px) rotateX(2deg) rotateY(2deg);
-      transition: 0.5s;
+      transition: all 0.5s;
       position: relative;
       overflow: hidden;
     }
@@ -306,33 +313,39 @@
       transform: perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1.02);
       box-shadow: 0 35px 70px rgba(0,0,0,0.6);
     }
+    .active-investment-3d h4 {
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      position: relative;
+      z-index: 1;
+    }
     .active-investment-3d .details-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
       margin-top: 15px;
       position: relative;
       z-index: 1;
     }
     .active-investment-3d .detail-item {
       background: rgba(255,255,255,0.15);
-      padding: 15px;
-      border-radius: 15px;
+      padding: 12px;
+      border-radius: 12px;
       text-align: center;
     }
     .active-investment-3d .detail-item .label {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       opacity: 0.9;
     }
     .active-investment-3d .detail-item .value {
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       font-weight: 700;
     }
     .countdown-timer {
-      font-size: 2rem;
+      font-size: 1.6rem;
       font-weight: 800;
       text-align: center;
-      margin: 15px 0;
+      margin: 15px 0 5px;
       color: #fff;
       text-shadow: 0 0 20px rgba(255,255,255,0.8);
       position: relative;
@@ -664,13 +677,8 @@
         <div class="referral-list" id="referralList">Loading...</div>
       </div>
 
-      <!-- Active Investment 3D Box -->
-      <div id="activeInvestmentBox" class="active-investment-3d hidden">
-        <h3>📦 Active Investment</h3>
-        <div class="details-grid" id="activeInvestmentDetails"></div>
-        <div class="countdown-timer" id="countdownTimer">--:--:--</div>
-        <div style="text-align:center; position:relative; z-index:1;">Next Earnings In:</div>
-      </div>
+      <!-- Active Investments Container (Multiple packages) -->
+      <div id="activeInvestmentsContainer" class="active-investments-container hidden"></div>
 
       <h3 style="margin-bottom:15px; color:var(--black);">Choose Investment Package</h3>
       <div class="package-grid" id="packageGrid"></div>
@@ -806,6 +814,7 @@
     let historyTab = 'activePlans';
     let historyUnsubscribe = null;
     let referralUnsubscribe = null;
+    let countdownIntervals = {}; // Store intervals per investment ID
 
     // Updated Packages Array: 11 paid packages (free is separate)
     const packages = [
@@ -821,6 +830,8 @@
       { id: 'elite', name: 'Elite', amount: 15000, dailyReturn: 3750, durationDays: 30, totalReturn: 112500, color: '#008080' },
       { id: 'legend', name: 'Legend', amount: 25000, dailyReturn: 6250, durationDays: 30, totalReturn: 187500, color: '#B8860B' }
     ];
+
+    // ... (rest of the functions same as before, with modifications below) ...
 
     function generateReferralCode() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -889,6 +900,7 @@
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
       if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
+      clearAllCountdowns();
     }
 
     function showUserDashboard(user) {
@@ -1008,6 +1020,7 @@
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
       if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
+      clearAllCountdowns();
       auth.signOut();
     }
 
@@ -1113,62 +1126,83 @@
 
     function setupActiveInvestment(user) {
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
+      clearAllCountdowns(); // clear any previous intervals
       activeInvestmentListener = db.collection('investments')
         .where('userId', '==', user.uid)
         .where('active', '==', true)
         .onSnapshot((snapshot) => {
-          const box = document.getElementById('activeInvestmentBox');
+          const container = document.getElementById('activeInvestmentsContainer');
           if (snapshot.empty) {
-            box.classList.add('hidden');
+            container.classList.add('hidden');
+            container.innerHTML = '';
+            clearAllCountdowns();
             return;
           }
+          container.classList.remove('hidden');
           let docs = snapshot.docs;
           docs.sort((a, b) => {
             const aDate = a.data().startDate ? a.data().startDate.toMillis() : 0;
             const bDate = b.data().startDate ? b.data().startDate.toMillis() : 0;
-            return bDate - aDate;
+            return bDate - aDate; // latest first
           });
-          const doc = docs[0];
-          const inv = doc.data();
-          box.classList.remove('hidden');
-          const detailsHtml = `
-            <div class="detail-item">
-              <div class="label">Package</div>
-              <div class="value">${inv.packageName}</div>
-            </div>
-            <div class="detail-item">
-              <div class="label">Invested</div>
-              <div class="value">${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount}</div>
-            </div>
-            <div class="detail-item">
-              <div class="label">Daily Earnings</div>
-              <div class="value">PKR ${inv.dailyReturn}</div>
-            </div>
-            <div class="detail-item">
-              <div class="label">Days Elapsed</div>
-              <div class="value" id="daysElapsed">0/${inv.durationDays}</div>
-            </div>
-            <div class="detail-item">
-              <div class="label">Earned So Far</div>
-              <div class="value" id="earnedSoFar">PKR ${inv.paidAmount || 0}</div>
-            </div>
-            <div class="detail-item">
-              <div class="label">Total Expected</div>
-              <div class="value">PKR ${inv.amount + (inv.dailyReturn * inv.durationDays)}</div>
-            </div>
-          `;
-          document.getElementById('activeInvestmentDetails').innerHTML = detailsHtml;
-          startCountdown(inv);
+
+          let html = '';
+          docs.forEach((doc) => {
+            const inv = doc.data();
+            const countdownId = `countdown-${doc.id}`;
+            html += `
+              <div class="active-investment-3d">
+                <h4>📦 ${inv.packageName} ${inv.amount === 0 ? '(FREE)' : ''}</h4>
+                <div class="details-grid">
+                  <div class="detail-item">
+                    <div class="label">Invested</div>
+                    <div class="value">${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount}</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="label">Daily Earnings</div>
+                    <div class="value">PKR ${inv.dailyReturn}</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="label">Days Elapsed</div>
+                    <div class="value" id="days-${doc.id}">0/${inv.durationDays}</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="label">Earned So Far</div>
+                    <div class="value" id="earned-${doc.id}">PKR ${inv.paidAmount || 0}</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="label">Total Expected</div>
+                    <div class="value">PKR ${inv.amount + (inv.dailyReturn * inv.durationDays)}</div>
+                  </div>
+                </div>
+                <div class="countdown-timer" id="${countdownId}">--:--:--</div>
+                <div style="text-align:center; font-size:0.9rem;">Next Earnings In</div>
+              </div>
+            `;
+          });
+          container.innerHTML = html;
+
+          // Start countdown for each investment
+          docs.forEach((doc) => {
+            const inv = doc.data();
+            const countdownId = `countdown-${doc.id}`;
+            startCountdownForInvestment(inv, countdownId, doc.id);
+          });
         });
     }
 
-    function startCountdown(inv) {
+    function startCountdownForInvestment(inv, elementId, investmentDocId) {
+      // Clear any existing interval for this investment
+      if (countdownIntervals[investmentDocId]) {
+        clearInterval(countdownIntervals[investmentDocId]);
+      }
+
       const startMillis = inv.startDate ? inv.startDate.toMillis() : Date.now();
       const paidAmount = inv.paidAmount || 0;
       const dailyReturn = inv.dailyReturn || 0;
       const paidDays = dailyReturn > 0 ? Math.floor(paidAmount / dailyReturn) : 0;
       const nextPayoutMillis = startMillis + (paidDays + 1) * 24 * 60 * 60 * 1000;
-      if (window.countdownInterval) clearInterval(window.countdownInterval);
+
       function updateTimer() {
         const now = Date.now();
         let diff = nextPayoutMillis - now;
@@ -1176,14 +1210,30 @@
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        document.getElementById('countdownTimer').innerText =
-          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        const el = document.getElementById(elementId);
+        if (el) {
+          el.innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
         if (diff === 0) {
-          processInvestments(currentUser).then(() => {});
+          // Reload user balance and update paidAmounts via processInvestments
+          if (currentUser) {
+            processInvestments(currentUser).then(() => {});
+          }
+          // Stop this interval; will be restarted by onSnapshot after update
+          clearInterval(countdownIntervals[investmentDocId]);
+          delete countdownIntervals[investmentDocId];
         }
       }
+
       updateTimer();
-      window.countdownInterval = setInterval(updateTimer, 1000);
+      countdownIntervals[investmentDocId] = setInterval(updateTimer, 1000);
+    }
+
+    function clearAllCountdowns() {
+      for (const key in countdownIntervals) {
+        clearInterval(countdownIntervals[key]);
+        delete countdownIntervals[key];
+      }
     }
 
     function loadInvestments(user) {
@@ -1227,6 +1277,8 @@
           list.innerHTML = html;
         });
     }
+
+    // ... (rest of functions remain same, with addition of clearAllCountdowns on logout) ...
 
     function setupReferralSection(user) {
       if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
@@ -1407,6 +1459,8 @@
         container.innerHTML = html;
       }
     }
+
+    // Withdrawal functions (same as before) ...
 
     function openWithdrawalModal() {
       if (!currentUser) return;
@@ -1803,6 +1857,7 @@
       }
     }
 
+    // Approve deposit: no longer deactivates existing active packages
     async function approveDeposit(depId) {
       try {
         const depRef = db.collection('deposits').doc(depId);
@@ -1834,11 +1889,6 @@
           }
         }
 
-        const activeInvestmentsSnapshot = await db.collection('investments')
-          .where('userId', '==', dep.userId)
-          .where('active', '==', true)
-          .get();
-
         await db.runTransaction(async (transaction) => {
           const freshDep = await transaction.get(depRef);
           if (!freshDep.exists || freshDep.data().status !== 'pending') {
@@ -1850,10 +1900,7 @@
             approvedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
 
-          activeInvestmentsSnapshot.docs.forEach((invDoc) => {
-            transaction.update(invDoc.ref, { active: false });
-          });
-
+          // Create new investment without deactivating existing ones
           transaction.set(db.collection('investments').doc(), {
             userId: dep.userId,
             userEmail: dep.userEmail,
@@ -1867,6 +1914,7 @@
             active: true
           });
 
+          // Referral bonus if applicable (still works)
           if (referredBy && referralDocRef && referralDocData && !referralDocData.bonusGiven) {
             const referrerRef = db.collection('users').doc(referredBy);
             transaction.update(referrerRef, {
@@ -1880,7 +1928,7 @@
           }
         });
 
-        alert('Deposit approved, previous investments deactivated, and new investment started!');
+        alert('Deposit approved! New investment started.');
       } catch (error) {
         alert(error.message);
       }
@@ -2000,4 +2048,4 @@
     });
   </script>
 </body>
-  </html>
+          </html>
