@@ -134,10 +134,19 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       display: none;
     }
-    .install-btn:hover {
-      background: #333;
-      transform: translateY(-2px);
+    .install-btn:hover { background: #333; transform: translateY(-2px); }
+    .privacy-btn, .whatsapp-btn {
+      background: #555;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
+    .privacy-btn:hover, .whatsapp-btn:hover { background: #333; transform: translateY(-2px); }
 
     /* Auth Styles */
     .auth-tabs { display: flex; gap: 10px; margin-bottom: 25px; }
@@ -586,6 +595,18 @@
     }
     .modal button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,140,0,0.6); }
 
+    /* Privacy Modal */
+    .privacy-content {
+      max-height: 300px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
     /* Withdrawal Modal Specific */
     .withdrawal-details-summary {
       background: var(--light);
@@ -644,6 +665,8 @@
       </div>
       <div class="nav-buttons">
         <button class="install-btn" id="installBtn" onclick="installApp()">📲 Install App</button>
+        <button class="privacy-btn" onclick="openPrivacyPolicyModal()">🔒 Privacy</button>
+        <button class="whatsapp-btn" onclick="openWhatsAppChannel()">💬 WhatsApp</button>
         <button class="profile-btn hidden" id="profileBtn" onclick="openProfileModal()">👤 Profile</button>
         <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">Logout</button>
       </div>
@@ -659,6 +682,10 @@
         <input type="email" id="signupEmail" placeholder="Email address">
         <input type="password" id="signupPassword" placeholder="Password">
         <input type="text" id="inviteCodeInput" placeholder="Invitation Code (Optional)">
+        <label style="display:flex; align-items:center; gap:10px; font-size:0.9rem;">
+          <input type="checkbox" id="acceptPrivacy" style="width:auto;">
+          I accept the <a href="#" onclick="event.preventDefault(); openPrivacyPolicyModal();" style="color:var(--primary);">Privacy Policy</a>
+        </label>
         <button onclick="signupUser()">Create Account</button>
       </div>
       <div class="auth-form hidden" id="loginForm">
@@ -725,7 +752,7 @@
     </div>
   </div>
 
-  <!-- Deposit Modal (Updated: No TID, Wallet Details) -->
+  <!-- Deposit Modal -->
   <div id="depositModal" class="modal-overlay hidden">
     <div class="modal">
       <h3>Deposit Details</h3>
@@ -768,6 +795,35 @@
     </div>
   </div>
 
+  <!-- Privacy Policy Modal -->
+  <div id="privacyModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Privacy Policy</h3>
+      <div class="privacy-content">
+        <p><strong>Jetour Private Solution</strong> ke privacy policy mein khush aamdeed.</p>
+        <p>Hum aapki zaati maloomat ki hifazat karte hain. Ye policy batati hai ke hum kaunsi maloomat collect karte hain aur usay kaise istemal karte hain.</p>
+        <h4>1. Maloomat Jo Hum Collect Karte Hain:</h4>
+        <ul>
+          <li>Email address (account banane ke liye)</li>
+          <li>Naam (optional)</li>
+          <li>Date of birth (optional)</li>
+          <li>Wallet details (withdrawal ke liye)</li>
+          <li>Referral code aur referred by information</li>
+        </ul>
+        <h4>2. Maloomat Ka Istemal:</h4>
+        <p>Hum aapki maloomat ko account manage karne, payments process karne, aur game ki services behtar banane ke liye istemal karte hain.</p>
+        <h4>3. Maloomat Ki Hifazat:</h4>
+        <p>Aapki maloomat Firebase secure servers par mehfooz hai. Hum kisi third party ko aapki zaati maloomat nahi bechte.</p>
+        <h4>4. Cookies:</h4>
+        <p>Hum cookies use karte hain taake aapka login session qaim rahe.</p>
+        <h4>5. Aapke Huqooq:</h4>
+        <p>Aap apni maloomat dekh sakte hain, update kar sakte hain, ya account delete kar sakte hain.</p>
+        <p>Agar koi sawaal ho to WhatsApp channel par raabta karein.</p>
+      </div>
+      <button onclick="closePrivacyPolicyModal()">Close</button>
+    </div>
+  </div>
+
   <script>
     // Firebase Config (provided)
     const firebaseConfig = {
@@ -788,6 +844,9 @@
     const FREE_PACKAGE_DAILY = 10;
     const FREE_PACKAGE_DAYS = 60;
     const MIN_WITHDRAWAL = 500; // Minimum withdrawal limit
+    const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
+    const DEPOSIT_START_TIME = '12:40 PM';
+    const DEPOSIT_END_TIME = '10:00 PM';
 
     let currentUser = null;
     let isAdmin = false;
@@ -818,6 +877,28 @@
     function getReferralFromURL() {
       const params = new URLSearchParams(window.location.search);
       return params.get('ref') || '';
+    }
+
+    function isDepositTimeOpen() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const currentMinutes = hours * 60 + minutes;
+      // 12:40 PM = 12*60+40 = 760
+      // 10:00 PM = 22*60 = 1320
+      return currentMinutes >= 760 && currentMinutes <= 1320;
+    }
+
+    function openPrivacyPolicyModal() {
+      document.getElementById('privacyModal').classList.remove('hidden');
+    }
+
+    function closePrivacyPolicyModal() {
+      document.getElementById('privacyModal').classList.add('hidden');
+    }
+
+    function openWhatsAppChannel() {
+      window.open(WHATSAPP_CHANNEL_URL, '_blank');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -896,7 +977,9 @@
       const email = document.getElementById('signupEmail').value.trim();
       const password = document.getElementById('signupPassword').value;
       const inviteCode = document.getElementById('inviteCodeInput').value.trim();
+      const acceptPrivacy = document.getElementById('acceptPrivacy').checked;
       if (!email || !password) return alert('Please fill all fields');
+      if (!acceptPrivacy) return alert('Please accept Privacy Policy');
       try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
@@ -1506,6 +1589,10 @@
     }
 
     function openDepositModal(packageId) {
+      if (!isDepositTimeOpen()) {
+        alert(`Deposit time is ${DEPOSIT_START_TIME} to ${DEPOSIT_END_TIME}. Please come back later.`);
+        return;
+      }
       const pkg = packages.find(p => p.id === packageId);
       if (!pkg) return;
       selectedPackage = pkg;
@@ -1530,6 +1617,7 @@
             <label style="font-weight:600;">Account Number</label>
             <input type="text" id="userWalletNumber" placeholder="03XXXXXXXXX" style="width:100%; padding:10px; border:2px solid #ffcc80; border-radius:8px; margin-top:5px;">
           </div>
+          <p style="font-size:0.85rem; color:#666;">Deposit timing: ${DEPOSIT_START_TIME} to ${DEPOSIT_END_TIME}</p>
         </div>
       `;
       document.getElementById('depositModal').classList.remove('hidden');
@@ -1701,27 +1789,36 @@
         });
         container.innerHTML = html;
       } else if (adminTab === 'users') {
+        // Only show users with paid active packages (exclude free)
         const snapshot = await db.collection('users').get();
         if (snapshot.empty) {
           container.innerHTML = '<p>No users found.</p>';
           return;
         }
         let html = '';
-        snapshot.docs.forEach((doc) => {
+        for (const doc of snapshot.docs) {
           const userData = doc.data();
-          html += `
-            <div class="admin-item">
-              <div>
-                <strong>${userData.email || 'No Email'}</strong><br>
-                <small>Balance: PKR ${Math.floor(userData.balance || 0)}</small>
+          const investmentsSnapshot = await db.collection('investments')
+            .where('userId', '==', doc.id)
+            .where('active', '==', true)
+            .where('amount', '>', 0)
+            .get();
+          if (!investmentsSnapshot.empty) {
+            html += `
+              <div class="admin-item">
+                <div>
+                  <strong>${userData.email || 'No Email'}</strong><br>
+                  <small>Balance: PKR ${Math.floor(userData.balance || 0)}</small><br>
+                  <small>Active Paid Packages: ${investmentsSnapshot.size}</small>
+                </div>
+                <div>
+                  <button class="approve-btn" onclick="viewUserInvestments('${doc.id}')">View Investments</button>
+                </div>
               </div>
-              <div>
-                <button class="approve-btn" onclick="viewUserInvestments('${doc.id}')">View Investments</button>
-              </div>
-            </div>
-          `;
-        });
-        container.innerHTML = html;
+            `;
+          }
+        }
+        container.innerHTML = html || '<p>No users with paid packages.</p>';
       } else if (adminTab === 'investments') {
         const snapshot = await db.collection('investments').get();
         let investments = snapshot.docs;
