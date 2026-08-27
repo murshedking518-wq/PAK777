@@ -725,12 +725,11 @@
     </div>
   </div>
 
-  <!-- Deposit Modal -->
+  <!-- Deposit Modal (Updated: No TID, Wallet Details) -->
   <div id="depositModal" class="modal-overlay hidden">
     <div class="modal">
       <h3>Deposit Details</h3>
       <div id="depositDetails"></div>
-      <input type="text" id="tidInput" placeholder="Enter TID / Transaction ID">
       <button onclick="submitDeposit()">Submit Deposit Request</button>
       <button style="margin-top:10px; background:#777;" onclick="closeDepositModal()">Cancel</button>
     </div>
@@ -785,13 +784,9 @@
     const db = firebase.firestore();
 
     const ADMIN_EMAIL = 'admin@engro.com';
-    const PHONE_NUMBER = '03162806904'; // Easypaisa number
-    const ACCOUNT_NAME = 'AAREN KHAN'; // Easypaisa account name
     const REFERRAL_BONUS = 100; // PKR
     const FREE_PACKAGE_DAILY = 10;
     const FREE_PACKAGE_DAYS = 60;
-    const DEPOSIT_START_TIME = '12:40 PM';
-    const DEPOSIT_END_TIME = '10:00 PM';
     const MIN_WITHDRAWAL = 500; // Minimum withdrawal limit
 
     let currentUser = null;
@@ -1333,7 +1328,7 @@
             <div class="history-item">
               <div>
                 <strong>${dep.packageName}</strong><br>
-                <small>PKR ${dep.amount} | TID: ${dep.tid}</small><br>
+                <small>PKR ${dep.amount} | Wallet: ${dep.walletType || 'N/A'} - ${dep.walletNumber || 'N/A'}</small><br>
                 <small>Requested: ${createdTime}</small>
               </div>
               <span class="badge ${statusClass}">${dep.status.toUpperCase()}</span>
@@ -1522,20 +1517,21 @@
         <div class="detail-row"><span>Duration:</span><strong>${pkg.durationDays} Days</strong></div>
         <div class="detail-row"><span>Total Return:</span><strong>PKR ${pkg.totalReturn}</strong></div>
         <div style="margin-top:15px; padding:15px; background:#FFF3E0; border-radius:10px; border-left: 4px solid #FF8C00;">
-          <p><strong>📱 Easypaisa Payment Instructions:</strong></p>
-          <p><strong>Account Name:</strong> ${ACCOUNT_NAME}</p>
-          <p><strong>Easypaisa Number:</strong> ${PHONE_NUMBER}</p>
-          <hr style="margin:10px 0; border-color:#ffcc80;">
-          <p><strong>🕒 Deposit Timings:</strong> ${DEPOSIT_START_TIME} to ${DEPOSIT_END_TIME}</p>
-          <p style="font-size:0.9rem; color:#666;">Is time window ke bahar payment karne par plan next day active hoga.</p>
-          <hr style="margin:10px 0; border-color:#ffcc80;">
-          <p>1. Send payment via <strong>Easypaisa</strong>.</p>
-          <p>2. Payment ke baad <strong>TID (Transaction ID)</strong> note karein.</p>
-          <p>3. Neeche TID enter karein aur submit karein.</p>
-          <p style="margin-top:10px; font-size:0.85rem; color:#666;">⏱️ Deposit approve hone mein 60 min tak lag sakte hain (admin approval).</p>
+          <p><strong>🔁 Payment Setup</strong></p>
+          <p>Apna wallet number aur type enter karein. Admin aapko payment request bhejega.</p>
+          <div style="margin:10px 0;">
+            <label style="font-weight:600;">Wallet Type</label>
+            <select id="userWalletType" style="width:100%; padding:10px; border:2px solid #ffcc80; border-radius:8px; margin-top:5px;">
+              <option value="Easypaisa">Easypaisa</option>
+              <option value="JazzCash">JazzCash</option>
+            </select>
+          </div>
+          <div style="margin:10px 0;">
+            <label style="font-weight:600;">Account Number</label>
+            <input type="text" id="userWalletNumber" placeholder="03XXXXXXXXX" style="width:100%; padding:10px; border:2px solid #ffcc80; border-radius:8px; margin-top:5px;">
+          </div>
         </div>
       `;
-      document.getElementById('tidInput').value = '';
       document.getElementById('depositModal').classList.remove('hidden');
     }
 
@@ -1546,8 +1542,10 @@
 
     async function submitDeposit() {
       if (!selectedPackage) return;
-      const tid = document.getElementById('tidInput').value.trim();
-      if (!tid) return alert('Please enter TID');
+      const walletType = document.getElementById('userWalletType')?.value;
+      const walletNumber = document.getElementById('userWalletNumber')?.value.trim();
+      if (!walletNumber) return alert('Please enter your account number');
+      if (!walletType) return alert('Please select wallet type');
       if (!currentUser) return alert('Please login first');
       try {
         await db.collection('deposits').add({
@@ -1558,11 +1556,12 @@
           amount: selectedPackage.amount,
           dailyReturn: selectedPackage.dailyReturn,
           durationDays: selectedPackage.durationDays,
-          tid: tid,
+          walletType: walletType,
+          walletNumber: walletNumber,
           status: 'pending',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert('Deposit request submitted. Your deposit will be approved within 60 minutes (if within deposit timing).');
+        alert('Deposit request submitted. Admin will contact you for payment.');
         closeDepositModal();
       } catch (error) {
         alert(error.message);
@@ -1623,7 +1622,8 @@
             <div class="admin-item">
               <div>
                 <strong>${dep.userEmail}</strong><br>
-                <small>${dep.packageName} - PKR ${dep.amount} | TID: ${dep.tid}</small><br>
+                <small>${dep.packageName} - PKR ${dep.amount}</small><br>
+                <small>Wallet: ${dep.walletType} - ${dep.walletNumber}</small><br>
                 <small>Status: <span style="color:${statusColor};">${dep.status}</span></small>
               </div>
               <div class="actions">
