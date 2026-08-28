@@ -351,6 +351,23 @@
       position: relative;
       z-index: 1;
     }
+    /* Progress Bar */
+    .progress-container {
+      width: 100%;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      height: 12px;
+      margin: 10px 0;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: #fff;
+      border-radius: 20px;
+      transition: width 0.5s ease;
+    }
     @keyframes rotate { 100% { transform: rotate(360deg); } }
 
     /* Package Grid */
@@ -376,6 +393,22 @@
     .package-card:hover {
       transform: translateY(-15px) scale(1.03);
       box-shadow: 0 25px 50px rgba(255,140,0,0.4);
+    }
+    .package-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: rotate(45deg);
+      transition: 0.6s;
+      pointer-events: none;
+    }
+    .package-card:hover::after {
+      left: 50%;
+      top: 50%;
     }
     .package-card .amount {
       font-size: 2rem;
@@ -411,16 +444,6 @@
       width: 100%;
     }
     .package-card .deposit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #b35900, 0 12px 25px rgba(0,0,0,0.4); }
-    .package-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,140,0,0.1) 0%, transparent 60%);
-      animation: rotate 8s linear infinite;
-    }
 
     /* History Section */
     .history-tabs {
@@ -600,6 +623,33 @@
       line-height: 1.6;
     }
 
+    /* Onboarding Modal */
+    .onboarding-content {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .onboarding-content h4 {
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    .onboarding-content p {
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: #777;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 15px;
+      color: #ccc;
+    }
+
     .hidden { display: none !important; }
     @media (max-width: 768px) {
       .container { padding: 15px; }
@@ -617,6 +667,7 @@
   <div class="blob"></div>
   <div class="blob"></div>
   <div class="blob"></div>
+  <canvas id="confettiCanvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:2000;"></canvas>
 
   <div class="container" id="mainContainer">
     <!-- Header -->
@@ -674,10 +725,12 @@
           <button class="copy-btn" onclick="copyReferralLink()">Copy Link</button>
         </div>
         <h4>Your Referrals</h4>
-        <div class="referral-list" id="referralList">Loading...</div>
+        <div class="referral-list" id="referralList">
+          <div class="empty-state"><i>🤝</i> No referrals yet. Share your link to earn bonuses!</div>
+        </div>
       </div>
 
-      <!-- Active Investments Container (Multiple packages) -->
+      <!-- Active Investments Container -->
       <div id="activeInvestmentsContainer" class="active-investments-container hidden"></div>
 
       <h3 style="margin-bottom:15px; color:var(--black);">Choose Investment Package</h3>
@@ -689,7 +742,9 @@
         <button onclick="switchHistoryTab('deposits')">Deposits</button>
         <button onclick="switchHistoryTab('withdrawals')">Withdrawals</button>
       </div>
-      <div class="history-content" id="historyContent">Loading...</div>
+      <div class="history-content" id="historyContent">
+        <div class="empty-state"><i>📦</i> Loading...</div>
+      </div>
     </div>
 
     <!-- Admin Dashboard -->
@@ -704,7 +759,9 @@
           <button onclick="switchAdminTab('users')">Users</button>
           <button onclick="switchAdminTab('investments')">Investments</button>
         </div>
-        <div class="admin-content" id="adminContent">Loading...</div>
+        <div class="admin-content" id="adminContent">
+          <div class="empty-state"><i>📊</i> Loading...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -781,6 +838,24 @@
     </div>
   </div>
 
+  <!-- Onboarding Modal -->
+  <div id="onboardingModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Welcome to Jetour Private Solution! 🎉</h3>
+      <div class="onboarding-content">
+        <h4>Step 1: Free Package</h4>
+        <p>Signup ke sath hi aapko 60 din ka free package milta hai jisse daily 10 PKR earning hoti hai.</p>
+        <h4>Step 2: Upgrade Packages</h4>
+        <p>11 powerful packages available hain. Invest karo aur daily 75 se 6250 PKR tak kamao.</p>
+        <h4>Step 3: Refer & Earn</h4>
+        <p>Apni referral link share karo aur har friend par 100 PKR bonus pao. Multi-level bonus bhi hai!</p>
+        <h4>Step 4: Withdraw Easily</h4>
+        <p>Easypaisa/JazzCash se apni earnings withdraw karo, minimum 500 PKR.</p>
+      </div>
+      <button onclick="closeOnboardingModal()">Let's Start!</button>
+    </div>
+  </div>
+
   <script>
     // Firebase Config (provided)
     const firebaseConfig = {
@@ -797,10 +872,12 @@
     const db = firebase.firestore();
 
     const ADMIN_EMAIL = 'admin@engro.com';
-    const REFERRAL_BONUS = 100; // PKR
+    const REFERRAL_BONUS_L1 = 100;
+    const REFERRAL_BONUS_L2 = 50;
+    const REFERRAL_BONUS_L3 = 25;
     const FREE_PACKAGE_DAILY = 10;
     const FREE_PACKAGE_DAYS = 60;
-    const MIN_WITHDRAWAL = 500; // Minimum withdrawal limit
+    const MIN_WITHDRAWAL = 500;
     const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
     const DEPOSIT_START_TIME = '12:40 PM';
     const DEPOSIT_END_TIME = '10:00 PM';
@@ -814,9 +891,86 @@
     let historyTab = 'activePlans';
     let historyUnsubscribe = null;
     let referralUnsubscribe = null;
-    let countdownIntervals = {}; // Store intervals per investment ID
+    let countdownIntervals = {};
+    let onboardingShown = false;
 
-    // Updated Packages Array: 11 paid packages (free is separate)
+    // Sound effects using Web Audio API
+    let audioCtx = null;
+    function playSound(type) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        gainNode.gain.value = 0.1;
+        if (type === 'click') {
+          oscillator.frequency.value = 800;
+          oscillator.type = 'sine';
+          oscillator.start();
+          oscillator.stop(audioCtx.currentTime + 0.1);
+        } else if (type === 'success') {
+          oscillator.frequency.value = 1200;
+          oscillator.type = 'sine';
+          oscillator.start();
+          oscillator.stop(audioCtx.currentTime + 0.2);
+        } else if (type === 'error') {
+          oscillator.frequency.value = 400;
+          oscillator.type = 'square';
+          oscillator.start();
+          oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+      } catch (e) {}
+    }
+
+    // Confetti animation
+    function showConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const particles = [];
+      const colors = ['#FF8C00', '#FFD700', '#FF4500', '#B8860B', '#fff', '#f44336'];
+      for (let i = 0; i < 150; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: Math.random() * 5 + 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speedY: Math.random() * 3 + 2,
+          speedX: Math.random() * 2 - 1,
+          rotation: Math.random() * 360,
+          rotationSpeed: Math.random() * 10 - 5
+        });
+      }
+      function animateConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.y += p.speedY;
+          p.x += p.speedX;
+          p.rotation += p.rotationSpeed;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rotation * Math.PI / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+        if (particles.some(p => p.y < canvas.height + 20)) {
+          requestAnimationFrame(animateConfetti);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animateConfetti();
+    }
+
+    // Currency formatter
+    function formatCurrency(amount) {
+      return 'PKR ' + Number(amount).toLocaleString('en-PK');
+    }
+
+    // Packages array
     const packages = [
       { id: 'starter', name: 'Starter', amount: 300, dailyReturn: 75, durationDays: 30, totalReturn: 2250, color: '#FF8C00' },
       { id: 'bronze', name: 'Bronze', amount: 500, dailyReturn: 125, durationDays: 30, totalReturn: 3750, color: '#CD7F32' },
@@ -831,8 +985,7 @@
       { id: 'legend', name: 'Legend', amount: 25000, dailyReturn: 6250, durationDays: 30, totalReturn: 187500, color: '#B8860B' }
     ];
 
-    // ... (rest of the functions same as before, with modifications below) ...
-
+    // Utility functions
     function generateReferralCode() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let code = '';
@@ -852,25 +1005,43 @@
       const hours = now.getHours();
       const minutes = now.getMinutes();
       const currentMinutes = hours * 60 + minutes;
-      return currentMinutes >= 760 && currentMinutes <= 1320; // 12:40 PM to 10:00 PM
+      return currentMinutes >= 760 && currentMinutes <= 1320;
     }
 
     function openPrivacyPolicyModal() {
+      playSound('click');
       document.getElementById('privacyModal').classList.remove('hidden');
     }
 
     function closePrivacyPolicyModal() {
+      playSound('click');
       document.getElementById('privacyModal').classList.add('hidden');
     }
 
     function openWhatsAppChannel() {
+      playSound('click');
       window.open(WHATSAPP_CHANNEL_URL, '_blank');
+    }
+
+    function openOnboardingModal() {
+      document.getElementById('onboardingModal').classList.remove('hidden');
+    }
+
+    function closeOnboardingModal() {
+      playSound('success');
+      document.getElementById('onboardingModal').classList.add('hidden');
+      onboardingShown = true;
+      localStorage.setItem('onboardingShown', 'true');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       const refCode = getReferralFromURL();
       if (refCode) {
         document.getElementById('inviteCodeInput').value = refCode;
+      }
+      // Check if onboarding already shown
+      if (localStorage.getItem('onboardingShown') === 'true') {
+        onboardingShown = true;
       }
     });
 
@@ -883,6 +1054,9 @@
         } else {
           isAdmin = false;
           showUserDashboard(user);
+          if (!onboardingShown && !localStorage.getItem('onboardingShown')) {
+            openOnboardingModal();
+          }
         }
       } else {
         currentUser = null;
@@ -897,9 +1071,6 @@
       document.getElementById('adminDashboardSection').classList.add('hidden');
       document.getElementById('logoutBtn').classList.add('hidden');
       document.getElementById('profileBtn').classList.add('hidden');
-      if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
-      if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
-      if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
       clearAllCountdowns();
     }
 
@@ -923,6 +1094,7 @@
     }
 
     function toggleAuth(type) {
+      playSound('click');
       const signupForm = document.getElementById('signupForm');
       const loginForm = document.getElementById('loginForm');
       const signupTab = document.getElementById('signupTab');
@@ -941,24 +1113,43 @@
     }
 
     async function signupUser() {
+      playSound('click');
       const email = document.getElementById('signupEmail').value.trim();
       const password = document.getElementById('signupPassword').value;
       const inviteCode = document.getElementById('inviteCodeInput').value.trim();
       const acceptPrivacy = document.getElementById('acceptPrivacy').checked;
-      if (!email || !password) return alert('Please fill all fields');
-      if (!acceptPrivacy) return alert('Please accept Privacy Policy');
+      if (!email || !password) {
+        playSound('error');
+        return alert('Please fill all fields');
+      }
+      if (!acceptPrivacy) {
+        playSound('error');
+        return alert('Please accept Privacy Policy');
+      }
       try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
         const referralCode = generateReferralCode();
         let referredBy = null;
+        let referredBy2 = null;
+        let referredBy3 = null;
         if (inviteCode) {
           const referrerSnapshot = await db.collection('users')
             .where('referralCode', '==', inviteCode)
             .limit(1)
             .get();
           if (!referrerSnapshot.empty) {
-            referredBy = referrerSnapshot.docs[0].id;
+            const referrerDoc = referrerSnapshot.docs[0];
+            referredBy = referrerDoc.id;
+            // Level 2
+            if (referrerDoc.data().referredBy) {
+              referredBy2 = referrerDoc.data().referredBy;
+              // Level 3
+              const level2Snapshot = await db.collection('users').doc(referredBy2).get();
+              if (level2Snapshot.exists && level2Snapshot.data().referredBy) {
+                referredBy3 = level2Snapshot.data().referredBy;
+              }
+            }
           }
         }
         await db.collection('users').doc(user.uid).set({
@@ -968,6 +1159,8 @@
           dob: '',
           referralCode: referralCode,
           referredBy: referredBy,
+          referredBy2: referredBy2,
+          referredBy3: referredBy3,
           accountHolderName: '',
           accountType: '',
           accountNumber: '',
@@ -999,32 +1192,36 @@
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         }
+        playSound('success');
         alert('Signup successful! Your free package is now active.');
+        openOnboardingModal();
       } catch (error) {
+        playSound('error');
         alert(error.message);
       }
     }
 
     async function loginUser() {
+      playSound('click');
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
       try {
         await auth.signInWithEmailAndPassword(email, password);
+        playSound('success');
       } catch (error) {
+        playSound('error');
         alert(error.message);
       }
     }
 
     function logout() {
-      if (adminUnsubscribe) { adminUnsubscribe(); adminUnsubscribe = null; }
-      if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
-      if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
-      if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
+      playSound('click');
       clearAllCountdowns();
       auth.signOut();
     }
 
     function openProfileModal() {
+      playSound('click');
       if (!currentUser) return;
       const modal = document.getElementById('profileModal');
       modal.classList.remove('hidden');
@@ -1040,10 +1237,12 @@
     }
 
     function closeProfileModal() {
+      playSound('click');
       document.getElementById('profileModal').classList.add('hidden');
     }
 
     async function saveProfile() {
+      playSound('click');
       if (!currentUser) return;
       const name = document.getElementById('profileName').value.trim();
       const dob = document.getElementById('profileDob').value;
@@ -1052,9 +1251,11 @@
           name: name,
           dob: dob
         });
+        playSound('success');
         alert('Profile saved successfully!');
         closeProfileModal();
       } catch (error) {
+        playSound('error');
         alert('Error saving profile: ' + error.message);
       }
     }
@@ -1063,11 +1264,11 @@
       const grid = document.getElementById('packageGrid');
       grid.innerHTML = packages.map(pkg => `
         <div class="package-card" style="border-top: 5px solid ${pkg.color};">
-          <div class="amount">PKR ${pkg.amount}</div>
+          <div class="amount">${formatCurrency(pkg.amount)}</div>
           <div style="font-weight:700; font-size:1.2rem; margin-bottom:10px;">${pkg.name}</div>
-          <div class="daily">Daily Earnings: PKR ${pkg.dailyReturn}</div>
+          <div class="daily">Daily: ${formatCurrency(pkg.dailyReturn)}</div>
           <div class="duration">Duration: ${pkg.durationDays} Days</div>
-          <div class="duration">Total Return: PKR ${pkg.totalReturn}</div>
+          <div class="duration">Total Return: ${formatCurrency(pkg.totalReturn)}</div>
           <button class="deposit-btn" onclick="openDepositModal('${pkg.id}')">Deposit</button>
         </div>
       `).join('');
@@ -1126,7 +1327,7 @@
 
     function setupActiveInvestment(user) {
       if (activeInvestmentListener) { activeInvestmentListener(); activeInvestmentListener = null; }
-      clearAllCountdowns(); // clear any previous intervals
+      clearAllCountdowns();
       activeInvestmentListener = db.collection('investments')
         .where('userId', '==', user.uid)
         .where('active', '==', true)
@@ -1143,12 +1344,19 @@
           docs.sort((a, b) => {
             const aDate = a.data().startDate ? a.data().startDate.toMillis() : 0;
             const bDate = b.data().startDate ? b.data().startDate.toMillis() : 0;
-            return bDate - aDate; // latest first
+            return bDate - aDate;
           });
 
           let html = '';
           docs.forEach((doc) => {
             const inv = doc.data();
+            const startMillis = inv.startDate ? inv.startDate.toMillis() : Date.now();
+            const now = Date.now();
+            let days = Math.floor((now - startMillis) / (1000 * 60 * 60 * 24));
+            if (days < 0) days = 0;
+            if (days > inv.durationDays) days = inv.durationDays;
+            const progressPercent = Math.floor((days / inv.durationDays) * 100);
+            const earned = days * inv.dailyReturn;
             const countdownId = `countdown-${doc.id}`;
             html += `
               <div class="active-investment-3d">
@@ -1156,24 +1364,23 @@
                 <div class="details-grid">
                   <div class="detail-item">
                     <div class="label">Invested</div>
-                    <div class="value">${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount}</div>
+                    <div class="value">${inv.amount === 0 ? 'FREE' : formatCurrency(inv.amount)}</div>
                   </div>
                   <div class="detail-item">
-                    <div class="label">Daily Earnings</div>
-                    <div class="value">PKR ${inv.dailyReturn}</div>
+                    <div class="label">Daily</div>
+                    <div class="value">${formatCurrency(inv.dailyReturn)}</div>
                   </div>
                   <div class="detail-item">
-                    <div class="label">Days Elapsed</div>
-                    <div class="value" id="days-${doc.id}">0/${inv.durationDays}</div>
+                    <div class="label">Earned</div>
+                    <div class="value">${formatCurrency(earned)}</div>
                   </div>
                   <div class="detail-item">
-                    <div class="label">Earned So Far</div>
-                    <div class="value" id="earned-${doc.id}">PKR ${inv.paidAmount || 0}</div>
+                    <div class="label">Days</div>
+                    <div class="value">${days}/${inv.durationDays}</div>
                   </div>
-                  <div class="detail-item">
-                    <div class="label">Total Expected</div>
-                    <div class="value">PKR ${inv.amount + (inv.dailyReturn * inv.durationDays)}</div>
-                  </div>
+                </div>
+                <div class="progress-container">
+                  <div class="progress-bar" style="width: ${progressPercent}%;"></div>
                 </div>
                 <div class="countdown-timer" id="${countdownId}">--:--:--</div>
                 <div style="text-align:center; font-size:0.9rem;">Next Earnings In</div>
@@ -1182,7 +1389,6 @@
           });
           container.innerHTML = html;
 
-          // Start countdown for each investment
           docs.forEach((doc) => {
             const inv = doc.data();
             const countdownId = `countdown-${doc.id}`;
@@ -1192,7 +1398,6 @@
     }
 
     function startCountdownForInvestment(inv, elementId, investmentDocId) {
-      // Clear any existing interval for this investment
       if (countdownIntervals[investmentDocId]) {
         clearInterval(countdownIntervals[investmentDocId]);
       }
@@ -1215,13 +1420,13 @@
           el.innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
         if (diff === 0) {
-          // Reload user balance and update paidAmounts via processInvestments
           if (currentUser) {
             processInvestments(currentUser).then(() => {});
           }
-          // Stop this interval; will be restarted by onSnapshot after update
           clearInterval(countdownIntervals[investmentDocId]);
           delete countdownIntervals[investmentDocId];
+          playSound('success');
+          showConfetti();
         }
       }
 
@@ -1242,7 +1447,7 @@
         .onSnapshot((snapshot) => {
           const list = document.getElementById('investmentsList');
           if (snapshot.empty) {
-            list.innerHTML = '<p>No investments yet. Choose a package above.</p>';
+            list.innerHTML = '<div class="empty-state"><i>📦</i> No investments yet. Choose a package above.</div>';
             return;
           }
           let docs = snapshot.docs;
@@ -1264,12 +1469,12 @@
             html += `
               <div class="investment-item">
                 <div>
-                  <strong>${inv.packageName}</strong> (${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount})<br>
-                  <small>Daily: PKR ${inv.dailyReturn} | Elapsed: ${days}/${inv.durationDays} days</small>
+                  <strong>${inv.packageName}</strong> (${inv.amount === 0 ? 'FREE' : formatCurrency(inv.amount)})<br>
+                  <small>Daily: ${formatCurrency(inv.dailyReturn)} | Elapsed: ${days}/${inv.durationDays} days</small>
                 </div>
                 <div style="text-align:right;">
                   <span class="badge ${status}">${status.toUpperCase()}</span><br>
-                  <small>Earned: PKR ${earned}</small>
+                  <small>Earned: ${formatCurrency(earned)}</small>
                 </div>
               </div>
             `;
@@ -1278,8 +1483,6 @@
         });
     }
 
-    // ... (rest of functions remain same, with addition of clearAllCountdowns on logout) ...
-
     function setupReferralSection(user) {
       if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
       referralUnsubscribe = db.collection('referrals')
@@ -1287,7 +1490,7 @@
         .onSnapshot((snapshot) => {
           const list = document.getElementById('referralList');
           if (snapshot.empty) {
-            list.innerHTML = '<p>No referrals yet. Share your link to earn bonuses!</p>';
+            list.innerHTML = '<div class="empty-state"><i>🤝</i> No referrals yet. Share your link to earn bonuses!</div>';
             return;
           }
           let html = '';
@@ -1310,6 +1513,7 @@
     }
 
     function copyReferralLink() {
+      playSound('click');
       const input = document.getElementById('referralLinkInput');
       input.select();
       document.execCommand('copy');
@@ -1319,7 +1523,6 @@
     function setupHistory(user) {
       if (historyUnsubscribe) { historyUnsubscribe(); historyUnsubscribe = null; }
       const historyContent = document.getElementById('historyContent');
-      historyContent.innerHTML = 'Loading...';
       const userId = user.uid;
       let activePlansUnsub = db.collection('investments')
         .where('userId', '==', userId)
@@ -1345,6 +1548,7 @@
     }
 
     function switchHistoryTab(tab) {
+      playSound('click');
       historyTab = tab;
       document.querySelectorAll('.history-tabs button').forEach((btn) => {
         btn.classList.remove('active');
@@ -1358,14 +1562,14 @@
     async function renderHistory(userId) {
       const container = document.getElementById('historyContent');
       if (!container) return;
-      container.innerHTML = 'Loading...';
+      container.innerHTML = '<div class="empty-state"><i>⏳</i> Loading...</div>';
       if (historyTab === 'activePlans') {
         const snapshot = await db.collection('investments')
           .where('userId', '==', userId)
           .where('active', '==', true)
           .get();
         if (snapshot.empty) {
-          container.innerHTML = '<p>No active plans.</p>';
+          container.innerHTML = '<div class="empty-state"><i>📦</i> No active plans.</div>';
           return;
         }
         let docs = snapshot.docs;
@@ -1386,8 +1590,8 @@
           html += `
             <div class="history-item">
               <div>
-                <strong>${inv.packageName}</strong> (${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount})<br>
-                <small>PKR ${inv.dailyReturn} daily | Elapsed: ${days}/${inv.durationDays} days</small><br>
+                <strong>${inv.packageName}</strong> (${inv.amount === 0 ? 'FREE' : formatCurrency(inv.amount)})<br>
+                <small>Daily: ${formatCurrency(inv.dailyReturn)} | Elapsed: ${days}/${inv.durationDays} days</small><br>
                 <small>Started: ${startedAt}</small>
               </div>
               <span class="badge active">ACTIVE</span>
@@ -1400,7 +1604,7 @@
           .where('userId', '==', userId)
           .get();
         if (snapshot.empty) {
-          container.innerHTML = '<p>No deposits.</p>';
+          container.innerHTML = '<div class="empty-state"><i>💳</i> No deposits.</div>';
           return;
         }
         let docs = snapshot.docs;
@@ -1418,7 +1622,7 @@
             <div class="history-item">
               <div>
                 <strong>${dep.packageName}</strong><br>
-                <small>PKR ${dep.amount} | Wallet: ${dep.walletType || 'N/A'} - ${dep.walletNumber || 'N/A'}</small><br>
+                <small>${formatCurrency(dep.amount)} | Wallet: ${dep.walletType || 'N/A'} - ${dep.walletNumber || 'N/A'}</small><br>
                 <small>Requested: ${createdTime}</small>
               </div>
               <span class="badge ${statusClass}">${dep.status.toUpperCase()}</span>
@@ -1431,7 +1635,7 @@
           .where('userId', '==', userId)
           .get();
         if (snapshot.empty) {
-          container.innerHTML = '<p>No withdrawals.</p>';
+          container.innerHTML = '<div class="empty-state"><i>💸</i> No withdrawals.</div>';
           return;
         }
         let docs = snapshot.docs;
@@ -1448,7 +1652,7 @@
           html += `
             <div class="history-item">
               <div>
-                <strong>PKR ${wd.amount}</strong><br>
+                <strong>${formatCurrency(wd.amount)}</strong><br>
                 <small>${wd.accountType} - ${wd.accountNumber} | ${wd.accountHolderName}</small><br>
                 <small>Requested: ${createdTime}</small>
               </div>
@@ -1460,9 +1664,8 @@
       }
     }
 
-    // Withdrawal functions (same as before) ...
-
     function openWithdrawalModal() {
+      playSound('click');
       if (!currentUser) return;
       const modal = document.getElementById('withdrawalModal');
       const content = document.getElementById('withdrawalContent');
@@ -1481,7 +1684,7 @@
               <button class="edit-details-btn" onclick="showEditAccountForm()">Edit Details</button>
             </div>
             <input type="number" id="withdrawAmountInput" placeholder="Amount (PKR)" min="${MIN_WITHDRAWAL}" required>
-            <p style="font-size:0.85rem; color:#666; margin-top:-5px;">Minimum withdrawal: PKR ${MIN_WITHDRAWAL}</p>
+            <p style="font-size:0.85rem; color:#666; margin-top:-5px;">Minimum withdrawal: ${formatCurrency(MIN_WITHDRAWAL)}</p>
             <button onclick="submitWithdrawal()">Proceed Withdrawal</button>
             <button style="margin-top:10px; background:#777;" onclick="closeWithdrawalModal()">Cancel</button>
           `;
@@ -1503,10 +1706,12 @@
     }
 
     function closeWithdrawalModal() {
+      playSound('click');
       document.getElementById('withdrawalModal').classList.add('hidden');
     }
 
     function showEditAccountForm() {
+      playSound('click');
       const content = document.getElementById('withdrawalContent');
       db.collection('users').doc(currentUser.uid).get().then((doc) => {
         if (!doc.exists) return;
@@ -1526,11 +1731,13 @@
     }
 
     async function saveAccountDetails() {
+      playSound('click');
       const holderName = document.getElementById('wdHolderName').value.trim();
       const accountType = document.getElementById('wdAccountType').value;
       const accountNumber = document.getElementById('wdAccountNumber').value.trim();
       const cnic = document.getElementById('wdCnic').value.trim();
       if (!holderName || !accountNumber || !cnic) {
+        playSound('error');
         alert('Please fill all fields');
         return;
       }
@@ -1541,22 +1748,27 @@
           accountNumber: accountNumber,
           cnic: cnic
         });
+        playSound('success');
         alert('Account details saved!');
         openWithdrawalModal();
       } catch (error) {
+        playSound('error');
         alert(error.message);
       }
     }
 
     async function submitWithdrawal() {
+      playSound('click');
       const amountInput = document.getElementById('withdrawAmountInput');
       const amount = parseFloat(amountInput.value);
       if (!amount || amount <= 0) {
+        playSound('error');
         alert('Please enter a valid amount');
         return;
       }
       if (amount < MIN_WITHDRAWAL) {
-        alert(`Minimum withdrawal amount is PKR ${MIN_WITHDRAWAL}`);
+        playSound('error');
+        alert(`Minimum withdrawal amount is ${formatCurrency(MIN_WITHDRAWAL)}`);
         return;
       }
       try {
@@ -1567,6 +1779,7 @@
         const accountNumber = data.accountNumber;
         const cnic = data.cnic;
         if (!accountHolderName || !accountType || !accountNumber || !cnic) {
+          playSound('error');
           alert('Account details missing. Please save them first.');
           return;
         }
@@ -1590,15 +1803,20 @@
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         });
+        playSound('success');
+        showConfetti();
         alert('Withdrawal request submitted. Balance deducted.');
         closeWithdrawalModal();
       } catch (error) {
+        playSound('error');
         alert(error.message);
       }
     }
 
     function openDepositModal(packageId) {
+      playSound('click');
       if (!isDepositTimeOpen()) {
+        playSound('error');
         alert(`Deposit time is ${DEPOSIT_START_TIME} to ${DEPOSIT_END_TIME}. Please come back later.`);
         return;
       }
@@ -1608,10 +1826,10 @@
       const details = document.getElementById('depositDetails');
       details.innerHTML = `
         <div class="detail-row"><span>Package:</span><strong>${pkg.name}</strong></div>
-        <div class="detail-row"><span>Investment Amount:</span><strong>PKR ${pkg.amount}</strong></div>
-        <div class="detail-row"><span>Daily Earnings:</span><strong>PKR ${pkg.dailyReturn}</strong></div>
+        <div class="detail-row"><span>Investment Amount:</span><strong>${formatCurrency(pkg.amount)}</strong></div>
+        <div class="detail-row"><span>Daily Earnings:</span><strong>${formatCurrency(pkg.dailyReturn)}</strong></div>
         <div class="detail-row"><span>Duration:</span><strong>${pkg.durationDays} Days</strong></div>
-        <div class="detail-row"><span>Total Return:</span><strong>PKR ${pkg.totalReturn}</strong></div>
+        <div class="detail-row"><span>Total Return:</span><strong>${formatCurrency(pkg.totalReturn)}</strong></div>
         <div style="margin-top:15px; padding:15px; background:#FFF3E0; border-radius:10px; border-left: 4px solid #FF8C00;">
           <p><strong>🔁 Payment Setup</strong></p>
           <p>Apna wallet number aur type enter karein. Admin aapko payment request bhejega.</p>
@@ -1633,17 +1851,28 @@
     }
 
     function closeDepositModal() {
+      playSound('click');
       document.getElementById('depositModal').classList.add('hidden');
       selectedPackage = null;
     }
 
     async function submitDeposit() {
+      playSound('click');
       if (!selectedPackage) return;
       const walletType = document.getElementById('userWalletType')?.value;
       const walletNumber = document.getElementById('userWalletNumber')?.value.trim();
-      if (!walletNumber) return alert('Please enter your account number');
-      if (!walletType) return alert('Please select wallet type');
-      if (!currentUser) return alert('Please login first');
+      if (!walletNumber) {
+        playSound('error');
+        return alert('Please enter your account number');
+      }
+      if (!walletType) {
+        playSound('error');
+        return alert('Please select wallet type');
+      }
+      if (!currentUser) {
+        playSound('error');
+        return alert('Please login first');
+      }
       try {
         await db.collection('deposits').add({
           userId: currentUser.uid,
@@ -1658,9 +1887,11 @@
           status: 'pending',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+        playSound('success');
         alert('Deposit request submitted. Admin will contact you for payment.');
         closeDepositModal();
       } catch (error) {
+        playSound('error');
         alert(error.message);
       }
     }
@@ -1685,6 +1916,7 @@
     }
 
     function switchAdminTab(tab) {
+      playSound('click');
       adminTab = tab;
       document.querySelectorAll('.admin-tabs button').forEach((btn, idx) => {
         const tabs = ['pending', 'all', 'withdrawals', 'referrals', 'users', 'investments'];
@@ -1696,7 +1928,7 @@
 
     async function renderAdminContent() {
       const container = document.getElementById('adminContent');
-      container.innerHTML = 'Loading...';
+      container.innerHTML = '<div class="empty-state"><i>📊</i> Loading...</div>';
 
       if (adminTab === 'pending' || adminTab === 'all') {
         const snapshot = await db.collection('deposits').get();
@@ -1708,7 +1940,7 @@
         });
         if (adminTab === 'pending') deposits = deposits.filter(doc => doc.data().status === 'pending');
         if (deposits.length === 0) {
-          container.innerHTML = '<p>No deposits found.</p>';
+          container.innerHTML = '<div class="empty-state"><i>📭</i> No deposits found.</div>';
           return;
         }
         let html = '';
@@ -1719,7 +1951,7 @@
             <div class="admin-item">
               <div>
                 <strong>${dep.userEmail}</strong><br>
-                <small>${dep.packageName} - PKR ${dep.amount}</small><br>
+                <small>${dep.packageName} - ${formatCurrency(dep.amount)}</small><br>
                 <small>Wallet: ${dep.walletType} - ${dep.walletNumber}</small><br>
                 <small>Status: <span style="color:${statusColor};">${dep.status}</span></small>
               </div>
@@ -1742,7 +1974,7 @@
           return bDate - aDate;
         });
         if (withdrawals.length === 0) {
-          container.innerHTML = '<p>No withdrawal requests.</p>';
+          container.innerHTML = '<div class="empty-state"><i>💸</i> No withdrawal requests.</div>';
           return;
         }
         let html = '';
@@ -1753,7 +1985,7 @@
             <div class="admin-item">
               <div>
                 <strong>${wd.userEmail}</strong><br>
-                <small>PKR ${wd.amount} | ${wd.accountType} | ${wd.accountNumber}</small><br>
+                <small>${formatCurrency(wd.amount)} | ${wd.accountType} | ${wd.accountNumber}</small><br>
                 <small>Holder: ${wd.accountHolderName} | CNIC: ${wd.cnic}</small><br>
                 <small>Status: <span style="color:${statusColor};">${wd.status}</span></small>
               </div>
@@ -1776,7 +2008,7 @@
           return bDate - aDate;
         });
         if (referrals.length === 0) {
-          container.innerHTML = '<p>No referrals yet.</p>';
+          container.innerHTML = '<div class="empty-state"><i>🤝</i> No referrals yet.</div>';
           return;
         }
         let html = '';
@@ -1800,7 +2032,7 @@
       } else if (adminTab === 'users') {
         const snapshot = await db.collection('users').get();
         if (snapshot.empty) {
-          container.innerHTML = '<p>No users found.</p>';
+          container.innerHTML = '<div class="empty-state"><i>👥</i> No users found.</div>';
           return;
         }
         let html = '';
@@ -1816,7 +2048,7 @@
               <div class="admin-item">
                 <div>
                   <strong>${userData.email || 'No Email'}</strong><br>
-                  <small>Balance: PKR ${Math.floor(userData.balance || 0)}</small><br>
+                  <small>Balance: ${formatCurrency(Math.floor(userData.balance || 0))}</small><br>
                   <small>Active Paid Packages: ${investmentsSnapshot.size}</small>
                 </div>
                 <div>
@@ -1826,7 +2058,7 @@
             `;
           }
         }
-        container.innerHTML = html || '<p>No users with paid packages.</p>';
+        container.innerHTML = html || '<div class="empty-state"><i>👥</i> No users with paid packages.</div>';
       } else if (adminTab === 'investments') {
         const snapshot = await db.collection('investments').get();
         let investments = snapshot.docs;
@@ -1836,7 +2068,7 @@
           return bDate - aDate;
         });
         if (investments.length === 0) {
-          container.innerHTML = '<p>No investments found.</p>';
+          container.innerHTML = '<div class="empty-state"><i>📦</i> No investments found.</div>';
           return;
         }
         let html = '';
@@ -1847,8 +2079,8 @@
             <div class="admin-item">
               <div>
                 <strong>${inv.userEmail}</strong><br>
-                <small>${inv.packageName} - ${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount} | Daily: PKR ${inv.dailyReturn}</small><br>
-                <small>Status: ${status} | Earned: PKR ${inv.paidAmount || 0}</small>
+                <small>${inv.packageName} - ${inv.amount === 0 ? 'FREE' : formatCurrency(inv.amount)} | Daily: ${formatCurrency(inv.dailyReturn)}</small><br>
+                <small>Status: ${status} | Earned: ${formatCurrency(inv.paidAmount || 0)}</small>
               </div>
             </div>
           `;
@@ -1857,7 +2089,6 @@
       }
     }
 
-    // Approve deposit: no longer deactivates existing active packages
     async function approveDeposit(depId) {
       try {
         const depRef = db.collection('deposits').doc(depId);
@@ -1874,20 +2105,10 @@
 
         const userRef = db.collection('users').doc(dep.userId);
         const userSnapshot = await userRef.get();
-        const referredBy = userSnapshot.exists ? userSnapshot.data().referredBy : null;
-
-        let referralDocRef = null;
-        let referralDocData = null;
-        if (referredBy) {
-          const referralsSnapshot = await db.collection('referrals')
-            .where('referredUserId', '==', dep.userId)
-            .limit(1)
-            .get();
-          if (!referralsSnapshot.empty) {
-            referralDocRef = referralsSnapshot.docs[0].ref;
-            referralDocData = referralsSnapshot.docs[0].data();
-          }
-        }
+        const userData = userSnapshot.data();
+        const referredBy = userData.referredBy || null;
+        const referredBy2 = userData.referredBy2 || null;
+        const referredBy3 = userData.referredBy3 || null;
 
         await db.runTransaction(async (transaction) => {
           const freshDep = await transaction.get(depRef);
@@ -1900,7 +2121,7 @@
             approvedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
 
-          // Create new investment without deactivating existing ones
+          // Create new investment
           transaction.set(db.collection('investments').doc(), {
             userId: dep.userId,
             userEmail: dep.userEmail,
@@ -1914,31 +2135,58 @@
             active: true
           });
 
-          // Referral bonus if applicable (still works)
-          if (referredBy && referralDocRef && referralDocData && !referralDocData.bonusGiven) {
-            const referrerRef = db.collection('users').doc(referredBy);
-            transaction.update(referrerRef, {
-              balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS)
+          // Multi-level referral bonuses
+          if (referredBy) {
+            transaction.update(db.collection('users').doc(referredBy), {
+              balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L1)
             });
-            transaction.update(referralDocRef, {
-              bonusGiven: true,
-              status: 'completed',
-              bonusAmount: REFERRAL_BONUS
+          }
+          if (referredBy2) {
+            transaction.update(db.collection('users').doc(referredBy2), {
+              balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L2)
+            });
+          }
+          if (referredBy3) {
+            transaction.update(db.collection('users').doc(referredBy3), {
+              balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L3)
+            });
+          }
+
+          // Mark referral record as completed if applicable (for immediate referrer)
+          if (referredBy) {
+            const referralsSnapshot = await db.collection('referrals')
+              .where('referredUserId', '==', dep.userId)
+              .limit(1)
+              .get();
+            referralsSnapshot.docs.forEach((refDoc) => {
+              const refData = refDoc.data();
+              if (!refData.bonusGiven) {
+                transaction.update(refDoc.ref, {
+                  bonusGiven: true,
+                  status: 'completed',
+                  bonusAmount: REFERRAL_BONUS_L1
+                });
+              }
             });
           }
         });
 
+        playSound('success');
+        showConfetti();
         alert('Deposit approved! New investment started.');
       } catch (error) {
+        playSound('error');
         alert(error.message);
       }
     }
 
     async function rejectDeposit(depId) {
+      playSound('click');
       try {
         await db.collection('deposits').doc(depId).update({
           status: 'rejected'
         });
+        playSound('error');
         alert('Deposit rejected.');
       } catch (error) {
         alert(error.message);
@@ -1946,18 +2194,23 @@
     }
 
     async function approveWithdrawal(wdId) {
+      playSound('click');
       try {
         await db.collection('withdrawals').doc(wdId).update({
           status: 'approved',
           approvedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+        playSound('success');
+        showConfetti();
         alert('Withdrawal approved.');
       } catch (error) {
+        playSound('error');
         alert(error.message);
       }
     }
 
     async function rejectWithdrawal(wdId) {
+      playSound('click');
       try {
         await db.runTransaction(async (transaction) => {
           const wdRef = db.collection('withdrawals').doc(wdId);
@@ -1970,6 +2223,7 @@
           transaction.update(userRef, { balance: firebase.firestore.FieldValue.increment(wd.amount) });
           transaction.update(wdRef, { status: 'rejected', rejectedAt: firebase.firestore.FieldValue.serverTimestamp() });
         });
+        playSound('error');
         alert('Withdrawal rejected. Amount refunded to user.');
       } catch (error) {
         alert(error.message);
@@ -1977,6 +2231,7 @@
     }
 
     async function giveReferralBonus(referralId) {
+      playSound('click');
       try {
         await db.runTransaction(async (transaction) => {
           const refRef = db.collection('referrals').doc(referralId);
@@ -1986,11 +2241,13 @@
           if (refData.bonusGiven) return;
 
           const referrerRef = db.collection('users').doc(refData.referrerId);
-          transaction.update(referrerRef, { balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS) });
-          transaction.update(refRef, { bonusGiven: true, status: 'completed', bonusAmount: REFERRAL_BONUS });
+          transaction.update(referrerRef, { balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L1) });
+          transaction.update(refRef, { bonusGiven: true, status: 'completed', bonusAmount: REFERRAL_BONUS_L1 });
         });
+        playSound('success');
         alert('Referral bonus given manually.');
       } catch (error) {
+        playSound('error');
         alert(error.message);
       }
     }
@@ -2006,7 +2263,7 @@
       let msg = 'Investments:\n\n';
       snapshot.docs.forEach(doc => {
         const inv = doc.data();
-        msg += `${inv.packageName} - ${inv.amount === 0 ? 'FREE' : 'PKR ' + inv.amount}, Daily: ${inv.dailyReturn}, Status: ${inv.active ? 'Active' : 'Completed'}\n`;
+        msg += `${inv.packageName} - ${inv.amount === 0 ? 'FREE' : formatCurrency(inv.amount)}, Daily: ${formatCurrency(inv.dailyReturn)}, Status: ${inv.active ? 'Active' : 'Completed'}\n`;
       });
       alert(msg);
     }
@@ -2028,6 +2285,7 @@
     });
 
     function installApp() {
+      playSound('click');
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(choice => {
