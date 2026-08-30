@@ -1,1898 +1,1187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana Trading - Investment Platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-dark: #0B5D32;
-            --primary-green: #168A3A;
-            --bright-green: #48C928;
-            --lime: #B9F51A;
-            --neon-lime: #D7FF19;
-            --light-green: #EFFFCC;
-            --bg-soft: #F5F9EF;
-            --white: #FFFFFF;
-            --dark-text: #17321E;
-            --muted-text: #718071;
-            --orange: #FF8C42;
-            --cyan: #00B4D8;
-            --purple: #7B2FBE;
-            --red: #E74C3C;
-            --radius: 16px;
-            --radius-lg: 24px;
-            --shadow-soft: 0 4px 20px rgba(11, 93, 50, 0.08);
-            --shadow-medium: 0 8px 30px rgba(11, 93, 50, 0.12);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        body {
-            background: var(--bg-soft);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-            color: var(--dark-text);
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Mobile Container */
-        .app-container {
-            width: 100%;
-            max-width: 430px;
-            min-height: 100vh;
-            background: var(--bg-soft);
-            position: relative;
-            overflow-x: hidden;
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Landing Page */
-        .landing-page {
-            min-height: 100vh;
-            background: linear-gradient(160deg, #0B5D32 0%, #168A3A 40%, #48C928 80%, #B9F51A 100%);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .landing-page::before {
-            content: '';
-            position: absolute;
-            bottom: -20%;
-            left: -10%;
-            width: 80%;
-            height: 50%;
-            background: radial-gradient(circle, rgba(215, 255, 25, 0.3) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: pulse-glow 4s ease-in-out infinite;
-        }
-
-        .landing-page::after {
-            content: '';
-            position: absolute;
-            top: 30%;
-            right: -20%;
-            width: 60%;
-            height: 40%;
-            background: radial-gradient(circle, rgba(72, 201, 40, 0.2) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        @keyframes pulse-glow {
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 0.7;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 1;
-            }
-        }
-
-        .landing-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-            z-index: 10;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 42px;
-            height: 42px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .logo-icon svg {
-            width: 28px;
-            height: 28px;
-            fill: #0B5D32;
-        }
-
-        .logo-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .logo-name {
-            font-weight: 900;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
-            color: white;
-            text-transform: uppercase;
-        }
-
-        .logo-sub {
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.7);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .landing-nav-right {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .btn-login-nav {
-            background: transparent;
-            border: none;
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            padding: 8px 12px;
-        }
-
-        .btn-register-nav {
-            background: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: var(--transition);
-        }
-
-        .btn-register-nav:hover {
-            background: rgba(255, 255, 255, 0.4);
-        }
-
-        .hero-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 30px 20px;
-            text-align: center;
-            position: relative;
-            z-index: 5;
-        }
-
-        .hero-badge {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            color: white;
-            font-weight: 600;
-            margin-bottom: 24px;
-            backdrop-filter: blur(10px);
-        }
-
-        .hero-headline {
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: var(--dark-text);
-            line-height: 1.1;
-            margin-bottom: 8px;
-        }
-
-        .hero-headline span {
-            display: block;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 3rem;
-        }
-
-        .hero-cta {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-            max-width: 280px;
-            margin-top: 30px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--neon-lime), var(--bright-green));
-            color: var(--dark-text);
-            border: none;
-            padding: 16px 24px;
-            border-radius: 30px;
-            font-weight: 800;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 8px 20px rgba(11, 93, 50, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 28px rgba(11, 93, 50, 0.4);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            color: white;
-            padding: 14px 24px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .hero-benefits {
-            display: flex;
-            gap: 16px;
-            margin-top: 24px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .benefit-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 500;
-        }
-
-        .benefit-item svg {
-            width: 16px;
-            height: 16px;
-            fill: var(--neon-lime);
-        }
-
-        .hero-footer-text {
-            margin-top: 20px;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.6);
-            letter-spacing: 1px;
-        }
-
-        /* Decorative elements */
-        .deco-circle {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            animation: float-up 6s ease-in-out infinite;
-        }
-
-        .deco-circle:nth-child(1) {
-            width: 60px;
-            height: 60px;
-            top: 20%;
-            left: 5%;
-        }
-        .deco-circle:nth-child(2) {
-            width: 30px;
-            height: 30px;
-            top: 40%;
-            right: 8%;
-            animation-delay: 1s;
-        }
-        .deco-circle:nth-child(3) {
-            width: 80px;
-            height: 80px;
-            bottom: 10%;
-            left: 15%;
-            animation-delay: 2s;
-        }
-
-        @keyframes float-up {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        /* Auth Pages */
-        .auth-page {
-            min-height: 100vh;
-            background: var(--bg-soft);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .auth-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-
-        .auth-logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--primary-green);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .auth-logo-icon svg {
-            width: 24px;
-            height: 24px;
-            fill: var(--neon-lime);
-        }
-
-        .auth-logo-text {
-            font-weight: 900;
-            font-size: 1.1rem;
-            color: var(--dark-text);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .auth-heading {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--dark-text);
-            margin-bottom: 8px;
-        }
-
-        .auth-sub {
-            color: var(--muted-text);
-            font-size: 0.9rem;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--dark-text);
-            margin-bottom: 6px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e0e8e0;
-            border-radius: 12px;
-            font-size: 1rem;
-            background: white;
-            color: var(--dark-text);
-            transition: var(--transition);
-        }
-
-        .form-input:focus {
-            border-color: var(--bright-green);
-            box-shadow: 0 0 0 3px rgba(72, 201, 40, 0.15);
-            outline: none;
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--muted-text);
-            font-size: 1.2rem;
-        }
-
-        /* Dashboard */
-        .dashboard-page {
-            min-height: 100vh;
-            background: var(--bg-soft);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .dash-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            background: white;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .dash-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .dash-logo-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--primary-green);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .dash-logo-icon svg {
-            width: 22px;
-            height: 22px;
-            fill: var(--neon-lime);
-        }
-
-        .dash-logo-text {
-            font-weight: 800;
-            font-size: 0.95rem;
-            color: var(--dark-text);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .hamburger-btn {
-            width: 40px;
-            height: 40px;
-            background: var(--bg-soft);
-            border-radius: 12px;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .hamburger-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: var(--dark-text);
-        }
-
-        .green-strip {
-            background: linear-gradient(90deg, #0B5D32, #168A3A);
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .green-strip-text {
-            color: white;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .green-strip-badge {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        .user-info-card {
-            background: white;
-            margin: 16px 20px;
-            border-radius: var(--radius);
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .user-info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .user-info-label {
-            font-size: 0.7rem;
-            color: var(--muted-text);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .user-info-value {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: var(--dark-text);
-        }
-
-        .balance-circle-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            margin: 10px 0;
-        }
-
-        .balance-circle {
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            background: white;
-            box-shadow: 0 0 0 8px var(--light-green), 0 0 0 12px var(--neon-lime), 0 0 50px rgba(72, 201, 40, 0.4);
-            animation: glow-ring 3s ease-in-out infinite;
-        }
-
-        @keyframes glow-ring {
-            0%,
-            100% {
-                box-shadow: 0 0 0 8px var(--light-green), 0 0 0 12px var(--neon-lime), 0 0 40px rgba(72, 201, 40, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 0 10px var(--light-green), 0 0 0 14px var(--neon-lime), 0 0 60px rgba(72, 201, 40, 0.5);
-            }
-        }
-
-        .balance-label {
-            font-size: 0.7rem;
-            color: var(--muted-text);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 600;
-        }
-
-        .balance-value {
-            font-size: 2rem;
-            font-weight: 900;
-            color: var(--dark-text);
-            margin: 4px 0;
-        }
-
-        .referral-card {
-            background: white;
-            margin: 0 20px 20px;
-            border-radius: var(--radius);
-            padding: 16px;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .referral-label {
-            font-size: 0.7rem;
-            color: var(--muted-text);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .referral-link-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .referral-link-input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 2px solid var(--light-green);
-            border-radius: 10px;
-            font-size: 0.85rem;
-            background: var(--bg-soft);
-            color: var(--dark-text);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .copy-btn {
-            background: var(--bright-green);
-            border: none;
-            padding: 10px 14px;
-            border-radius: 10px;
-            color: white;
-            font-weight: 700;
-            font-size: 0.8rem;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: var(--transition);
-        }
-
-        .copy-btn:hover {
-            background: var(--primary-green);
-        }
-
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            padding: 0 20px;
-            margin-bottom: 20px;
-        }
-
-        .action-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .action-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-soft);
-            transition: var(--transition);
-        }
-
-        .action-item:hover .action-icon {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .action-icon svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .action-label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--dark-text);
-        }
-
-        .icon-deposit {
-            fill: var(--bright-green);
-        }
-        .icon-withdraw {
-            fill: var(--orange);
-        }
-        .icon-team {
-            fill: var(--cyan);
-        }
-        .icon-profit {
-            fill: var(--purple);
-        }
-        .icon-admin {
-            fill: #5B8DEF;
-        }
-        .icon-channel {
-            fill: #FF6B6B;
-        }
-        .icon-app {
-            fill: #20B2AA;
-        }
-        .icon-verify {
-            fill: #FFA500;
-        }
-
-        /* Investment Cards */
-        .investments-section {
-            padding: 0 20px 100px;
-        }
-
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: var(--dark-text);
-            margin-bottom: 16px;
-        }
-
-        .plan-card {
-            background: white;
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid #eef4ee;
-            transition: var(--transition);
-        }
-
-        .plan-card:hover {
-            box-shadow: var(--shadow-medium);
-            transform: translateY(-2px);
-        }
-
-        .plan-name {
-            font-weight: 800;
-            font-size: 1rem;
-            color: var(--primary-green);
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        .plan-amount {
-            font-size: 2rem;
-            font-weight: 900;
-            color: var(--dark-text);
-            margin-bottom: 16px;
-        }
-
-        .plan-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .plan-stat {
-            background: var(--bg-soft);
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        .plan-stat-label {
-            font-size: 0.7rem;
-            color: var(--muted-text);
-            margin-bottom: 2px;
-        }
-
-        .plan-stat-value {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: var(--dark-text);
-        }
-
-        .invest-btn {
-            width: 100%;
-            background: linear-gradient(135deg, var(--neon-lime), var(--bright-green));
-            border: none;
-            padding: 14px;
-            border-radius: 14px;
-            font-weight: 800;
-            font-size: 0.95rem;
-            color: var(--dark-text);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: var(--transition);
-        }
-
-        .invest-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(11, 93, 50, 0.2);
-        }
-
-        .invest-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: var(--dark-text);
-        }
-
-        /* Navigation Drawer */
-        .drawer-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 200;
-            opacity: 0;
-            pointer-events: none;
-            transition: var(--transition);
-        }
-
-        .drawer-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .drawer {
-            position: fixed;
-            top: 0;
-            right: -300px;
-            width: 280px;
-            height: 100%;
-            background: white;
-            z-index: 300;
-            transition: var(--transition);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .drawer.active {
-            right: 0;
-        }
-
-        .drawer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .drawer-title {
-            font-weight: 800;
-            font-size: 1.1rem;
-            color: var(--dark-text);
-        }
-
-        .drawer-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--muted-text);
-        }
-
-        .drawer-items {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 0;
-        }
-
-        .drawer-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 20px;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--dark-text);
-        }
-
-        .drawer-item:hover {
-            background: var(--bg-soft);
-        }
-
-        .drawer-item svg {
-            width: 20px;
-            height: 20px;
-            fill: var(--primary-green);
-        }
-
-        .drawer-footer {
-            padding: 16px 20px;
-            border-top: 1px solid #eee;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 400;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: var(--transition);
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-            width: 100%;
-            max-width: 430px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 24px;
-            transform: translateY(100%);
-            transition: var(--transition);
-        }
-
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-        }
-
-        /* Toast */
-        .toast-container {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 500;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: none;
-        }
-
-        .toast {
-            background: var(--dark-text);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            animation: toast-in 0.3s ease, toast-out 0.3s ease 2.5s forwards;
-            pointer-events: auto;
-        }
-
-        @keyframes toast-in {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes toast-out {
-            from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Add responsive fine-tuning */
-        @media (max-width: 380px) {
-            .hero-headline {
-                font-size: 2.8rem;
-            }
-            .hero-headline span {
-                font-size: 2.4rem;
-            }
-            .balance-circle {
-                width: 190px;
-                height: 190px;
-            }
-            .balance-value {
-                font-size: 1.6rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solana Trading - Investment Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    :root {
+      --primary-dark: #075C2A;
+      --deep-green: #08752F;
+      --bright-green: #45D316;
+      --lime: #B9FF16;
+      --neon-lime: #D8FF18;
+      --light-lime: #EFFFCA;
+      --bg-soft: #F4F9F1;
+      --white: #FFFFFF;
+      --dark-text: #123B22;
+      --muted-text: #718078;
+      --orange: #FF9E27;
+      --purple: #8B4DEB;
+      --blue: #25AEEA;
+      --turquoise: #20B8B5;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --shadow-soft: 0 4px 20px rgba(0,0,0,0.06);
+      --shadow-medium: 0 8px 30px rgba(0,0,0,0.1);
+    }
+    body {
+      background: var(--bg-soft);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      color: var(--dark-text);
+    }
+    .app-container {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      background: var(--bg-soft);
+      position: relative;
+      overflow-x: hidden;
+      box-shadow: 0 0 50px rgba(0,0,0,0.15);
+    }
+    .hidden { display: none !important; }
+    /* Common */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--lime), var(--bright-green));
+      color: var(--dark-text);
+      border: none;
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+      transition: all 0.2s;
+    }
+    .btn-primary:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.15); }
+    .btn-secondary {
+      background: white;
+      color: var(--dark-text);
+      border: 2px solid #d0e0c8;
+      padding: 12px 20px;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    /* Header */
+    .app-header {
+      background: white;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--lime), var(--bright-green));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .logo-icon i { color: var(--dark-text); }
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .logo-name {
+      font-weight: 900;
+      font-size: 1.4rem;
+      color: var(--dark-text);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+    .logo-sub {
+      font-size: 0.7rem;
+      color: var(--muted-text);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    .hamburger-btn {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--lime), var(--bright-green));
+      border-radius: 14px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    .hamburger-btn i { color: var(--dark-text); }
+    /* Landing */
+    .landing-hero {
+      background: linear-gradient(160deg, #0B5D32 0%, #168A3A 40%, #48C928 80%, #B9F51A 100%);
+      min-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 30px 20px;
+      border-bottom-left-radius: 40px;
+      border-bottom-right-radius: 40px;
+    }
+    .hero-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: white;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--dark-text);
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .hero-title span {
+      display: block;
+      color: rgba(255,255,255,0.9);
+    }
+    /* Nav */
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .nav-btn {
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .nav-btn.register {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.5);
+      color: white;
+    }
+    .nav-btn.login {
+      background: white;
+      color: var(--dark-text);
+    }
+    /* Auth */
+    .auth-container {
+      padding: 20px;
+    }
+    .auth-card {
+      background: white;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow-soft);
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--dark-text);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e8e0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      background: white;
+      transition: border 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--bright-green);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(69,211,22,0.1);
+    }
+    /* Dashboard */
+    .dashboard-hero {
+      background: linear-gradient(135deg, var(--lime), var(--bright-green));
+      padding: 20px;
+      border-bottom-left-radius: 30px;
+      border-bottom-right-radius: 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #2d3a2d;
+      border: 3px solid white;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: white;
+    }
+    .rank-card {
+      background: var(--dark-text);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      margin: 16px 0;
+      border: 2px solid var(--lime);
+    }
+    .balance-circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 0 8px var(--light-lime), 0 0 0 12px var(--lime), 0 0 40px rgba(69,211,22,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .balance-label {
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: var(--muted-text);
+      font-weight: 600;
+    }
+    .balance-value {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--dark-text);
+    }
+    .referral-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 16px;
+    }
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 0 20px;
+      margin-bottom: 20px;
+    }
+    .action-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .action-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-soft);
+    }
+    .action-icon.deposit { background: var(--light-lime); }
+    .action-icon.withdraw { background: var(--orange); color: white; }
+    .action-icon.team { background: var(--blue); color: white; }
+    .action-icon.profit { background: var(--purple); color: white; }
+    .action-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--dark-text);
+    }
+    .pending-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow-soft);
+      margin: 0 20px 16px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 0 20px;
+    }
+    .stat-card {
+      border-radius: 16px;
+      padding: 16px;
+      color: white;
+    }
+    .stat-card.green { background: linear-gradient(135deg, var(--bright-green), var(--deep-green)); }
+    .stat-card.orange { background: linear-gradient(135deg, var(--orange), #E57300); }
+    .stat-card.purple { background: linear-gradient(135deg, var(--purple), #5E35B1); }
+    .stat-card.turquoise { background: linear-gradient(135deg, var(--turquoise), #00897B); }
+    /* Plan Grid */
+    .plan-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 0 20px;
+    }
+    .plan-card {
+      background: white;
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: var(--shadow-soft);
+      border: 2px solid #e0e8e0;
+    }
+    .plan-header {
+      font-weight: 800;
+      color: var(--dark-text);
+      margin-bottom: 8px;
+    }
+    .plan-amount {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--deep-green);
+    }
+    /* Drawer */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .drawer-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 280px;
+      height: 100%;
+      background: white;
+      z-index: 300;
+      transition: right 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+    .drawer.active { right: 0; }
+    .drawer-header {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .drawer-items { flex: 1; overflow-y: auto; padding: 10px 0; }
+    .drawer-item {
+      padding: 14px 20px;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-weight: 600;
+      color: var(--dark-text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .drawer-item:hover { background: var(--bg-soft); }
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 500;
+    }
+    .toast {
+      background: var(--dark-text);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      animation: toastIn 0.3s, toastOut 0.3s 2.5s forwards;
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
+  </style>
 </head>
 <body>
-
-    <div class="app-container" id="app">
-        <!-- All screens will be rendered here by JavaScript -->
-    </div>
-
-    <div id="toast-container" class="toast-container"></div>
-
-    <script>
-        // ==========================================
-        // SOLANA TRADING - Full Application
-        // ==========================================
-
-        // ---------- DATA STRUCTURES ----------
-        const PLANS = [
-            { id: 'SOLANA-01', name: 'SOLANA-01', amount: 255, dailyProfit: 56, totalProfit: 3080, referralBonus: 'Level 1: 3%',
-                duration: 55, color: '#48C928' },
-            { id: 'SOLANA-02', name: 'SOLANA-02', amount: 755, dailyProfit: 167, totalProfit: 9185, referralBonus: 'Level 1: 3%',
-                duration: 55, color: '#B9F51A' },
-            { id: 'SOLANA-03', name: 'SOLANA-03', amount: 1500, dailyProfit: 330, totalProfit: 18150,
-                referralBonus: 'Level 1: 3%', duration: 55, color: '#0B5D32' },
-        ];
-
-        const DEFAULT_USER = {
-            id: 'demo-user',
-            username: 'haseebjee',
-            phone: '03001234567',
-            password: 'demo123',
-            balance: 0,
-            referralCode: 'SOLANA-HASEEB-001',
-            referredBy: 'N/A',
-            createdAt: Date.now(),
-            investments: [],
-            transactions: [],
-            withdrawals: [],
-            deposits: [],
-            team: [],
-            verified: false,
-        };
-
-        // ---------- STATE ----------
-        let state = {
-            currentPage: 'landing',
-            user: null,
-            isLoggedIn: false,
-            selectedPlan: null,
-            activeModal: null,
-            toastId: 0,
-            timerInterval: null,
-        };
-
-        // ---------- LOCAL STORAGE ----------
-        function saveState() {
-            localStorage.setItem('solana_trading_state', JSON.stringify({
-                user: state.user,
-                isLoggedIn: state.isLoggedIn,
-                currentPage: state.currentPage,
-            }));
+<div class="app-container" id="app"></div>
+<div class="toast-container" id="toastContainer"></div>
+<script>
+  // ------------------- Data & State -------------------
+  const PLAN_DATA = [
+    { id: 1, name: 'Plan 1', oldPrice: 255, newPrice: 605, dailyProfit: 173, send: 350 },
+    { id: 2, name: 'Plan 2', oldPrice: 755, newPrice: 1405, dailyProfit: 401, send: 650 },
+    { id: 3, name: 'Plan 3', oldPrice: 1455, newPrice: 2405, dailyProfit: 687, send: 950 },
+    { id: 4, name: 'Plan 4', oldPrice: 2255, newPrice: 3605, dailyProfit: 1030, send: 1350 },
+    { id: 5, name: 'Plan 5', oldPrice: 3355, newPrice: 5205, dailyProfit: 1487, send: 1850 },
+    { id: 6, name: 'Plan 6', oldPrice: 4155, newPrice: 6605, dailyProfit: 1887, send: 2450 },
+    { id: 7, name: 'Plan 7', oldPrice: 7255, newPrice: 10805, dailyProfit: 3087, send: 3550 },
+    { id: 8, name: 'Plan 8', oldPrice: 9855, newPrice: 15105, dailyProfit: 4316, send: 5250 },
+    { id: 9, name: 'Plan 9', oldPrice: 16555, newPrice: 24805, dailyProfit: 7087, send: 8250 },
+    { id: 10, name: 'Plan 10', oldPrice: 24555, newPrice: 36805, dailyProfit: 10516, send: 12250 },
+    { id: 11, name: 'Plan 11', oldPrice: 34555, newPrice: 51805, dailyProfit: 14802, send: 17250 },
+    { id: 12, name: 'Plan 12', oldPrice: 46555, newPrice: 70805, dailyProfit: 20230, send: 24250 },
+    { id: 13, name: 'Plan 13', oldPrice: 0, newPrice: 0, dailyProfit: 0, send: 0 }, // demo placeholder
+    { id: 14, name: 'Plan 14', oldPrice: 0, newPrice: 0, dailyProfit: 0, send: 0 },
+    { id: 15, name: 'Plan 15', oldPrice: 0, newPrice: 0, dailyProfit: 0, send: 0 },
+    { id: 16, name: 'Plan 16', oldPrice: 0, newPrice: 0, dailyProfit: 0, send: 0 },
+  ];
+  let state = {
+    user: null,
+    isLoggedIn: false,
+    currentPage: 'landing',
+    selectedPlan: null,
+  };
+  function loadState() {
+    const saved = localStorage.getItem('solanaState');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      state = { ...state, ...parsed };
+    }
+    if (state.isLoggedIn && state.user) {
+      state.currentPage = 'dashboard';
+    }
+  }
+  function saveState() {
+    localStorage.setItem('solanaState', JSON.stringify({
+      user: state.user,
+      isLoggedIn: state.isLoggedIn,
+      currentPage: state.currentPage,
+    }));
+  }
+  function showToast(message) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+  function formatCurrency(amount) {
+    return 'Rs ' + Number(amount).toLocaleString('en-PK');
+  }
+  // ------------------- Navigation -------------------
+  function navigateTo(page) {
+    if (!state.isLoggedIn && page !== 'landing' && page !== 'login' && page !== 'register') {
+      page = 'login';
+    }
+    state.currentPage = page;
+    saveState();
+    render();
+  }
+  // ------------------- Render -------------------
+  function render() {
+    const app = document.getElementById('app');
+    app.innerHTML = '';
+    switch(state.currentPage) {
+      case 'landing': renderLanding(app); break;
+      case 'login': renderLogin(app); break;
+      case 'register': renderRegister(app); break;
+      case 'dashboard': renderDashboard(app); break;
+      case 'plans': renderPlans(app); break;
+      case 'deposit': renderDeposit(app); break;
+      case 'withdraw': renderWithdraw(app); break;
+      case 'team': renderTeam(app); break;
+      case 'profit': renderProfit(app); break;
+      case 'transactions': renderTransactions(app); break;
+      case 'profile': renderProfile(app); break;
+      case 'verification': renderVerification(app); break;
+      default: renderDashboard(app);
+    }
+  }
+  // ------------------- Components -------------------
+  function renderHeader(app, backBtn=false) {
+    return `
+      <div class="app-header">
+        <div class="logo-container">
+          <div class="logo-icon"><i data-lucide="leaf"></i></div>
+          <div class="logo-text">
+            <span class="logo-name">SOLANA</span>
+            <span class="logo-sub">TRADING</span>
+          </div>
+        </div>
+        <button class="hamburger-btn" onclick="toggleDrawer()"><i data-lucide="menu"></i></button>
+      </div>
+      ${backBtn ? `<button class="btn-secondary" onclick="navigateTo('dashboard')" style="margin:10px 20px;">← Back</button>` : ''}
+    `;
+  }
+  function renderDrawer() {
+    const drawerItems = [
+      { label: 'Dashboard', icon: 'layout-dashboard', page: 'dashboard' },
+      { label: 'Investment Plans', icon: 'trending-up', page: 'plans' },
+      { label: 'Deposit', icon: 'wallet', page: 'deposit' },
+      { label: 'Withdraw', icon: 'banknote', page: 'withdraw' },
+      { label: 'My Team', icon: 'users', page: 'team' },
+      { label: 'Next Profit', icon: 'clock', page: 'profit' },
+      { label: 'Transactions', icon: 'receipt', page: 'transactions' },
+      { label: 'Profile', icon: 'user', page: 'profile' },
+      { label: 'Verification', icon: 'shield-check', page: 'verification' },
+      { label: 'Logout', icon: 'log-out', page: 'logout' },
+    ];
+    return `
+      <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer(false)"></div>
+      <div class="drawer" id="drawer">
+        <div class="drawer-header">
+          <span style="font-weight:800;font-size:1.2rem;color:var(--dark-text)">Menu</span>
+          <button class="btn-secondary" onclick="toggleDrawer(false)">✕</button>
+        </div>
+        <div class="drawer-items">
+          ${drawerItems.map(item => `
+            <button class="drawer-item" onclick="handleDrawerNavigation('${item.page}')">
+              <i data-lucide="${item.icon}"></i> ${item.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  function toggleDrawer(show) {
+    const overlay = document.getElementById('drawerOverlay');
+    const drawer = document.getElementById('drawer');
+    if (overlay && drawer) {
+      const isActive = show !== undefined ? show : !drawer.classList.contains('active');
+      overlay.classList.toggle('active', isActive);
+      drawer.classList.toggle('active', isActive);
+    }
+    lucide.createIcons();
+  }
+  function handleDrawerNavigation(page) {
+    toggleDrawer(false);
+    if (page === 'logout') {
+      logout();
+    } else {
+      navigateTo(page);
+    }
+  }
+  function logout() {
+    state.isLoggedIn = false;
+    state.user = null;
+    saveState();
+    navigateTo('landing');
+  }
+  // ------------------- Pages -------------------
+  function renderLanding(app) {
+    app.innerHTML = `
+      ${renderHeader(app)}
+      <div class="landing-hero">
+        <div class="hero-badge">SMARTER GROWTH STARTS HERE</div>
+        <h1 class="hero-title">Invest today.<span>Grow brighter.</span></h1>
+        <div class="nav-buttons">
+          <button class="nav-btn register" onclick="navigateTo('register')">Register →</button>
+          <button class="nav-btn login" onclick="navigateTo('login')">Login</button>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;justify-content:center;">
+          <span style="color:white;font-size:0.8rem;">✅ Secure signup</span>
+          <span style="color:white;font-size:0.8rem;">⚡ Quick start</span>
+          <span style="color:white;font-size:0.8rem;">📈 Clear returns</span>
+        </div>
+        <div style="color:white;font-size:0.75rem;margin-top:16px;">Ranking System Ahead</div>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  function renderLogin(app) {
+    app.innerHTML = `
+      ${renderHeader(app, true)}
+      <div class="auth-container">
+        <div class="auth-card">
+          <h2 style="font-weight:900;color:var(--dark-text);margin-bottom:8px;">Welcome back</h2>
+          <p style="color:var(--muted-text);margin-bottom:20px;">Sign in to check your balance, plans and referral rewards.</p>
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-input" id="loginUsername" placeholder="Enter username or email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="loginPassword" placeholder="Enter password">
+          </div>
+          <button class="btn-primary" style="width:100%;" onclick="handleLogin()">LOGIN</button>
+        </div>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  function renderRegister(app) {
+    app.innerHTML = `
+      ${renderHeader(app, true)}
+      <div class="auth-container">
+        <div class="auth-card">
+          <h2 style="font-weight:900;color:var(--dark-text);margin-bottom:8px;">Create Account</h2>
+          <p style="color:var(--muted-text);margin-bottom:20px;">Fill in your details to get started.</p>
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-input" id="regUsername" placeholder="Enter username">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-input" id="regPhone" placeholder="03xx xxxxxxx">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="regPassword" placeholder="Password">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" class="form-input" id="regConfirm" placeholder="Confirm password">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Referral Code</label>
+            <input type="text" class="form-input" id="regReferral" placeholder="Optional">
+          </div>
+          <button class="btn-primary" style="width:100%;" onclick="handleRegister()">REGISTER</button>
+        </div>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  function renderDashboard(app) {
+    if (!state.user) return;
+    const user = state.user;
+    app.innerHTML = `
+      ${renderHeader(app)}
+      <div class="dashboard-hero">
+        <div class="avatar">${user.username[0].toUpperCase()}</div>
+        <div style="font-size:1.2rem;color:var(--dark-text);font-weight:600;margin-top:8px;">Welcome back,</div>
+        <div style="font-size:1.8rem;font-weight:900;color:var(--dark-text);">${user.username}</div>
+        <div class="rank-card">
+          <span>⭐ Rank</span>
+          <span style="font-weight:700;">CURRENT RANK • Start</span>
+          <span>→</span>
+        </div>
+      </div>
+      <div style="padding:0 20px;">
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <div style="flex:1;background:white;border-radius:16px;padding:14px;box-shadow:var(--shadow-soft);">
+            <div style="font-size:0.7rem;color:var(--muted-text);">USER NAME</div>
+            <div style="font-weight:700;">${user.username}</div>
+          </div>
+          <div style="flex:1;background:white;border-radius:16px;padding:14px;box-shadow:var(--shadow-soft);">
+            <div style="font-size:0.7rem;color:var(--muted-text);">REFERRED BY</div>
+            <div style="font-weight:700;">${user.referredBy || 'N/A'}</div>
+          </div>
+        </div>
+        <div class="balance-circle">
+          <span class="balance-label">AVAILABLE BALANCE</span>
+          <span class="balance-value">${formatCurrency(user.balance)}</span>
+        </div>
+        <div class="referral-card">
+          <div style="flex:1;">
+            <span style="font-size:0.7rem;color:var(--muted-text);">YOUR REFERRAL LINK</span>
+            <div style="font-size:0.8rem;font-weight:600;color:var(--dark-text);">https://solanatrading.pk/register/${user.referralCode}</div>
+          </div>
+          <button class="btn-secondary" style="padding:8px 12px;" onclick="copyReferral()">Copy</button>
+        </div>
+        <div class="action-grid">
+          <div class="action-item" onclick="navigateTo('deposit')">
+            <div class="action-icon deposit"><i data-lucide="wallet"></i></div>
+            <span class="action-label">Deposit</span>
+            <span style="font-size:0.6rem;color:var(--muted-text);">Add funds</span>
+          </div>
+          <div class="action-item" onclick="navigateTo('withdraw')">
+            <div class="action-icon withdraw"><i data-lucide="banknote"></i></div>
+            <span class="action-label">Withdraw</span>
+            <span style="font-size:0.6rem;color:var(--muted-text);">Cash out</span>
+          </div>
+          <div class="action-item" onclick="navigateTo('team')">
+            <div class="action-icon team"><i data-lucide="users"></i></div>
+            <span class="action-label">My Team</span>
+            <span style="font-size:0.6rem;color:var(--muted-text);">View members</span>
+          </div>
+          <div class="action-item" onclick="navigateTo('profit')">
+            <div class="action-icon profit"><i data-lucide="clock"></i></div>
+            <span class="action-label">Next Profit</span>
+            <span style="font-size:0.6rem;color:var(--muted-text);">View schedule</span>
+          </div>
+        </div>
+        <div class="pending-card">
+          <div style="font-weight:800;margin-bottom:10px;">PENDING REQUESTS <span style="background:var(--bright-green);color:white;padding:2px 8px;border-radius:10px;font-size:0.7rem;">LIVE</span></div>
+          <div style="display:flex;gap:10px;">
+            <div style="flex:1;background:var(--light-lime);border-radius:12px;padding:12px;">
+              <span style="font-size:0.7rem;">DEPOSIT PENDING</span>
+              <div style="font-weight:800;">Rs 0</div>
+              <span style="font-size:0.7rem;">0 requests</span>
+            </div>
+            <div style="flex:1;background:#FFEBCC;border-radius:12px;padding:12px;">
+              <span style="font-size:0.7rem;">WITHDRAW PENDING</span>
+              <div style="font-weight:800;">Rs 0</div>
+              <span style="font-size:0.7rem;">0 requests</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-weight:800;margin:16px 0 10px;">Account Statistics</div>
+        <div class="stats-grid">
+          <div class="stat-card green" onclick="navigateTo('plans')">
+            <div>TOTAL INVEST</div>
+            <div style="font-size:1.5rem;font-weight:900;">${formatCurrency(user.totalInvest || 0)}</div>
+            <div>${user.activeInvestments ? user.activeInvestments.length : 0} active</div>
+          </div>
+          <div class="stat-card orange">
+            <div>WITHDRAW</div>
+            <div style="font-size:1.5rem;font-weight:900;">${formatCurrency(user.totalWithdraw || 0)}</div>
+            <div>Paid</div>
+          </div>
+          <div class="stat-card purple">
+            <div>REFER BONUS</div>
+            <div style="font-size:1.5rem;font-weight:900;">Rs 0</div>
+            <div>${user.team ? user.team.length : 0} members</div>
+          </div>
+          <div class="stat-card turquoise">
+            <div>TOTAL EARNING</div>
+            <div style="font-size:1.5rem;font-weight:900;">${formatCurrency(user.totalEarning || 0)}</div>
+            <div>Profit earned</div>
+          </div>
+        </div>
+        <div style="margin:20px 0;">
+          <button class="btn-primary" style="width:100%;" onclick="navigateTo('plans')">VIEW INVESTMENT PLANS</button>
+        </div>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  function renderPlans(app) {
+    app.innerHTML = `
+      ${renderHeader(app, true)}
+      <div style="padding:20px;">
+        <h2 style="font-weight:900;color:var(--dark-text);">Investment Plans</h2>
+        <div class="plan-grid" style="margin-top:16px;">
+          ${PLAN_DATA.map(plan => `
+            <div class="plan-card" onclick="selectPlan('${plan.id}')">
+              <div class="plan-header">${plan.name}</div>
+              <div>Old: <span class="plan-amount">Rs ${plan.oldPrice}</span></div>
+              <div>New: <span class="plan-amount">Rs ${plan.newPrice}</span></div>
+              <div>Daily: <span class="plan-amount">Rs ${plan.dailyProfit}</span></div>
+              <div style="text-align:center;margin-top:8px;">
+                <span style="background:var(--lime);padding:4px 8px;border-radius:8px;font-weight:700;">SEND Rs ${plan.send}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  function selectPlan(planId) {
+    const plan = PLAN_DATA.find(p => p.id == planId);
+    if (!plan) return;
+    state.selectedPlan = plan;
+    openModal(`
+      <h3 style="font-weight:900;">${plan.name}</h3>
+      <p>Old Price: Rs ${plan.oldPrice}</p>
+      <p>New Price: Rs ${plan.newPrice}</p>
+      <p>Daily Profit: Rs ${plan.dailyProfit}</p>
+      <button class="btn-primary" style="width:100%;margin-top:16px;" onclick="confirmPlan()">CONFIRM</button>
+    `);
+  }
+  function confirmPlan() {
+    if (!state.selectedPlan || !state.user) return;
+    const plan = state.selectedPlan;
+    if (state.user.balance < plan.newPrice) {
+      showToast('Insufficient balance');
+      return;
+    }
+    state.user.balance -= plan.newPrice;
+    if (!state.user.investments) state.user.investments = [];
+    state.user.investments.push({
+      planId: plan.id,
+      planName: plan.name,
+      amount: plan.newPrice,
+      dailyProfit: plan.dailyProfit,
+      createdAt: Date.now(),
+      completedDays: 0,
+      durationDays: 55,
+      nextProfitAt: Date.now() + 24*60*60*1000,
+      status: 'active'
+    });
+    if (!state.user.transactions) state.user.transactions = [];
+    state.user.transactions.push({ type: 'Investment', amount: plan.newPrice, status: 'Completed', timestamp: Date.now() });
+    state.user.totalInvest = (state.user.totalInvest || 0) + plan.newPrice;
+    saveState();
+    closeModal();
+    showToast('Investment successful!');
+    navigateTo('profit');
+  }
+  function renderDeposit(app) {
+    app.innerHTML = `
+      ${renderHeader(app, true)}
+      <div style="padding:20px;">
+        <h2 style="font-weight:900;color:var(--dark-text);">Deposit</h2>
+        <div class="referral-card" style="margin-top:16px;">
+          <div style="flex:1;">
+            <span style="font-size:0.7rem;color:var(--muted-text);">AVAILABLE BALANCE</span>
+            <div style="font-size:1.5rem;font-weight:900;">${formatCurrency(state.user ? state.user.balance : 0)}</div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:16px;">
+          <label class="form-label">Amount</label>
+          <input type="number" class="form-input" id="depositAmount" placeholder="Enter amount">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transaction Reference</label>
+          <input type="text" class="form-input" id="depositTID" placeholder="Enter TID">
+        </div>
+        <button class="btn-primary" style="width:100%;" onclick="submitDeposit()">Submit Deposit</button>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  function submitDeposit() {
+    const amount = parseFloat(document.getElementById('depositAmount').value);
+    const tid = document.getElementById('depositTID').value.trim();
+    if (!amount || amount <= 0 || !tid) {
+      showToast('Please fill all fields');
+      return;
+    }
+    if (!state.user) return;
+    if (!state.user.deposits) state.user.deposits = [];
+    state.user.deposits.push({ amount, tid, status: 'pending', timestamp: Date.now() });
+    if (!state.user.transactions) state.user.transactions = [];
+    state.user.transactions.push({ type: 'Deposit', amount, status: 'Pending', timestamp: Date.now() });
+    saveState();
+    showToast('Deposit submitted for verification');
+    navigateTo('dashboard');
+  }
+  function renderWithdraw(app) {
+    app.innerHTML = `
+      ${renderHeader(app, true)}
+      <div style="padding:20px;">
+        <h2 style="font-weight:900;color:var(--dark-text);">Withdraw</h2>
+        <div class="referral-card" style="margin-top:16px;">
+          <div style="flex:1;">
+            <span style="font-size:0.7rem;color:var(--muted-text);">AVAILABLE BALANCE</span>
+            <div style="font-size:1.5rem;font-weight:900;">${formatCurrency(state.user ? state.user.balance : 0)}</div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:16px;">
+          <label class="form-label">Amount</label>
+          <input type="number" class="form-input" id="withdrawAmount" placeholder="Enter amount">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account Number / Phone</label>
+          <input type="text" class="form-input" id="withdrawAccount" placeholder="03xx xxxxxxx">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account Holder Name</label>
+          <input type="text" class="form-input" id="withdrawName" placeholder="Enter name">
+        </div>
+        <button class="btn-primary" style="width:100%;" onclick="submitWithdraw()">Submit Withdrawal</button>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  function submitWithdraw() {
+    const amount = parseFloat(document.getElementById('withdrawAmount').value);
+    const account = document.getElementById('withdrawAccount').value.trim();
+    const name = document.getElementById('withdrawName').value.trim();
+    if (!amount || amount <= 0 || !account || !name) {
+      showToast('Please fill all fields');
+      return;
+    }
+    if (!state.user) return;
+    if (amount > state.user.balance) {
+      showToast('Insufficient balance');
+      return;
+    }
+    state.user.balance -= amount;
+    if (!state.user.withdrawals) state.user.withdrawals = [];
+    state.user.withdrawals.push({ amount, account, name, status: 'pending', timestamp: Date.now() });
+    if (!state.user.transactions) state.user.transactions = [];
+    state.user.transactions.push({ type: 'Withdrawal', amount, status: 'Pending', timestamp: Date.now() });
+    state.user.totalWithdraw = (state.user.totalWithdraw || 0) + amount;
+    saveState();
+    showToast('Withdrawal request submitted');
+    navigateTo('dashboard');
+  }
+  function renderTeam(app) {
+    app.innerHTML = `
+      ${renderHeader(app, true)}
+      <div style="padding:20px;">
+        <h2 style="font-weight:900;color:var(--dark-text);">My Team</h2>
+        <div class="referral-card" style="margin-top:16px;">
+          <div style="flex:1;"><span style="font-size:0.7rem;">TOTAL MEMBERS</span><div style="font-size:1.5rem;font-weight:900;">${state.user.team ? state.user.team.length : 0}</div></div>
+          <div style="flex:1;"><span style="font-size:0.7rem;">DIRECT MEMBERS</span><div style="font-size:1.5rem;font-weight:900;">0</div></div>
+          <div style="flex:1;"><span style="font-size:0.7rem;">TEAM EARNINGS</span><div style="font-size:1.5rem;font-weight:900;">Rs 0</div></div>
+        </div>
+        <div style="margin-top:16px;">
+          <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <button class="btn-secondary" style="flex:1;">Level 1</button>
+            <button class="btn-secondary" style="flex:1;">Level 2</button>
+            <button class="btn-secondary" style="flex:1;">Level 3</button>
+          </div>
+          ${state.user.team && state.user.team.length > 0 ? state.user.team.map(m => `
+            <div class="referral-card" style="margin-bottom:8px;">
+              <div style="flex:1;"><strong>${m.username}</strong><br><span style="font-size:0.7rem;">${m.level}</span></div>
+              <span style="font-size:0.8rem;">${m.status}</span>
+            </div>
+          `).join('') : '<p style="color:var(--muted-text);text-align:center;">No team members yet.</p>'}
+        </div>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  function renderProfit(app) {
+    const user = state.user;
+    if (!user) return;
+    const activeInvest = user.investments ? user.investments.find(i => i.status === 'active') : null;
+    app.innerHTML = `
+      ${renderHeader(app, true)}
+      <div style="padding:20px;">
+        <h2 style="font-weight:900;color:var(--dark-text);">Next Profit</h2>
+        ${activeInvest ? `
+          <div class="balance-circle" style="margin:30px auto;">
+            <span class="balance-label">NEXT PROFIT</span>
+            <span class="balance-value">${formatCurrency(activeInvest.dailyProfit)}</span>
+            <span id="profitTimer" style="font-size:1.2rem;font-weight:700;">--:--:--</span>
+          </div>
+          <div style="text-align:center;margin-top:16px;">
+            <div>DAY ${activeInvest.completedDays} / ${activeInvest.durationDays}</div>
+            <div style="background:#eee;height:8px;border-radius:10px;margin:8px 0;overflow:hidden;">
+              <div style="width:${(activeInvest.completedDays/activeInvest.durationDays)*100}%;background:var(--bright-green);height:100%;"></div>
+            </div>
+          </div>
+        ` : '<p style="color:var(--muted-text);text-align:center;">No active investment.</p>'}
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+    if (activeInvest) startProfitTimer(activeInvest);
+  }
+  function startProfitTimer(investment) {
+    clearInterval(window.timerInterval);
+    const timerEl = document.getElementById('profitTimer');
+    if (!timerEl) return;
+    function updateTimer() {
+      const now = Date.now();
+      const diff = investment.nextProfitAt - now;
+      if (diff <= 0) {
+        if (state.user) {
+          state.user.balance += investment.dailyProfit;
+          investment.completedDays += 1;
+          investment.nextProfitAt = now + 24*60*60*1000;
+          if (investment.completedDays >= investment.durationDays) investment.status = 'completed';
+          if (!state.user.transactions) state.user.transactions = [];
+          state.user.transactions.push({ type: 'Profit', amount: investment.dailyProfit, status: 'Completed', timestamp: now });
+          state.user.totalEarning = (state.user.totalEarning || 0) + investment.dailyProfit;
+          saveState();
+          showToast('Profit credited!');
+          render();
         }
-
-        function loadState() {
-            const saved = localStorage.getItem('solana_trading_state');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                state.user = parsed.user || null;
-                state.isLoggedIn = parsed.isLoggedIn || false;
-                state.currentPage = parsed.currentPage || 'landing';
-                if (state.isLoggedIn && state.user) {
-                    state.currentPage = 'dashboard';
-                }
-            } else {
-                state.user = null;
-                state.isLoggedIn = false;
-                state.currentPage = 'landing';
-            }
-        }
-
-        // ---------- UTILITY FUNCTIONS ----------
-        function formatCurrency(amount) {
-            return `Rs${Number(amount).toLocaleString('en-PK')}`;
-        }
-
-        function generateReferralCode() {
-            return 'SOLANA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-        }
-
-        function showToast(message) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-        function navigateTo(page) {
-            state.currentPage = page;
-            if (state.isLoggedIn && (page === 'landing' || page === 'register' || page === 'login')) {
-                state.currentPage = 'dashboard';
-            }
-            if (!state.isLoggedIn && page !== 'landing' && page !== 'register' && page !== 'login') {
-                state.currentPage = 'login';
-            }
-            render();
-            saveState();
-        }
-
-        // ---------- RENDER ENGINE ----------
-        function render() {
-            const app = document.getElementById('app');
-            const page = state.currentPage;
-
-            if (page === 'landing') {
-                renderLanding(app);
-            } else if (page === 'register') {
-                renderAuthPage(app, 'register');
-            } else if (page === 'login') {
-                renderAuthPage(app, 'login');
-            } else if (page === 'dashboard') {
-                renderDashboard(app);
-            } else if (page === 'deposit') {
-                renderDeposit(app);
-            } else if (page === 'withdraw') {
-                renderWithdraw(app);
-            } else if (page === 'team') {
-                renderTeam(app);
-            } else if (page === 'profit') {
-                renderProfit(app);
-            } else if (page === 'transactions') {
-                renderTransactions(app);
-            } else if (page === 'profile') {
-                renderProfile(app);
-            } else if (page === 'verification') {
-                renderVerification(app);
-            } else {
-                renderDashboard(app);
-            }
-        }
-
-        // ---------- LANDING PAGE ----------
-        function renderLanding(app) {
-            app.innerHTML = `
-                <div class="landing-page">
-                    <div class="deco-circle"></div>
-                    <div class="deco-circle"></div>
-                    <div class="deco-circle"></div>
-                    <nav class="landing-nav">
-                        <div class="logo-container">
-                            <div class="logo-icon">
-                                <svg viewBox="0 0 24 24"><path d="M12 2L4 6v12l8 4 8-4V6l-8-4z"/><circle cx="12" cy="10" r="2" fill="#0B5D32"/><path d="M12 14c-2 0-4-1-4-3s2-3 4-3 4 1 4 3-2 3-4 3z" fill="#0B5D32"/></svg>
-                            </div>
-                            <div class="logo-text">
-                                <span class="logo-name">Solana</span>
-                                <span class="logo-sub">Trading</span>
-                            </div>
-                        </div>
-                        <div class="landing-nav-right">
-                            <button class="btn-login-nav" onclick="navigateTo('login')">Login</button>
-                            <button class="btn-register-nav" onclick="navigateTo('register')">Register →</button>
-                        </div>
-                    </nav>
-                    <div class="hero-section">
-                        <div class="hero-badge">SMARTER GROWTH STARTS HERE</div>
-                        <h1 class="hero-headline">Invest today.<span>Grow brighter.</span></h1>
-                        <div class="hero-cta">
-                            <button class="btn-primary" onclick="navigateTo('register')">Register account →</button>
-                            <button class="btn-secondary" onclick="navigateTo('login')">Login</button>
-                        </div>
-                        <div class="hero-benefits">
-                            <span class="benefit-item">✅ Secure signup</span>
-                            <span class="benefit-item">⚡ Quick start</span>
-                            <span class="benefit-item">📈 Clear returns</span>
-                        </div>
-                        <div class="hero-footer-text">Ranking System Ahead</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // ---------- AUTH PAGE ----------
-        function renderAuthPage(app, type) {
-            const isRegister = type === 'register';
-            app.innerHTML = `
-                <div class="auth-page">
-                    <div class="auth-header">
-                        <div class="auth-logo-icon">
-                            <svg viewBox="0 0 24 24"><path d="M12 2L4 6v12l8 4 8-4V6l-8-4z"/><circle cx="12" cy="10" r="2" fill="#D7FF19"/></svg>
-                        </div>
-                        <span class="auth-logo-text">SOLANA</span>
-                    </div>
-                    <h1 class="auth-heading">${isRegister ? 'Create Account' : 'Login'}</h1>
-                    <p class="auth-sub">${isRegister ? 'Fill in your details to get started.' : 'Login to access your account.'}</p>
-                    ${isRegister ? `
-                    <div class="form-group">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-input" id="reg-username" placeholder="@ username">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Phone Number</label>
-                        <input type="tel" class="form-input" id="reg-phone" placeholder="03xx xxxxxxx">
-                    </div>
-                    ` : `
-                    <div class="form-group">
-                        <label class="form-label">Username/Phone</label>
-                        <input type="text" class="form-input" id="login-username" placeholder="Username or phone number">
-                    </div>
-                    `}
-                    <div class="form-group">
-                        <label class="form-label">Password</label>
-                        <div class="password-wrapper">
-                            <input type="password" class="form-input" id="${isRegister ? 'reg-password' : 'login-password'}" placeholder="Password">
-                            <button class="password-toggle" onclick="togglePassword('${isRegister ? 'reg-password' : 'login-password'}')">👁</button>
-                        </div>
-                    </div>
-                    <button class="btn-primary" onclick="${isRegister ? 'handleRegister()' : 'handleLogin()'}">
-                        ${isRegister ? 'Create Account' : 'Login'}
-                    </button>
-                    <button class="btn-secondary" style="margin-top:12px;border-color:var(--primary-green);color:var(--dark-text);" onclick="navigateTo('${isRegister ? 'login' : 'register'}')">
-                        ${isRegister ? 'Already have an account? Login' : 'Create new account'}
-                    </button>
-                    <button class="btn-secondary" style="margin-top:8px;border-color:transparent;color:var(--muted-text);" onclick="navigateTo('landing')">
-                        ← Back
-                    </button>
-                </div>
-            `;
-        }
-
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            if (input.type === 'password') {
-                input.type = 'text';
-            } else {
-                input.type = 'password';
-            }
-        }
-
-        function handleRegister() {
-            const username = document.getElementById('reg-username').value.trim();
-            const phone = document.getElementById('reg-phone').value.trim();
-            const password = document.getElementById('reg-password').value;
-
-            if (!username || !phone || !password) {
-                showToast('Please fill all fields');
-                return;
-            }
-
-            state.user = {
-                ...DEFAULT_USER,
-                username,
-                phone,
-                password,
-                referralCode: generateReferralCode(),
-                id: 'user-' + Date.now(),
-            };
-
-            state.isLoggedIn = true;
-            saveState();
-            showToast('Account created successfully!');
-            navigateTo('dashboard');
-        }
-
-        function handleLogin() {
-            const identifier = document.getElementById('login-username').value.trim();
-            const password = document.getElementById('login-password').value;
-
-            if (!identifier || !password) {
-                showToast('Please fill all fields');
-                return;
-            }
-
-            // Demo login
-            const saved = JSON.parse(localStorage.getItem('solana_trading_state') || '{}');
-            if (saved.user && (saved.user.username === identifier || saved.user.phone === identifier || saved.user
-                    .email === identifier) && saved.user.password === password) {
-                state.user = saved.user;
-                state.isLoggedIn = true;
-                saveState();
-                showToast('Login successful!');
-                navigateTo('dashboard');
-            } else if (identifier === 'demo' && password === 'demo123') {
-                state.user = { ...DEFAULT_USER, id: 'demo-' + Date.now() };
-                state.isLoggedIn = true;
-                saveState();
-                showToast('Demo login successful!');
-                navigateTo('dashboard');
-            } else {
-                showToast('Invalid credentials');
-            }
-        }
-
-        // ---------- DASHBOARD ----------
-        function renderDashboard(app) {
-            const user = state.user || DEFAULT_USER;
-            const balance = user.balance || 0;
-
-            app.innerHTML = `
-                <div class="dashboard-page">
-                    <header class="dash-header">
-                        <div class="dash-logo">
-                            <div class="dash-logo-icon">
-                                <svg viewBox="0 0 24 24"><path d="M12 2L4 6v12l8 4 8-4V6l-8-4z"/><circle cx="12" cy="10" r="2" fill="#D7FF19"/></svg>
-                            </div>
-                            <span class="dash-logo-text">Solana</span>
-                        </div>
-                        <button class="hamburger-btn" onclick="toggleDrawer(true)">
-                            <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
-                        </button>
-                    </header>
-                    <div class="green-strip">
-                        <span class="green-strip-text">Solana Capital</span>
-                        <span class="green-strip-badge">● Online</span>
-                    </div>
-                    <div class="user-info-card">
-                        <div class="user-info-item">
-                            <span class="user-info-label">USER NAME</span>
-                            <span class="user-info-value">${user.username}</span>
-                        </div>
-                        <div class="user-info-item">
-                            <span class="user-info-label">REFERRED BY</span>
-                            <span class="user-info-value">${user.referredBy}</span>
-                        </div>
-                    </div>
-                    <div class="balance-circle-wrapper">
-                        <div class="balance-circle">
-                            <span class="balance-label">AVAILABLE BALANCE</span>
-                            <span class="balance-value" id="balance-display">${formatCurrency(balance)}</span>
-                        </div>
-                    </div>
-                    <div class="referral-card">
-                        <span class="referral-label">YOUR REFERRAL LINK</span>
-                        <div class="referral-link-row">
-                            <input type="text" class="referral-link-input" value="https://solanatrading.pk/register/${user.referralCode}" readonly id="ref-link">
-                            <button class="copy-btn" onclick="copyReferral()">Copy</button>
-                        </div>
-                    </div>
-                    <div class="action-grid">
-                        <div class="action-item" onclick="navigateTo('deposit')">
-                            <div class="action-icon"><svg class="icon-deposit" viewBox="0 0 24 24"><path d="M12 2l7 7h-4v5h-6V9H5l7-7zm-8 12h16v2H4v-2zm0 4h12v2H4v-2z"/></svg></div>
-                            <span class="action-label">Deposit</span>
-                        </div>
-                        <div class="action-item" onclick="navigateTo('withdraw')">
-                            <div class="action-icon"><svg class="icon-withdraw" viewBox="0 0 24 24"><path d="M12 22l-7-7h4v-5h6v5h4l-7 7zM4 4h16v2H4V4zm0 4h12v2H4V8z"/></svg></div>
-                            <span class="action-label">Withdraw</span>
-                        </div>
-                        <div class="action-item" onclick="navigateTo('team')">
-                            <div class="action-icon"><svg class="icon-team" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V20h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
-                            <span class="action-label">My Team</span>
-                        </div>
-                        <div class="action-item" onclick="navigateTo('profit')">
-                            <div class="action-icon"><svg class="icon-profit" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm1-13h-2v6H8l4 4 4-4h-3V7z"/></svg></div>
-                            <span class="action-label">Next Profit</span>
-                        </div>
-                    </div>
-                    <div class="action-grid">
-                        <div class="action-item" onclick="navigateTo('admin')">
-                            <div class="action-icon"><svg class="icon-admin" viewBox="0 0 24 24"><path d="M12 2L4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3zm0 14c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></div>
-                            <span class="action-label">Admin</span>
-                        </div>
-                        <div class="action-item" onclick="openChannel()">
-                            <div class="action-icon"><svg class="icon-channel" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-                            <span class="action-label">Channel</span>
-                        </div>
-                        <div class="action-item" onclick="showToast('App coming soon')">
-                            <div class="action-icon"><svg class="icon-app" viewBox="0 0 24 24"><path d="M17 1H7C5.9 1 5 1.9 5 3v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm0 18H7V5h10v14z"/></svg></div>
-                            <span class="action-label">App</span>
-                        </div>
-                        <div class="action-item" onclick="navigateTo('verification')">
-                            <div class="action-icon"><svg class="icon-verify" viewBox="0 0 24 24"><path d="M12 2L4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3zm-2 16l-4-4 1.41-1.41L10 15.17l6.59-6.59L18 10l-8 8z"/></svg></div>
-                            <span class="action-label">Verification</span>
-                        </div>
-                    </div>
-                    <div class="investments-section">
-                        <h2 class="section-title">Investment Plans</h2>
-                        ${PLANS.map(plan => `
-                            <div class="plan-card">
-                                <div class="plan-name">${plan.name}</div>
-                                <div class="plan-amount">${formatCurrency(plan.amount)}</div>
-                                <div class="plan-stats">
-                                    <div class="plan-stat"><span class="plan-stat-label">Daily Profit</span><span class="plan-stat-value">${formatCurrency(plan.dailyProfit)}</span></div>
-                                    <div class="plan-stat"><span class="plan-stat-label">Total Profit</span><span class="plan-stat-value">${formatCurrency(plan.totalProfit)}</span></div>
-                                    <div class="plan-stat"><span class="plan-stat-label">Refer Bonus</span><span class="plan-stat-value">${plan.referralBonus}</span></div>
-                                    <div class="plan-stat"><span class="plan-stat-label">Duration</span><span class="plan-stat-value">${plan.duration} DAYS</span></div>
-                                </div>
-                                <button class="invest-btn" onclick="openInvestModal('${plan.id}')">
-                                    INVEST NOW <span>→</span>
-                                </button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ${renderDrawer()}
-                ${renderInvestModal()}
-            `;
-        }
-
-        function copyReferral() {
-            const input = document.getElementById('ref-link');
-            input.select();
-            document.execCommand('copy');
-            showToast('Copied successfully!');
-        }
-
-        // ---------- DRAWER ----------
-        function toggleDrawer(show) {
-            const overlay = document.getElementById('drawer-overlay');
-            const drawer = document.getElementById('drawer');
-            if (overlay && drawer) {
-                overlay.classList.toggle('active', show);
-                drawer.classList.toggle('active', show);
-            }
-        }
-
-        function renderDrawer() {
-            const items = [
-                { label: 'Dashboard', icon: 'home', page: 'dashboard' },
-                { label: 'Invest', icon: 'invest', page: 'dashboard' },
-                { label: 'Deposit', icon: 'deposit', page: 'deposit' },
-                { label: 'Withdraw', icon: 'withdraw', page: 'withdraw' },
-                { label: 'My Team', icon: 'team', page: 'team' },
-                { label: 'Next Profit', icon: 'profit', page: 'profit' },
-                { label: 'Transactions', icon: 'transactions', page: 'transactions' },
-                { label: 'Profile', icon: 'profile', page: 'profile' },
-                { label: 'Verification', icon: 'verify', page: 'verification' },
-            ];
-
-            return `
-                <div class="drawer-overlay" id="drawer-overlay" onclick="toggleDrawer(false)"></div>
-                <div class="drawer" id="drawer">
-                    <div class="drawer-header">
-                        <span class="drawer-title">Menu</span>
-                        <button class="drawer-close" onclick="toggleDrawer(false)">✕</button>
-                    </div>
-                    <div class="drawer-items">
-                        ${items.map(item => `
-                            <button class="drawer-item" onclick="toggleDrawer(false);navigateTo('${item.page}')">
-                                ${item.label}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <div class="drawer-footer">
-                        <button class="btn-primary" style="width:100%;" onclick="toggleDrawer(false);logout()">Logout</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        // ---------- INVEST MODAL ----------
-        function openInvestModal(planId) {
-            const plan = PLANS.find(p => p.id === planId);
-            if (!plan) return;
-            state.selectedPlan = plan;
-            const modal = document.getElementById('invest-modal');
-            if (modal) modal.classList.add('active');
-        }
-
-        function renderInvestModal() {
-            const plan = state.selectedPlan || PLANS[0];
-            return `
-                <div class="modal-overlay" id="invest-modal" onclick="closeModal('invest-modal')">
-                    <div class="modal-content" onclick="event.stopPropagation()">
-                        <h3 style="font-weight:800;margin-bottom:16px;">${plan.name}</h3>
-                        <div class="plan-stats">
-                            <div class="plan-stat"><span class="plan-stat-label">Investment</span><span class="plan-stat-value">${formatCurrency(plan.amount)}</span></div>
-                            <div class="plan-stat"><span class="plan-stat-label">Daily Profit</span><span class="plan-stat-value">${formatCurrency(plan.dailyProfit)}</span></div>
-                            <div class="plan-stat"><span class="plan-stat-label">Total Profit</span><span class="plan-stat-value">${formatCurrency(plan.totalProfit)}</span></div>
-                            <div class="plan-stat"><span class="plan-stat-label">Duration</span><span class="plan-stat-value">${plan.duration} days</span></div>
-                        </div>
-                        <button class="btn-primary" style="width:100%;margin-top:16px;" onclick="confirmInvestment()">
-                            CONFIRM INVESTMENT
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function confirmInvestment() {
-            if (!state.selectedPlan || !state.user) return;
-            const plan = state.selectedPlan;
-            if (state.user.balance < plan.amount) {
-                showToast('Insufficient balance');
-                closeModal('invest-modal');
-                return;
-            }
-
-            state.user.balance -= plan.amount;
-            const investment = {
-                id: 'inv-' + Date.now(),
-                planId: plan.id,
-                planName: plan.name,
-                amount: plan.amount,
-                dailyProfit: plan.dailyProfit,
-                totalProfit: plan.totalProfit,
-                durationDays: plan.duration,
-                completedDays: 0,
-                nextProfitAt: Date.now() + 24 * 60 * 60 * 1000,
-                status: 'active',
-                createdAt: Date.now(),
-            };
-            state.user.investments.push(investment);
-            state.user.transactions.push({
-                type: 'Investment',
-                amount: plan.amount,
-                status: 'Completed',
-                timestamp: Date.now(),
-            });
-            saveState();
-            closeModal('invest-modal');
-            showToast('Investment successful!');
-            render();
-        }
-
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) modal.classList.remove('active');
-        }
-
-        // ---------- DEPOSIT ----------
-        function renderDeposit(app) {
-            app.innerHTML = `
-                <div class="dashboard-page">
-                    <header class="dash-header">
-                        <button class="hamburger-btn" onclick="navigateTo('dashboard')">←</button>
-                        <div class="dash-logo-text">Deposit Funds</div>
-                        <button class="hamburger-btn" onclick="toggleDrawer(true)">☰</button>
-                    </header>
-                    <div style="padding:20px;">
-                        <div class="referral-card">
-                            <span class="referral-label">Deposit Amount</span>
-                            <input type="number" class="form-input" id="deposit-amount" placeholder="Enter amount" style="margin:10px 0;">
-                            <span class="referral-label">Transaction ID/Reference</span>
-                            <input type="text" class="form-input" id="deposit-tid" placeholder="Enter TID" style="margin:10px 0;">
-                            <span class="referral-label">Payment Screenshot</span>
-                            <div style="border:2px dashed #e0e8e0;border-radius:12px;padding:20px;text-align:center;margin:10px 0;cursor:pointer;" onclick="showToast('Screenshot upload simulated')">
-                                <span style="font-size:2rem;">📸</span>
-                                <p style="color:var(--muted-text);font-size:0.85rem;">Choose Payment Screenshot</p>
-                            </div>
-                            <button class="btn-primary" style="width:100%;" onclick="submitDeposit()">Submit Deposit</button>
-                        </div>
-                    </div>
-                </div>
-                ${renderDrawer()}
-            `;
-        }
-
-        function submitDeposit() {
-            const amount = parseFloat(document.getElementById('deposit-amount').value);
-            const tid = document.getElementById('deposit-tid').value.trim();
-            if (!amount || amount <= 0) {
-                showToast('Enter valid amount');
-                return;
-            }
-            if (!tid) {
-                showToast('Enter transaction ID');
-                return;
-            }
-            if (!state.user) return;
-            state.user.deposits.push({ amount, tid, status: 'pending', timestamp: Date.now() });
-            state.user.transactions.push({ type: 'Deposit', amount, status: 'Pending', timestamp: Date.now() });
-            saveState();
-            showToast('Deposit submitted for verification');
-            navigateTo('dashboard');
-        }
-
-        // ---------- WITHDRAW ----------
-        function renderWithdraw(app) {
-            const user = state.user;
-            app.innerHTML = `
-                <div class="dashboard-page">
-                    <header class="dash-header">
-                        <button class="hamburger-btn" onclick="navigateTo('dashboard')">←</button>
-                        <div class="dash-logo-text">Withdraw Funds</div>
-                        <button class="hamburger-btn" onclick="toggleDrawer(true)">☰</button>
-                    </header>
-                    <div style="padding:20px;">
-                        <div class="referral-card">
-                            <span class="referral-label">WITHDRAW AMOUNT</span>
-                            <input type="number" class="form-input" id="withdraw-amount" placeholder="Rs 0.00" style="margin:10px 0;">
-                        </div>
-                        <div class="referral-card" style="margin-top:16px;">
-                            <span class="referral-label">Select Withdrawal Method</span>
-                            <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;" id="withdraw-methods">
-                                ${['Nayapay', 'Easypaisa', 'JazzCash', 'Bank'].map(m => `
-                                    <button class="btn-secondary" style="border-color:var(--bright-green);color:var(--dark-text);font-size:0.8rem;padding:8px 14px;" onclick="selectWithdrawMethod('${m}')">${m}</button>
-                                `).join('')}
-                            </div>
-                        </div>
-                        <div class="referral-card" style="margin-top:16px;">
-                            <span class="referral-label">Your Details</span>
-                            <input type="text" class="form-input" id="withdraw-account" placeholder="Account number / phone" style="margin:10px 0;">
-                            <input type="text" class="form-input" id="withdraw-name" placeholder="Account holder name" style="margin:10px 0;">
-                            <button class="btn-primary" style="width:100%;" onclick="submitWithdraw()">Submit Withdrawal</button>
-                        </div>
-                    </div>
-                </div>
-                ${renderDrawer()}
-            `;
-        }
-
-        let selectedWithdrawMethod = null;
-
-        function selectWithdrawMethod(m) {
-            selectedWithdrawMethod = m;
-            showToast(`${m} selected`);
-        }
-
-        function submitWithdraw() {
-            if (!state.user) return;
-            const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            const account = document.getElementById('withdraw-account').value.trim();
-            const name = document.getElementById('withdraw-name').value.trim();
-            if (!amount || amount <= 0) return showToast('Enter valid amount');
-            if (!selectedWithdrawMethod) return showToast('Select withdrawal method');
-            if (!account || !name) return showToast('Fill account details');
-            if (amount > state.user.balance) return showToast('Insufficient balance');
-
-            state.user.balance -= amount;
-            state.user.withdrawals.push({ amount, method: selectedWithdrawMethod, account, name, status: 'pending',
-                timestamp: Date.now() });
-            state.user.transactions.push({ type: 'Withdrawal', amount, status: 'Pending', timestamp: Date.now() });
-            saveState();
-            showToast('Withdrawal request submitted');
-            navigateTo('dashboard');
-        }
-
-        // ---------- MY TEAM ----------
-        function renderTeam(app) {
-            const user = state.user || DEFAULT_USER;
-            app.innerHTML = `
-                <div class="dashboard-page">
-                    <header class="dash-header">
-                        <button class="hamburger-btn" onclick="navigateTo('dashboard')">←</button>
-                        <div class="dash-logo-text">My Team</div>
-                        <button class="hamburger-btn" onclick="toggleDrawer(true)">☰</button>
-                    </header>
-                    <div style="padding:20px;">
-                        <div class="referral-card">
-                            <span class="referral-label">Total Team Members</span>
-                            <div style="font-size:2rem;font-weight:900;">${user.team.length}</div>
-                        </div>
-                        <div class="referral-card" style="margin-top:16px;">
-                            <span class="referral-label">Referral Levels</span>
-                            <div style="display:flex;gap:10px;margin-top:12px;">
-                                <button class="btn-secondary" style="border-color:var(--bright-green);color:var(--dark-text);flex:1;">Level 1</button>
-                                <button class="btn-secondary" style="border-color:var(--bright-green);color:var(--dark-text);flex:1;">Level 2</button>
-                                <button class="btn-secondary" style="border-color:var(--bright-green);color:var(--dark-text);flex:1;">Level 3</button>
-                            </div>
-                        </div>
-                        ${user.team.length > 0 ? user.team.map(m => `
-                            <div class="plan-card" style="margin-top:12px;">
-                                <div style="display:flex;justify-content:space-between;align-items:center;">
-                                    <span style="font-weight:700;">${m.username}</span>
-                                    <span style="font-size:0.8rem;color:var(--muted-text);">${m.level}</span>
-                                </div>
-                            </div>
-                        `).join('') : `
-                            <div class="referral-card" style="margin-top:16px;text-align:center;color:var(--muted-text);">
-                                No team members yet. Share your referral link!
-                            </div>
-                        `}
-                    </div>
-                </div>
-                ${renderDrawer()}
-            `;
-        }
-
-        // ---------- NEXT PROFIT ----------
-        function renderProfit(app) {
-            const user = state.user || DEFAULT_USER;
-            const activeInvestments = user.investments.filter(i => i.status === 'active');
-            const active = activeInvestments.length > 0 ? activeInvestments[0] : null;
-
-            app.innerHTML = `
-                <div class="dashboard-page">
-                    <header class="dash-header">
-                        <button class="hamburger-btn" onclick="navigateTo('dashboard')">←</button>
-                        <div class="dash-logo-text">Next Profit</div>
-                        <button class="hamburger-btn" onclick="toggleDrawer(true)">☰</button>
-                    </header>
-                    <div style="padding:20px;">
-                        ${active ? `
-                            <div class="plan-card">
-                                <div class="plan-name">${active.planName} ACTIVE</div>
-                                <div style="text-align:center;padding:20px 0;">
-                                    <div style="font-size:2.5rem;font-weight:900;" id="profit-timer">24:00:00</div>
-                                    <span class="referral-label">NEXT PROFIT</span>
-                                    <div style="font-size:2rem;font-weight:900;">${formatCurrency(active.dailyProfit)}</div>
-                                    <div style="margin-top:16px;">
-                                        <span class="referral-label">${active.completedDays} OF ${active.durationDays} DAYS COMPLETED</span>
-                                        <div class="progress-container" style="margin-top:8px;">
-                                            <div class="progress-bar" style="width:${(active.completedDays / active.durationDays) * 100}%;"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ` : `
-                            <div class="referral-card" style="text-align:center;color:var(--muted-text);">
-                                No active investments. Start investing!
-                            </div>
-                        `}
-                    </div>
-                </div>
-                ${renderDrawer()}
-            `;
-
-            if (active) {
-                startProfitTimer(active);
-            }
-        }
-
-        function startProfitTimer(investment) {
-            clearInterval(state.timerInterval);
-            const timerEl = document.getElementById('profit-timer');
-            if (!timerEl) return;
-
-            function updateTimer() {
-                const now = Date.now();
-                const diff = investment.nextProfitAt - now;
-                if (diff <= 0) {
-                    // Credit profit
-                    if (state.user) {
-                        state.user.balance += investment.dailyProfit;
-                        investment.completedDays += 1;
-                        investment.nextProfitAt = now + 24 * 60 * 60 * 1000;
-                        if (investment.completedDays >= investment.durationDays) {
-                            investment.status = 'completed';
-                        }
-                        state.user.transactions.push({ type: 'Profit', amount: investment.dailyProfit,
-                            status: 'Completed', timestamp: now });
-                        saveState();
-                        showToast('Profit credited!');
-                        render();
-                    }
-                    return;
-                }
-
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                timerEl.textContent =
-                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            }
-
-            updateTimer();
-            state.timerInterval = setInterval(updateTimer, 1000);
-        }
-
-        // ---------- TRANSACTIONS ----------
-        function renderTransactions(app) {
-            const user = state.user || DEFAULT_USER;
-            app.innerHTML = `
-                <div class="dashboard-page">
-                    <header class="dash-header">
-                        <button class="hamburger-btn" onclick="navigateTo('dashboard')">←</button>
-                        <div class="dash-logo-text">Transactions</div>
-                        <button class="hamburger-btn" onclick="toggleDrawer(true)">☰</button>
-                    </header>
-                    <div style="padding:20px;">
-                        ${user.transactions.length > 0 ? user.transactions.map(t => `
-                            <div class="plan-card" style="margin-bottom:10px;">
-                                <div style="display:flex;justify-content:space-between;align-items:center;">
-                                    <span style="font-weight:700;">${t.type}</span>
-                                    <span style="font-weight:700;">${formatCurrency(t.amount)}</span>
-                                </div>
-                                <div style="display:flex;justify-content:space-between;margin-top:6px;">
-                                    <span style="font-size:0.8rem;color:var(--muted-text);">${new Date(t.timestamp).toLocaleString()}</span>
-                                    <span style="font-size:0.8rem;color:${t.status === 'Completed' ? 'var(--bright-green)' : t.status === 'Pending' ? 'var(--orange)' : 'var(--red)'};">${t.status}</span>
-                                </div>
-                            </div>
-                        `).join('') : `
-                            <div class="referral-card" style="text-align:center;color:var(--muted-text);">
-                                No transactions yet.
-                            </div>
-                        `}
-                    </div>
-                </div>
-                ${renderDrawer()}
-            `;
-        }
-
-        // ---------- PROFILE ----------
-        function renderProfile(app) {
-            const user = state.user || DEFAULT_USER;
-            app.innerHTML = `
-                <div class="dashboard-page">
-                    <header class="dash-header">
-                        <button class="hamburger-btn" onclick="navigateTo('dashboard')">←</button>
-                        <div class="dash-logo-text">Profile</div>
-                        <button class="hamburger-btn" onclick="toggleDrawer(true)">☰</button>
-                    </header>
-                    <div style="padding:20px;">
-                        <div class="referral-card" style="text-align:center;">
-                            <div style="width:60px;height:60px;background:var(--primary-green);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:white;">${user.username[0]?.toUpperCase()}</div>
-                            <span class="referral-label">Welcome back, ${user.username}</span>
-                            <div style="margin-top:12px;font-weight:700;">Balance: ${formatCurrency(user.balance)}</div>
-                        </div>
-                        <div class="referral-card" style="margin-top:16px;">
-                            <div class="form-group"><label class="form-label">Username</label><input type="text" class="form-input" value="${user.username}" readonly></div>
-                            <div class="form-group"><label class="form-label">Phone</label><input type="text" class="form-input" value="${user.phone}" readonly></div>
-                            <div class="form-group"><label class="form-label">Referral Code</label><input type="text" class="form-input" value="${user.referralCode}" readonly></div>
-                        </div>
-                        <button class="btn-primary" style="width:100%;margin-top:12px;" onclick="logout()">Logout</button>
-                    </div>
-                </div>
-                ${renderDrawer()}
-            `;
-        }
-
-        // ---------- VERIFICATION ----------
-        function renderVerification(app) {
-            const user = state.user || DEFAULT_USER;
-            app.innerHTML = `
-                <div class="dashboard-page">
-                    <header class="dash-header">
-                        <button class="hamburger-btn" onclick="navigateTo('dashboard')">←</button>
-                        <div class="dash-logo-text">Verification</div>
-                        <button class="hamburger-btn" onclick="toggleDrawer(true)">☰</button>
-                    </header>
-                    <div style="padding:20px;">
-                        <div class="referral-card" style="text-align:center;">
-                            <span style="font-size:2rem;">${user.verified ? '✅' : '⏳'}</span>
-                            <div style="font-weight:800;margin-top:8px;">${user.verified ? 'Verified' : 'Pending Verification'}</div>
-                            <p style="color:var(--muted-text);font-size:0.85rem;margin-top:8px;">${user.verified ? 'Your account is verified' : 'Upload your documents to verify'}</p>
-                            ${!user.verified ? `
-                                <div style="border:2px dashed #e0e8e0;border-radius:12px;padding:20px;text-align:center;margin:16px 0;cursor:pointer;" onclick="showToast('Upload simulated')">
-                                    <span style="font-size:2rem;">📄</span>
-                                    <p style="color:var(--muted-text);font-size:0.85rem;">Upload Document</p>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                </div>
-                ${renderDrawer()}
-            `;
-        }
-
-        // ---------- ADMIN (Demo) ----------
-        function navigateTo(page) {
-            if (page === 'admin') {
-                showToast('Admin panel demo - Full access');
-                return;
-            }
-            state.currentPage = page;
-            if (state.isLoggedIn && (page === 'landing' || page === 'register' || page === 'login')) {
-                state.currentPage = 'dashboard';
-            }
-            if (!state.isLoggedIn && page !== 'landing' && page !== 'register' && page !== 'login') {
-                state.currentPage = 'login';
-            }
-            render();
-            saveState();
-        }
-
-        function logout() {
-            state.isLoggedIn = false;
-            state.user = null;
-            state.currentPage = 'landing';
-            clearInterval(state.timerInterval);
-            saveState();
-            render();
-            showToast('Logged out');
-        }
-
-        function openChannel() {
-            window.open('https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47', '_blank');
-            showToast('Opening channel...');
-        }
-
-        // ---------- INITIALIZATION ----------
-        loadState();
-        render();
-    </script>
+        return;
+      }
+      const hrs = Math.floor(diff / (1000*60*60));
+      const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+      const secs = Math.floor((diff % (1000*60)) / 1000);
+      timerEl.textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    }
+    updateTimer();
+    window.timerInterval = setInterval(updateTimer, 1000);
+  }
+  function renderTransactions(app) {
+    app.innerHTML = `
+      ${renderHeader(app, true)}
+      <div style="padding:20px;">
+        <h2 style="font-weight:900;color:var(--dark-text);">Transactions</h2>
+        <div style="margin-top:16px;">
+          ${state.user && state.user.transactions && state.user.transactions.length > 0 ? state.user.transactions.map(t => `
+            <div class="referral-card" style="margin-bottom:8px;">
+              <div style="flex:1;">
+                <strong>${t.type}</strong>
+                <div style="font-size:0.8rem;color:var(--muted-text);">${new Date(t.timestamp).toLocaleString()}</div>
+              </div>
+              <span style="font-weight:700;">${formatCurrency(t.amount)}</span>
+              <span style="font-size:0.8rem;color:${t.status==='Completed'?'var(--bright-green)':t.status==='Pending'?'var(--orange)':'red'};">${t.status}</span>
+            </div>
+          `).join('') : '<p style="color:var(--muted-text);">No transactions yet.</p>'}
+        </div>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  function renderProfile(app) {
+    const user = state.user;
+    if (!user) return;
+    app.innerHTML = `
+      ${renderHeader(app, true)}
+      <div style="padding:20px;">
+        <div style="text-align:center;margin-bottom:20px;">
+          <div class="avatar" style="margin:0 auto;">${user.username[0].toUpperCase()}</div>
+          <div style="font-size:1.5rem;font-weight:900;">${user.username}</div>
+        </div>
+        <div class="referral-card">
+          <div style="flex:1;"><span style="font-size:0.7rem;">PHONE</span><div>${user.phone}</div></div>
+        </div>
+        <div class="referral-card">
+          <div style="flex:1;"><span style="font-size:0.7rem;">REFERRAL CODE</span><div>${user.referralCode}</div></div>
+        </div>
+        <div class="referral-card">
+          <div style="flex:1;"><span style="font-size:0.7rem;">BALANCE</span><div>${formatCurrency(user.balance)}</div></div>
+        </div>
+        <div class="referral-card">
+          <div style="flex:1;"><span style="font-size:0.7rem;">RANK</span><div>Start</div></div>
+        </div>
+        <button class="btn-primary" style="width:100%;margin-top:16px;" onclick="logout()">Logout</button>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  function renderVerification(app) {
+    app.innerHTML = `
+      ${renderHeader(app, true)}
+      <div style="padding:20px;">
+        <h2 style="font-weight:900;color:var(--dark-text);">Verification</h2>
+        <div class="referral-card" style="margin-top:16px;text-align:center;">
+          <div style="font-size:2rem;">${state.user && state.user.verified ? '✅' : '⏳'}</div>
+          <div style="font-weight:800;">${state.user && state.user.verified ? 'Verified' : 'Pending Verification'}</div>
+          <p style="color:var(--muted-text);font-size:0.8rem;">${state.user && state.user.verified ? 'Your account is verified' : 'Upload your documents to verify'}</p>
+        </div>
+      </div>
+      ${renderDrawer()}
+    `;
+    lucide.createIcons();
+  }
+  // ------------------- Modal & Drawer Helpers -------------------
+  function openModal(content) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:400;';
+    modal.innerHTML = `<div style="background:white;border-radius:24px;padding:24px;max-width:90%;width:100%;">${content}</div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
+  }
+  function closeModal() {
+    const modal = document.querySelector('.modal-overlay');
+    if (modal) modal.remove();
+  }
+  // ------------------- Auth Handlers -------------------
+  function handleLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!username || !password) {
+      showToast('Please fill all fields');
+      return;
+    }
+    // Demo login
+    if (username === 'demo' && password === 'demo123') {
+      state.user = {
+        username: 'Usmankhan008',
+        phone: '03001234567',
+        password: 'demo123',
+        balance: 605,
+        referralCode: 'SOL-12345',
+        referredBy: 'Ahmed56',
+        investments: [],
+        transactions: [],
+        team: [],
+        totalInvest: 605,
+        totalWithdraw: 173,
+        totalEarning: 173,
+        verified: false,
+        rank: 'Start',
+      };
+      state.isLoggedIn = true;
+      saveState();
+      showToast('Login successful!');
+      navigateTo('dashboard');
+    } else {
+      showToast('Invalid credentials');
+    }
+  }
+  function handleRegister() {
+    const username = document.getElementById('regUsername').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('regConfirm').value;
+    const referral = document.getElementById('regReferral').value.trim();
+    if (!username || !phone || !password || !confirm) {
+      showToast('Please fill all fields');
+      return;
+    }
+    if (password !== confirm) {
+      showToast('Passwords do not match');
+      return;
+    }
+    state.user = {
+      username,
+      phone,
+      password,
+      balance: 0,
+      referralCode: 'SOL-' + Math.random().toString(36).substring(2,8).toUpperCase(),
+      referredBy: referral || 'N/A',
+      investments: [],
+      transactions: [],
+      team: [],
+      totalInvest: 0,
+      totalWithdraw: 0,
+      totalEarning: 0,
+      verified: false,
+      rank: 'Start',
+    };
+    state.isLoggedIn = true;
+    saveState();
+    showToast('Account created successfully!');
+    navigateTo('dashboard');
+  }
+  function copyReferral() {
+    if (state.user) {
+      navigator.clipboard.writeText(`https://solanatrading.pk/register/${state.user.referralCode}`)
+        .then(() => showToast('Copied successfully'))
+        .catch(() => showToast('Copy failed'));
+    }
+  }
+  // ------------------- Init -------------------
+  loadState();
+  render();
+  lucide.createIcons();
+</script>
 </body>
-  </html>
+    </html>
