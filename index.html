@@ -596,8 +596,6 @@
     const MIN_WITHDRAWAL = 500;
     const WITHDRAWAL_FEE_PERCENT = 2;
     const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
-    const DEPOSIT_START_TIME = '12:40 PM';
-    const DEPOSIT_END_TIME = '10:00 PM';
     const DEPOSIT_NUMBER = '03162806904';
     const DEPOSIT_NAME = 'AAREN KHAN';
 
@@ -634,11 +632,6 @@
       return code;
     }
     function getReferralFromURL() { return new URLSearchParams(window.location.search).get('ref') || ''; }
-    function isDepositTimeOpen() {
-      const now = new Date();
-      const minutes = now.getHours() * 60 + now.getMinutes();
-      return minutes >= 760 && minutes <= 1320;
-    }
     function formatCurrency(amount) { return 'PKR ' + Number(amount).toLocaleString('en-PK'); }
     function showNotification(message) {
       const n = document.getElementById('notification');
@@ -1056,9 +1049,8 @@
       alert(`Withdrawal request submitted. Amount: ${formatCurrency(amount)}, Fee: ${formatCurrency(fee)}, Net: ${formatCurrency(netAmount)}.`); closeWithdrawalModal();
     }
 
-    // Deposit (Updated)
+    // Deposit (updated - no time limit)
     function openDepositModal(packageId) {
-      if (!isDepositTimeOpen()) return alert(`Deposit time is ${DEPOSIT_START_TIME} to ${DEPOSIT_END_TIME}. Please come back later.`);
       const pkg = packages.find(p => p.id === packageId);
       if (!pkg) return;
       selectedPackage = pkg;
@@ -1231,4 +1223,4 @@
     window.addEventListener('appinstalled', () => { document.getElementById('installBtn').style.display = 'none'; alert('App install ho gayi!'); });
   </script>
 </body>
-          </html>
+  </html>
