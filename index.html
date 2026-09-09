@@ -4,1730 +4,562 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jetour Private Solution - Investment Game</title>
-
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4CAF50">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Jetour Private Solution">
-
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js">
-    </script>
-
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter','Segoe UI',sans-serif; }
         :root {
-            --primary: #4CAF50;
-            --primary-dark: #388E3C;
-            --primary-light: #66BB6A;
-            --lighter-green: #E8F5E9;
-            --pale-green: #C8E6C9;
-            --bg: #F4F9F1;
-            --white: #FFFFFF;
-            --dark-text: #1a2a1a;
-            --muted: #6a7a6a;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-            --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.08);
-            --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.12);
-            --radius-sm: 10px;
-            --radius-md: 16px;
-            --radius-lg: 22px;
-            --radius-xl: 28px;
-            --transition: 0.25s ease;
-        }
-        body {
-            background: var(--bg);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow-x: hidden;
-            color: var(--dark-text);
-            -webkit-tap-highlight-color: transparent;
-        }
-        .app-wrapper {
-            width: 100%;
-            max-width: 430px;
-            margin: 0 auto;
-            padding: 0 14px 90px 14px;
-            position: relative;
-        }
-
-        /* ===== TOP HEADER ===== */
-        .top-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 16px 0 12px;
-            text-align: center;
-        }
-        .brand-logo {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
-            margin-bottom: 6px;
-        }
-        .brand-logo svg {
-            width: 28px;
-            height: 28px;
-            fill: white;
-        }
-        .brand-name {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--primary-dark);
-            letter-spacing: 1px;
-        }
-        .brand-sub {
-            font-size: 0.65rem;
-            color: var(--muted);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        /* ===== BALANCE CARD ===== */
-        .balance-card {
-            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-            border-radius: var(--radius-lg);
-            padding: 18px 20px;
-            color: white;
-            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.35);
-            margin-bottom: 16px;
-        }
-        .balance-card .label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            opacity: 0.85;
-        }
-        .balance-card .amount {
-            font-size: 2rem;
-            font-weight: 800;
-            margin: 4px 0 8px;
-        }
-        .balance-info-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            font-size: 0.75rem;
-            opacity: 0.95;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding-top: 10px;
-        }
-        .balance-info-row span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* ===== ACTION BUTTONS (Deposit / Withdraw) ===== */
-        .action-buttons-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .action-btn {
-            flex: 1;
-            padding: 14px 10px;
-            border-radius: var(--radius-md);
-            border: none;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            transition: var(--transition);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .action-btn:active {
-            transform: scale(0.96);
-        }
-        .action-btn .btn-icon {
-            font-size: 1.5rem;
-        }
-        .action-btn.deposit {
-            background: var(--white);
-            color: var(--primary-dark);
-        }
-        .action-btn.withdraw {
-            background: var(--dark-text);
-            color: white;
-        }
-
-        /* ===== INVITE & EARN ===== */
-        .invite-card {
-            background: var(--white);
-            border-radius: var(--radius-md);
-            padding: 14px 16px;
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .invite-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: var(--lighter-green);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
-        .invite-info {
-            flex: 1;
-        }
-        .invite-title {
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-        .invite-link {
-            font-size: 0.7rem;
-            color: var(--muted);
-            word-break: break-all;
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .copy-btn-small {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-
-        /* ===== SHORTCUT GRID (8 items) ===== */
-        .shortcut-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .shortcut-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .shortcut-item:active {
-            transform: scale(0.95);
-        }
-        .shortcut-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.25);
-        }
-        .shortcut-icon svg {
-            width: 22px;
-            height: 22px;
-            fill: white;
-            stroke: white;
-            stroke-width: 1.5;
-        }
-        .shortcut-label {
-            font-size: 0.65rem;
-            font-weight: 500;
-            color: var(--dark-text);
-            text-align: center;
-        }
-
-        /* ===== COMMUNITY CARDS ===== */
-        .community-card {
-            background: var(--white);
-            border-radius: var(--radius-md);
-            padding: 14px 16px;
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .community-card:active {
-            transform: scale(0.98);
-        }
-        .community-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
-        .community-icon.whatsapp {
-            background: #E8F5E9;
-            color: #25D366;
-        }
-        .community-icon.channel {
-            background: #E8F5E9;
-            color: #4CAF50;
-        }
-        .community-icon.admin {
-            background: #FFF3E0;
-            color: #FF9800;
-        }
-        .community-icon.helpline {
-            background: #E3F2FD;
-            color: #2196F3;
-        }
-        .community-info {
-            flex: 1;
-        }
-        .community-title {
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-        .community-sub {
-            font-size: 0.7rem;
-            color: var(--muted);
-        }
-
-        /* ===== TWO COLUMN FEATURE CARDS ===== */
-        .feature-two-col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .feature-card {
-            background: var(--white);
-            border-radius: var(--radius-md);
-            padding: 16px 14px;
-            box-shadow: var(--shadow-sm);
-            text-align: center;
-        }
-        .feature-icon {
-            font-size: 1.5rem;
-            margin-bottom: 6px;
-        }
-        .feature-title {
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-        .feature-sub {
-            font-size: 0.65rem;
-            color: var(--muted);
-        }
-
-        /* ===== ACTIVE INVESTMENTS ===== */
-        .active-investment-card {
-            background: linear-gradient(135deg, #66BB6A, #388E3C);
-            border-radius: var(--radius-md);
-            padding: 16px;
-            color: white;
-            box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
-            margin-bottom: 12px;
-        }
-        .active-investment-card h4 {
-            font-size: 0.95rem;
-            margin-bottom: 8px;
-        }
-        .inv-details {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin: 8px 0;
-        }
-        .inv-detail-item {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 8px;
-            text-align: center;
-        }
-        .inv-detail-label {
-            font-size: 0.6rem;
-            opacity: 0.85;
-        }
-        .inv-detail-value {
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-        .progress-track {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            margin: 8px 0;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: white;
-            border-radius: 10px;
-            transition: width 0.5s;
-        }
-        .countdown {
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: 800;
-        }
-
-        /* ===== HISTORY TABS ===== */
-        .history-tabs {
-            display: flex;
-            gap: 8px;
-            margin: 16px 0 10px;
-        }
-        .history-tab {
-            padding: 8px 14px;
-            border-radius: 20px;
-            border: none;
-            background: var(--white);
-            font-weight: 600;
-            font-size: 0.8rem;
-            cursor: pointer;
-            color: var(--muted);
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-        }
-        .history-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-        .history-content {
-            background: var(--white);
-            border-radius: var(--radius-md);
-            padding: 14px;
-            box-shadow: var(--shadow-sm);
-        }
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-            font-size: 0.85rem;
-        }
-        .history-item:last-child {
-            border-bottom: none;
-        }
-
-        /* ===== BOTTOM NAVIGATION ===== */
-        .bottom-nav {
-            position: fixed;
-            bottom: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 28px);
-            max-width: 402px;
-            background: var(--white);
-            border-radius: 30px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 8px 6px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-            z-index: 200;
-        }
-        .bottom-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            cursor: pointer;
-            padding: 6px 10px;
-            border-radius: 20px;
-            transition: var(--transition);
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: var(--muted);
-        }
-        .bottom-nav-item.active {
-            background: var(--primary-dark);
-            color: white;
-        }
-        .bottom-nav-icon {
-            font-size: 1.2rem;
-        }
-
-        /* ===== MODALS ===== */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 300;
-            backdrop-filter: blur(4px);
-            animation: fadeIn 0.2s;
-        }
-        .modal {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: var(--shadow-lg);
-            animation: slideUp 0.3s;
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-        .modal h3 {
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-        }
-        .modal input,
-        .modal select {
-            width: 100%;
-            padding: 12px 14px;
-            border: 2px solid var(--pale-green);
-            border-radius: var(--radius-sm);
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            background: var(--white);
-        }
-        .modal input:focus,
-        .modal select:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
-        .modal button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-weight: 700;
-            cursor: pointer;
-            background: var(--primary);
-            color: white;
-            margin-top: 6px;
-        }
-        .modal .btn-secondary {
-            background: #777;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-        @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-        .badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-        .badge.active {
-            background: #E8F5E9;
-            color: #388E3C;
-        }
-        .badge.pending {
-            background: #FFF3E0;
-            color: #E65100;
-        }
-        .badge.approved {
-            background: #E8F5E9;
-            color: #388E3C;
-        }
-        .badge.rejected {
-            background: #FFEBEE;
-            color: #C62828;
-        }
-        .badge.completed {
-            background: #F5F5F5;
-            color: #777;
-        }
-
-        /* Mobile responsiveness */
-        @media (max-width: 400px) {
-            .shortcut-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 8px;
-            }
-            .shortcut-icon {
-                width: 42px;
-                height: 42px;
-            }
-            .balance-card .amount {
-                font-size: 1.7rem;
-            }
-            .inv-details {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+            --primary:#4CAF50; --primary-dark:#388E3C; --primary-light:#66BB6A;
+            --lighter:#E8F5E9; --pale:#C8E6C9; --bg:#F4F9F1; --white:#fff;
+            --dark-text:#1a2a1a; --muted:#6a7a6a; --whatsapp:#25D366;
+            --shadow-sm:0 2px 8px rgba(0,0,0,.06); --shadow-md:0 6px 18px rgba(0,0,0,.08);
+            --radius-sm:10px; --radius-md:16px; --radius-lg:22px;
+        }
+        body { background:var(--bg); min-height:100vh; display:flex; justify-content:center; align-items:center; color:var(--dark-text); -webkit-tap-highlight-color:transparent; }
+        .app-wrapper { width:100%; max-width:430px; padding:0 14px 90px; position:relative; }
+        .top-header { display:flex; flex-direction:column; align-items:center; padding:16px 0 12px; text-align:center; }
+        .brand-logo { width:52px; height:52px; background:linear-gradient(135deg,var(--primary-light),var(--primary-dark)); border-radius:14px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(76,175,80,.3); margin-bottom:6px; }
+        .brand-logo svg { width:30px; height:30px; fill:white; }
+        .brand-name { font-size:1.3rem; font-weight:800; color:var(--primary-dark); }
+        .brand-sub { font-size:0.65rem; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
+        .balance-card { background:linear-gradient(135deg,#4CAF50,#2E7D32); border-radius:var(--radius-lg); padding:18px 20px; color:white; box-shadow:0 8px 20px rgba(76,175,80,.35); margin-bottom:12px; }
+        .balance-card .label { font-size:0.7rem; text-transform:uppercase; letter-spacing:2px; opacity:.85; }
+        .balance-card .amount { font-size:2rem; font-weight:800; margin:4px 0 8px; }
+        .balance-info-row { display:flex; justify-content:space-between; gap:10px; font-size:0.75rem; border-top:1px solid rgba(255,255,255,.2); padding-top:10px; }
+        .action-buttons-row { display:flex; gap:12px; margin-bottom:12px; }
+        .action-btn { flex:1; padding:14px 10px; border-radius:var(--radius-md); border:none; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; transition:.25s; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+        .action-btn:active { transform:scale(.96); }
+        .action-btn.deposit { background:var(--white); color:var(--primary-dark); }
+        .action-btn.withdraw { background:var(--dark-text); color:white; }
+        .invite-card { background:var(--white); border-radius:var(--radius-md); padding:14px 16px; box-shadow:var(--shadow-sm); margin-bottom:12px; display:flex; align-items:center; gap:12px; }
+        .invite-icon { width:36px; height:36px; border-radius:10px; background:var(--lighter); display:flex; align-items:center; justify-content:center; }
+        .invite-info { flex:1; }
+        .invite-title { font-weight:700; font-size:0.85rem; }
+        .invite-link { font-size:0.7rem; color:var(--muted); word-break:break-all; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .copy-btn-small { background:var(--primary); color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:600; font-size:0.75rem; cursor:pointer; }
+        .shortcut-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+        .shortcut-item { display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; transition:.25s; }
+        .shortcut-item:active { transform:scale(.95); }
+        .shortcut-icon { width:48px; height:48px; border-radius:14px; background:var(--primary); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(76,175,80,.25); color:white; font-size:1.2rem; }
+        .shortcut-label { font-size:0.65rem; font-weight:500; text-align:center; }
+        .community-card { background:var(--white); border-radius:var(--radius-md); padding:14px 16px; box-shadow:var(--shadow-sm); margin-bottom:10px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:.25s; }
+        .community-card:active { transform:scale(.98); }
+        .community-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+        .community-icon.whatsapp { background:#E8F5E9; color:#25D366; }
+        .community-icon.channel { background:#E8F5E9; color:#4CAF50; }
+        .community-icon.admin { background:#FFF3E0; color:#FF9800; }
+        .community-icon.helpline { background:#E3F2FD; color:#2196F3; }
+        .community-info { flex:1; }
+        .community-title { font-weight:700; font-size:0.85rem; }
+        .community-sub { font-size:0.7rem; color:var(--muted); }
+        .feature-two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+        .feature-card { background:var(--white); border-radius:var(--radius-md); padding:16px 14px; box-shadow:var(--shadow-sm); text-align:center; cursor:pointer; }
+        .feature-icon { font-size:1.5rem; margin-bottom:6px; }
+        .feature-title { font-weight:700; font-size:0.85rem; }
+        .feature-sub { font-size:0.65rem; color:var(--muted); }
+        .history-tabs { display:flex; gap:8px; margin:16px 0 10px; }
+        .history-tab { padding:8px 14px; border-radius:20px; border:none; background:var(--white); font-weight:600; font-size:0.8rem; cursor:pointer; color:var(--muted); box-shadow:var(--shadow-sm); }
+        .history-tab.active { background:var(--primary); color:white; }
+        .history-content { background:var(--white); border-radius:var(--radius-md); padding:14px; box-shadow:var(--shadow-sm); }
+        .history-item { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; font-size:0.85rem; }
+        .bottom-nav { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); width:calc(100% - 28px); max-width:402px; background:var(--white); border-radius:30px; display:flex; justify-content:space-around; align-items:center; padding:8px 6px; box-shadow:0 8px 25px rgba(0,0,0,.12); z-index:200; }
+        .bottom-nav-item { display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; padding:6px 10px; border-radius:20px; font-size:0.6rem; font-weight:600; color:var(--muted); }
+        .bottom-nav-item.active { background:var(--primary-dark); color:white; }
+        .bottom-nav-icon { font-size:1.2rem; }
+        .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:300; backdrop-filter:blur(4px); }
+        .modal { background:var(--white); border-radius:var(--radius-lg); padding:20px; width:90%; max-width:400px; box-shadow:0 12px 30px rgba(0,0,0,.2); max-height:85vh; overflow-y:auto; }
+        .modal h3 { font-size:1.1rem; margin-bottom:12px; }
+        .modal input, .modal select { width:100%; padding:12px 14px; border:2px solid var(--pale); border-radius:var(--radius-sm); font-size:0.9rem; margin-bottom:10px; }
+        .modal button { width:100%; padding:12px; border:none; border-radius:var(--radius-sm); font-weight:700; cursor:pointer; background:var(--primary); color:white; margin-top:6px; }
+        .modal .btn-secondary { background:#777; }
+        .badge { padding:4px 10px; border-radius:12px; font-size:0.7rem; font-weight:700; }
+        .badge.active { background:#E8F5E9; color:#388E3C; }
+        .badge.pending { background:#FFF3E0; color:#E65100; }
+        .badge.approved { background:#E8F5E9; color:#388E3C; }
+        .badge.rejected { background:#FFEBEE; color:#C62828; }
+        .badge.completed { background:#F5F5F5; color:#777; }
+        .hidden { display:none !important; }
+        .package-grid { display:grid; gap:12px; }
+        @media (max-width:400px) { .shortcut-grid { grid-template-columns:repeat(4,1fr); gap:8px; } .shortcut-icon { width:42px; height:42px; } }
     </style>
 </head>
 <body>
-
-    <div class="app-wrapper" id="appWrapper">
-
-        <!-- ===== HEADER ===== -->
-        <div class="top-header">
-            <div class="brand-logo">
-                <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7l-10-5z"/><path d="M12 8l4 4-4 4-4-4 4-4z" fill="#4CAF50"/></svg>
-            </div>
-            <div class="brand-name">Jetour Private Solution</div>
-            <div class="brand-sub">Investment Game</div>
-        </div>
-
-        <!-- ===== AUTH SECTION ===== -->
-        <div id="authSection">
-            <div class="history-tabs" style="justify-content: center; margin: 16px 0;">
-                <button id="signupTab" class="history-tab active" onclick="toggleAuth('signup')">Sign Up</button>
-                <button id="loginTab" class="history-tab" onclick="toggleAuth('login')">Login</button>
-            </div>
-            <div id="signupForm" class="modal" style="position: static; width: 100%; max-width: 100%; box-shadow: var(--shadow-sm);">
-                <h3>Create Account</h3>
-                <input type="email" id="signupEmail" placeholder="Email address">
-                <input type="password" id="signupPassword" placeholder="Password">
-                <input type="text" id="inviteCodeInput" placeholder="Invitation Code (Optional)">
-                <label style="display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:0.85rem;">
-                    <input type="checkbox" id="acceptPrivacy" style="width:auto; margin:0;">
-                    I accept the <a href="#" onclick="event.preventDefault(); openPrivacyModal();" style="color:var(--primary);">Privacy Policy</a>
-                </label>
-                <button onclick="signupUser()">Create Account</button>
-            </div>
-            <div id="loginForm" class="modal hidden" style="position: static; width: 100%; max-width: 100%; box-shadow: var(--shadow-sm);">
-                <h3>Login</h3>
-                <input type="email" id="loginEmail" placeholder="Email address">
-                <input type="password" id="loginPassword" placeholder="Password">
-                <button onclick="loginUser()">Login</button>
-            </div>
-        </div>
-
-        <!-- ===== DASHBOARD ===== -->
-        <div id="dashboardSection" class="hidden">
-
-            <!-- Balance Card -->
-            <div class="balance-card">
-                <div class="label">Available Balance</div>
-                <div class="amount" id="balanceDisplay">PKR 0</div>
-                <div class="balance-info-row">
-                    <span>👤 <span id="accountHolderDisplay">-</span></span>
-                    <span>🔗 <span id="referredByDisplay">-</span></span>
-                </div>
-            </div>
-
-            <!-- Deposit / Withdraw Buttons -->
-            <div class="action-buttons-row">
-                <button class="action-btn deposit" onclick="showPackagesForDeposit()">
-                    <span class="btn-icon">💰</span> Deposit
-                </button>
-                <button class="action-btn withdraw" onclick="openWithdrawalModal()">
-                    <span class="btn-icon">💸</span> Withdraw
-                </button>
-            </div>
-
-            <!-- Invite & Earn -->
-            <div class="invite-card">
-                <div class="invite-icon">🔗</div>
-                <div class="invite-info">
-                    <div class="invite-title">Invite & Earn</div>
-                    <div class="invite-link" id="referralLinkDisplay">-</div>
-                </div>
-                <button class="copy-btn-small" onclick="copyReferralLink()">Copy</button>
-            </div>
-
-            <!-- Shortcut Grid -->
-            <div class="shortcut-grid">
-                <div class="shortcut-item" onclick="switchHistoryTab('withdrawals')">
-                    <div class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M12 22l-7-7h4v-5h6v5h4l-7 7zM4 4h16v2H4V4zm0 4h12v2H4V8z"/></svg></div>
-                    <span class="shortcut-label">Withdraw Log</span>
-                </div>
-                <div class="shortcut-item" onclick="switchHistoryTab('deposits')">
-                    <div class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M12 2l7 7h-4v5h-6V9H5l7-7zm-8 12h16v2H4v-2zm0 4h12v2H4v-2z"/></svg></div>
-                    <span class="shortcut-label">Deposit Log</span>
-                </div>
-                <div class="shortcut-item" onclick="showTransactions()">
-                    <div class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M5 3h14v2H5V3zm0 4h14v2H5V7zm0 4h14v2H5v-2zm0 4h14v2H5v-2zm0 4h14v2H5v-2z"/></svg></div>
-                    <span class="shortcut-label">Transactions</span>
-                </div>
-                <div class="shortcut-item" onclick="showMyTeam()">
-                    <div class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V20h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
-                    <span class="shortcut-label">My Team</span>
-                </div>
-                <div class="shortcut-item" onclick="showMyPlan()">
-                    <div class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm1-13h-2v6H8l4 4 4-4h-3V7z"/></svg></div>
-                    <span class="shortcut-label">My Plan</span>
-                </div>
-                <div class="shortcut-item" onclick="showCertificates()">
-                    <div class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M12 2L4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3zm-2 16l-4-4 1.41-1.41L10 15.17l6.59-6.59L18 10l-8 8z"/></svg></div>
-                    <span class="shortcut-label">Certificates</span>
-                </div>
-                <div class="shortcut-item" onclick="showPlanChart()">
-                    <div class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg></div>
-                    <span class="shortcut-label">Plan Chart</span>
-                </div>
-                <div class="shortcut-item" onclick="installApp()">
-                    <div class="shortcut-icon"><svg viewBox="0 0 24 24"><path d="M17 1H7C5.9 1 5 1.9 5 3v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm0 18H7V5h10v14z"/></svg></div>
-                    <span class="shortcut-label">App Install</span>
-                </div>
-            </div>
-
-            <!-- Community Cards -->
-            <div class="community-card" onclick="openWhatsAppGroup()">
-                <div class="community-icon whatsapp">💬</div>
-                <div class="community-info">
-                    <div class="community-title">Join WhatsApp Group</div>
-                    <div class="community-sub">Connect with community</div>
-                </div>
-            </div>
-            <div class="community-card" onclick="openWhatsAppChannel()">
-                <div class="community-icon channel">📢</div>
-                <div class="community-info">
-                    <div class="community-title">Join WhatsApp Channel</div>
-                    <div class="community-sub">Get latest updates</div>
-                </div>
-            </div>
-            <div class="community-card" onclick="openAdminPanel()">
-                <div class="community-icon admin">🛠️</div>
-                <div class="community-info">
-                    <div class="community-title">Admin</div>
-                    <div class="community-sub">Administrator access</div>
-                </div>
-            </div>
-            <div class="community-card" onclick="openHelpline()">
-                <div class="community-icon helpline">📞</div>
-                <div class="community-info">
-                    <div class="community-title">Helpline</div>
-                    <div class="community-sub">Get support</div>
-                </div>
-            </div>
-
-            <!-- Team Reward & Salary (Two Columns) -->
-            <div class="feature-two-col">
-                <div class="feature-card" onclick="showTeamReward()">
-                    <div class="feature-icon">🏆</div>
-                    <div class="feature-title">Team Reward</div>
-                    <div class="feature-sub">Earn from your team</div>
-                </div>
-                <div class="feature-card" onclick="showSalary()">
-                    <div class="feature-icon">💵</div>
-                    <div class="feature-title">Salary</div>
-                    <div class="feature-sub">Your earnings</div>
-                </div>
-            </div>
-
-            <!-- Active Investments -->
-            <div id="activeInvestmentsContainer" class="hidden"></div>
-
-            <!-- History -->
-            <div class="history-tabs">
-                <button class="history-tab active" onclick="switchHistoryTab('activePlans')">Active</button>
-                <button class="history-tab" onclick="switchHistoryTab('deposits')">Deposits</button>
-                <button class="history-tab" onclick="switchHistoryTab('withdrawals')">Withdrawals</button>
-            </div>
-            <div class="history-content" id="historyContent">Loading...</div>
-        </div>
-
-        <!-- ===== DEPOSIT PACKAGES PAGE ===== -->
-        <div id="depositPage" class="hidden">
-            <h3 style="margin-bottom:12px; text-align:center;">Choose Investment Package</h3>
-            <div class="package-grid" id="packageGrid" style="display:grid; gap:12px;"></div>
-            <button class="action-btn withdraw" onclick="goBackToDashboard()" style="margin-top:16px; width:100%; flex-direction:row; justify-content:center;">← Back to Dashboard</button>
-        </div>
-
-        <!-- ===== ADMIN DASHBOARD ===== -->
-        <div id="adminDashboardSection" class="hidden">
-            <h3 style="margin-bottom:12px; text-align:center;">Admin Panel</h3>
-            <div id="adminStats" style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px;"></div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-                <button class="history-tab active" onclick="switchAdminTab('pending')">Pending</button>
-                <button class="history-tab" onclick="switchAdminTab('all')">All Deposits</button>
-                <button class="history-tab" onclick="switchAdminTab('withdrawals')">Withdrawals</button>
-                <button class="history-tab" onclick="switchAdminTab('referrals')">Referrals</button>
-                <button class="history-tab" onclick="switchAdminTab('users')">Users</button>
-                <button class="history-tab" onclick="switchAdminTab('investments')">Investments</button>
-                <button class="history-tab" onclick="openBroadcastModal()">📢 Broadcast</button>
-            </div>
-            <div id="adminFilterBar" style="display:none; gap:8px; margin-bottom:10px;">
-                <input type="text" id="searchInput" placeholder="Search..." oninput="applyFilter()" style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--pale-green);">
-                <select id="filterSelect" onchange="applyFilter()" style="padding:10px; border-radius:8px; border:1px solid var(--pale-green);">
-                    <option value="">All</option>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                </select>
-            </div>
-            <div id="adminContent" style="background:white; border-radius:12px; padding:12px; box-shadow:var(--shadow-sm);">Loading...</div>
-            <button class="action-btn withdraw" onclick="goBackToDashboard()" style="margin-top:16px; width:100%; flex-direction:row; justify-content:center;">← Back to Dashboard</button>
-        </div>
-
+<div class="app-wrapper" id="appWrapper">
+    <div class="top-header">
+        <div class="brand-logo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7l-10-5z"/></svg></div>
+        <div class="brand-name">Jetour Private Solution</div>
+        <div class="brand-sub">Investment Game</div>
     </div>
-
-    <!-- ===== BOTTOM NAVIGATION ===== -->
-    <div class="bottom-nav">
-        <div class="bottom-nav-item active" onclick="goHome()">
-            <span class="bottom-nav-icon">🏠</span> Home
+    <div id="authSection">
+        <div class="history-tabs" style="justify-content:center;">
+            <button id="signupTab" class="history-tab active" onclick="toggleAuth('signup')">Sign Up</button>
+            <button id="loginTab" class="history-tab" onclick="toggleAuth('login')">Login</button>
         </div>
-        <div class="bottom-nav-item" onclick="showPackagesForDeposit()">
-            <span class="bottom-nav-icon">💰</span> Deposit
+        <div id="signupForm" class="modal" style="position:static; width:100%; max-width:100%; box-shadow:var(--shadow-sm);">
+            <h3>Create Account</h3>
+            <input type="email" id="signupEmail" placeholder="Email address">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <input type="text" id="inviteCodeInput" placeholder="Invitation Code (Optional)">
+            <label style="display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:0.85rem;">
+                <input type="checkbox" id="acceptPrivacy" style="width:auto; margin:0;">
+                I accept the <a href="#" onclick="event.preventDefault(); openPrivacyModal();" style="color:var(--primary);">Privacy Policy</a>
+            </label>
+            <button onclick="signupUser()">Create Account</button>
         </div>
-        <div class="bottom-nav-item" onclick="openWithdrawalModal()">
-            <span class="bottom-nav-icon">💸</span> Withdraw
-        </div>
-        <div class="bottom-nav-item" onclick="showPackagesForDeposit()">
-            <span class="bottom-nav-icon">📦</span> Plans
-        </div>
-        <div class="bottom-nav-item" onclick="logout()">
-            <span class="bottom-nav-icon">🚪</span> Logout
+        <div id="loginForm" class="modal hidden" style="position:static; width:100%; max-width:100%; box-shadow:var(--shadow-sm);">
+            <h3>Login</h3>
+            <input type="email" id="loginEmail" placeholder="Email address">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button onclick="loginUser()">Login</button>
         </div>
     </div>
-
-    <!-- ===== MODALS ===== -->
-    <div id="depositModal" class="modal-overlay hidden">
-        <div class="modal">
-            <h3>Deposit Details</h3>
-            <div id="depositDetails"></div>
-            <button onclick="submitDeposit()">Submit Deposit Request</button>
-            <button class="btn-secondary" onclick="closeDepositModal()">Cancel</button>
+    <div id="dashboardSection" class="hidden">
+        <div class="balance-card">
+            <div class="label">Available Balance</div>
+            <div class="amount" id="balanceDisplay">PKR 0</div>
+            <div class="balance-info-row">
+                <span>👤 <span id="accountHolderDisplay">-</span></span>
+                <span>🔗 <span id="referredByDisplay">-</span></span>
+            </div>
         </div>
-    </div>
-    <div id="withdrawalModal" class="modal-overlay hidden">
-        <div class="modal">
-            <h3>Withdraw Funds</h3>
-            <div id="withdrawalContent"></div>
+        <div class="action-buttons-row">
+            <button class="action-btn deposit" onclick="showPackagesForDeposit()">💰 Deposit</button>
+            <button class="action-btn withdraw" onclick="openWithdrawalModal()">💸 Withdraw</button>
         </div>
-    </div>
-    <div id="profileModal" class="modal-overlay hidden">
-        <div class="modal">
-            <h3>My Profile</h3>
-            <input type="email" id="profileEmail" placeholder="Email" disabled>
-            <input type="text" id="profileName" placeholder="Full Name">
-            <input type="text" id="profileReferralCode" placeholder="Invitation Code" readonly>
-            <input type="date" id="profileDob" placeholder="Date of Birth">
-            <button onclick="saveProfile()">Save Profile</button>
-            <button class="btn-secondary" onclick="closeProfileModal()">Cancel</button>
+        <div class="invite-card">
+            <div class="invite-icon">🔗</div>
+            <div class="invite-info">
+                <div class="invite-title">Invite & Earn</div>
+                <div class="invite-link" id="referralLinkDisplay">-</div>
+            </div>
+            <button class="copy-btn-small" onclick="copyReferralLink()">Copy</button>
         </div>
-    </div>
-    <div id="privacyModal" class="modal-overlay hidden">
-        <div class="modal">
-            <h3>Privacy Policy</h3>
-            <p style="font-size:0.85rem; color:var(--muted); max-height:250px; overflow-y:auto;">Jetour Private Solution ke privacy policy mein khush aamdeed. Hum aapki zaati maloomat ki hifazat karte hain...</p>
-            <button onclick="closePrivacyModal()">Close</button>
+        <div class="shortcut-grid">
+            <div class="shortcut-item" onclick="switchHistoryTab('withdrawals')"><div class="shortcut-icon">💸</div><span class="shortcut-label">Withdraw Log</span></div>
+            <div class="shortcut-item" onclick="switchHistoryTab('deposits')"><div class="shortcut-icon">💰</div><span class="shortcut-label">Deposit Log</span></div>
+            <div class="shortcut-item" onclick="showMyTeam()"><div class="shortcut-icon">👥</div><span class="shortcut-label">My Team</span></div>
+            <div class="shortcut-item" onclick="showTeamReward()"><div class="shortcut-icon">🏆</div><span class="shortcut-label">Team Reward</span></div>
+            <div class="shortcut-item" onclick="showSalary()"><div class="shortcut-icon">💵</div><span class="shortcut-label">Salary</span></div>
+            <div class="shortcut-item" onclick="showPackagesForDeposit()"><div class="shortcut-icon">📦</div><span class="shortcut-label">Plans</span></div>
+            <div class="shortcut-item" onclick="showCertificates()"><div class="shortcut-icon">📜</div><span class="shortcut-label">Certificates</span></div>
+            <div class="shortcut-item" onclick="installApp()"><div class="shortcut-icon">📲</div><span class="shortcut-label">App Install</span></div>
         </div>
-    </div>
-    <div id="aboutModal" class="modal-overlay hidden">
-        <div class="modal">
-            <h3>About Us</h3>
-            <p>Jetour Private Solution is a leading investment platform...</p>
-            <button onclick="closeAboutModal()">Close</button>
+        <div class="community-card" onclick="openWhatsAppCommunity()"><div class="community-icon whatsapp">💬</div><div class="community-info"><div class="community-title">Join WhatsApp Community</div><div class="community-sub">Connect with members</div></div></div>
+        <div class="community-card" onclick="openWhatsAppChannel()"><div class="community-icon channel">📢</div><div class="community-info"><div class="community-title">Join WhatsApp Channel</div><div class="community-sub">Latest updates</div></div></div>
+        <div class="community-card" onclick="openAdminPanel()"><div class="community-icon admin">🛠️</div><div class="community-info"><div class="community-title">Admin</div><div class="community-sub">Administrator access</div></div></div>
+        <div class="feature-two-col">
+            <div class="feature-card" onclick="showTeamReward()"><div class="feature-icon">🏆</div><div class="feature-title">Team Reward</div><div class="feature-sub">Earn from team</div></div>
+            <div class="feature-card" onclick="showSalary()"><div class="feature-icon">💵</div><div class="feature-title">Salary</div><div class="feature-sub">Monthly income</div></div>
         </div>
-    </div>
-    <div id="onboardingModal" class="modal-overlay hidden">
-        <div class="modal">
-            <h3>Welcome to Jetour! 🎉</h3>
-            <p style="font-size:0.9rem; margin-bottom:8px;">Get started with your free package.</p>
-            <button onclick="closeOnboardingModal()">Let's Start!</button>
+        <div id="activeInvestmentsContainer" class="hidden"></div>
+        <div class="history-tabs">
+            <button class="history-tab active" onclick="switchHistoryTab('activePlans')">Active</button>
+            <button class="history-tab" onclick="switchHistoryTab('deposits')">Deposits</button>
+            <button class="history-tab" onclick="switchHistoryTab('withdrawals')">Withdrawals</button>
         </div>
+        <div class="history-content" id="historyContent">Loading...</div>
     </div>
-    <div id="broadcastModal" class="modal-overlay hidden">
-        <div class="modal">
-            <h3>Send Broadcast Message</h3>
-            <textarea id="broadcastMessage" rows="4" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--pale-green); resize:none;"></textarea>
-            <button onclick="sendBroadcast()">Send to All Users</button>
-            <button class="btn-secondary" onclick="closeBroadcastModal()">Cancel</button>
+    <div id="depositPage" class="hidden">
+        <h3 style="text-align:center; margin-bottom:12px;">Choose Jetour Plan</h3>
+        <div class="package-grid" id="packageGrid"></div>
+        <button class="action-btn withdraw" onclick="goBackToDashboard()" style="width:100%; flex-direction:row; justify-content:center; margin-top:16px;">← Back</button>
+    </div>
+    <div id="adminDashboardSection" class="hidden">
+        <h3 style="text-align:center; margin-bottom:12px;">Admin Panel</h3>
+        <div id="adminStats" style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px;"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+            <button class="history-tab active" onclick="switchAdminTab('pending')">Pending</button>
+            <button class="history-tab" onclick="switchAdminTab('all')">All Deposits</button>
+            <button class="history-tab" onclick="switchAdminTab('withdrawals')">Withdrawals</button>
+            <button class="history-tab" onclick="switchAdminTab('referrals')">Referrals</button>
+            <button class="history-tab" onclick="switchAdminTab('users')">Users</button>
+            <button class="history-tab" onclick="switchAdminTab('investments')">Investments</button>
+            <button class="history-tab" onclick="openBroadcastModal()">📢 Broadcast</button>
         </div>
+        <div id="adminFilterBar" style="display:none; gap:8px; margin-bottom:10px;">
+            <input type="text" id="searchInput" placeholder="Search..." oninput="applyFilter()" style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--pale);">
+            <select id="filterSelect" onchange="applyFilter()" style="padding:10px; border-radius:8px; border:1px solid var(--pale);">
+                <option value="">All</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
+            </select>
+        </div>
+        <div id="adminContent" style="background:white; border-radius:12px; padding:12px; box-shadow:var(--shadow-sm);">Loading...</div>
+        <button class="action-btn withdraw" onclick="goBackToDashboard()" style="width:100%; flex-direction:row; justify-content:center; margin-top:16px;">← Back</button>
     </div>
+</div>
+<div class="bottom-nav">
+    <div class="bottom-nav-item active" onclick="goHome()"><span class="bottom-nav-icon">🏠</span>Home</div>
+    <div class="bottom-nav-item" onclick="showPackagesForDeposit()"><span class="bottom-nav-icon">💰</span>Deposit</div>
+    <div class="bottom-nav-item" onclick="openWithdrawalModal()"><span class="bottom-nav-icon">💸</span>Withdraw</div>
+    <div class="bottom-nav-item" onclick="showMyTeam()"><span class="bottom-nav-icon">👥</span>Team</div>
+    <div class="bottom-nav-item" onclick="logout()"><span class="bottom-nav-icon">🚪</span>Logout</div>
+</div>
+<div id="depositModal" class="modal-overlay hidden"><div class="modal"><h3>Deposit Details</h3><div id="depositDetails"></div><button onclick="submitDeposit()">Submit</button><button class="btn-secondary" onclick="closeDepositModal()">Cancel</button></div></div>
+<div id="withdrawalModal" class="modal-overlay hidden"><div class="modal"><h3>Withdraw Funds</h3><div id="withdrawalContent"></div></div></div>
+<div id="profileModal" class="modal-overlay hidden"><div class="modal"><h3>My Profile</h3><input type="email" id="profileEmail" placeholder="Email" disabled><input type="text" id="profileName" placeholder="Full Name"><input type="text" id="profileReferralCode" placeholder="Code" readonly><input type="date" id="profileDob"><button onclick="saveProfile()">Save</button><button class="btn-secondary" onclick="closeProfileModal()">Cancel</button></div></div>
+<div id="privacyModal" class="modal-overlay hidden"><div class="modal"><h3>Privacy Policy</h3><p style="font-size:0.85rem; color:var(--muted);">Jetour Private Solution privacy policy...</p><button onclick="closePrivacyModal()">Close</button></div></div>
+<div id="onboardingModal" class="modal-overlay hidden"><div class="modal"><h3>Welcome! 🎉</h3><p>PKR 20 welcome bonus added to your account!</p><button onclick="closeOnboardingModal()">Start!</button></div></div>
+<div id="broadcastModal" class="modal-overlay hidden"><div class="modal"><h3>Broadcast</h3><textarea id="broadcastMessage" rows="4" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--pale); resize:none;"></textarea><button onclick="sendBroadcast()">Send</button><button class="btn-secondary" onclick="closeBroadcastModal()">Cancel</button></div></div>
+<div id="teamModal" class="modal-overlay hidden"><div class="modal"><h3>My Team</h3><div id="teamContent"></div><button class="btn-secondary" onclick="closeTeamModal()">Close</button></div></div>
+<div id="salaryModal" class="modal-overlay hidden"><div class="modal"><h3>Salary System</h3><div id="salaryContent"></div><button class="btn-secondary" onclick="closeSalaryModal()">Close</button></div></div>
 
-    <script>
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBUUvgeDFSWUYZEg7QdmXRMGSe8okAEXrc",
-            authDomain: "halal-pk.firebaseapp.com",
-            projectId: "halal-pk",
-            storageBucket: "halal-pk.firebasestorage.app",
-            messagingSenderId: "806259174926",
-            appId: "1:806259174926:web:79147c363c041cdf16d65f"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+<script>
+const firebaseConfig = { apiKey:"AIzaSyBUUvgeDFSWUYZEg7QdmXRMGSe8okAEXrc", authDomain:"halal-pk.firebaseapp.com", projectId:"halal-pk", storageBucket:"halal-pk.firebasestorage.app", messagingSenderId:"806259174926", appId:"1:806259174926:web:79147c363c041cdf16d65f" };
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-        // Constants
-        const ADMIN_EMAIL = 'admin@engro.com';
-        const REFERRAL_BONUS_L1 = 100,
-            REFERRAL_BONUS_L2 = 50,
-            REFERRAL_BONUS_L3 = 25;
-        const FREE_PACKAGE_DAILY = 10,
-            FREE_PACKAGE_DAYS = 60;
-        const MIN_WITHDRAWAL = 500,
-            WITHDRAWAL_FEE_PERCENT = 2;
-        const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
-        const DEPOSIT_NUMBER = '03162806904',
-            DEPOSIT_NAME = 'AAREN KHAN';
+const ADMIN_EMAIL='admin@engro.com';
+const REFERRAL_BONUS_L1=100, REFERRAL_BONUS_L2=50, REFERRAL_BONUS_L3=25;
+const WELCOME_BONUS=20;
+const MIN_WITHDRAWAL=500, WITHDRAWAL_FEE_PERCENT=2;
+const WHATSAPP_CHANNEL_URL='https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
+const WHATSAPP_COMMUNITY_URL='https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
+const DEPOSIT_NUMBER='03162806904', DEPOSIT_NAME='AAREN KHAN';
 
-        // State
-        let currentUser = null;
-        let isAdmin = false;
-        let selectedPackage = null;
-        let adminTab = 'pending';
-        let activeInvestmentListener = null;
-        let historyTab = 'activePlans';
-        let historyUnsubscribe = null;
-        let referralUnsubscribe = null;
-        let countdownIntervals = {};
+let currentUser=null, isAdmin=false, selectedPackage=null, adminTab='pending';
+let activeInvestmentListener=null, historyTab='activePlans', historyUnsubscribe=null, referralUnsubscribe=null, countdownIntervals={};
 
-        // Packages
-        const packages = [
-            { id: 'starter', name: 'Starter', amount: 300, dailyReturn: 75, durationDays: 30, totalReturn: 2250,
-                color: '#4CAF50' },
-            { id: 'bronze', name: 'Bronze', amount: 500, dailyReturn: 125, durationDays: 30, totalReturn: 3750,
-                color: '#CD7F32' },
-            { id: 'silver', name: 'Silver', amount: 800, dailyReturn: 200, durationDays: 30, totalReturn: 6000,
-                color: '#C0C0C0' },
-            { id: 'gold', name: 'Gold', amount: 1400, dailyReturn: 350, durationDays: 30, totalReturn: 10500,
-                color: '#FFD700' },
-            { id: 'platinum', name: 'Platinum', amount: 2000, dailyReturn: 500, durationDays: 30, totalReturn: 15000,
-                color: '#E5E4E2' },
-            { id: 'diamond', name: 'Diamond', amount: 2500, dailyReturn: 625, durationDays: 30, totalReturn: 18750,
-                color: '#B9F2FF' },
-            { id: 'royal', name: 'Royal', amount: 4000, dailyReturn: 1000, durationDays: 30, totalReturn: 30000,
-                color: '#4169E1' },
-            { id: 'executive', name: 'Executive', amount: 6000, dailyReturn: 1500, durationDays: 30, totalReturn: 45000,
-                color: '#800080' },
-            { id: 'premium', name: 'Premium', amount: 10000, dailyReturn: 2500, durationDays: 30, totalReturn: 75000,
-                color: '#FF4500' },
-            { id: 'elite', name: 'Elite', amount: 15000, dailyReturn: 3750, durationDays: 30, totalReturn: 112500,
-                color: '#008080' },
-            { id: 'legend', name: 'Legend', amount: 25000, dailyReturn: 6250, durationDays: 30, totalReturn: 187500,
-                color: '#B8860B' }
-        ];
+const jetourCars = ['Jetour X70','Jetour X90','Jetour Dashing','Jetour T2','Jetour Ice Cream','Jetour Shanhai L9','Jetour X70 Plus','Jetour X90 Plus','Jetour Traveller','Jetour Freedom','Jetour Voyage'];
 
-        // ----- UTILITY -----
-        function generateReferralCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-            return code;
-        }
+const packages = [
+    { id:'p1', name:jetourCars[0], amount:300, dailyReturn:75, durationDays:30, totalReturn:2250, color:'#4CAF50' },
+    { id:'p2', name:jetourCars[1], amount:500, dailyReturn:125, durationDays:30, totalReturn:3750, color:'#CD7F32' },
+    { id:'p3', name:jetourCars[2], amount:800, dailyReturn:200, durationDays:30, totalReturn:6000, color:'#C0C0C0' },
+    { id:'p4', name:jetourCars[3], amount:1400, dailyReturn:350, durationDays:30, totalReturn:10500, color:'#FFD700' },
+    { id:'p5', name:jetourCars[4], amount:2000, dailyReturn:500, durationDays:30, totalReturn:15000, color:'#E5E4E2' },
+    { id:'p6', name:jetourCars[5], amount:2500, dailyReturn:625, durationDays:30, totalReturn:18750, color:'#B9F2FF' },
+    { id:'p7', name:jetourCars[6], amount:4000, dailyReturn:1000, durationDays:30, totalReturn:30000, color:'#4169E1' },
+    { id:'p8', name:jetourCars[7], amount:6000, dailyReturn:1500, durationDays:30, totalReturn:45000, color:'#800080' },
+    { id:'p9', name:jetourCars[8], amount:10000, dailyReturn:2500, durationDays:30, totalReturn:75000, color:'#FF4500' },
+    { id:'p10', name:jetourCars[9], amount:15000, dailyReturn:3750, durationDays:30, totalReturn:112500, color:'#008080' },
+    { id:'p11', name:jetourCars[10], amount:25000, dailyReturn:6250, durationDays:30, totalReturn:187500, color:'#B8860B' }
+];
 
-        function getReferralFromURL() { return new URLSearchParams(window.location.search).get('ref') || ''; }
+function generateReferralCode(){const c='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';let s='';for(let i=0;i<6;i++)s+=c.charAt(Math.floor(Math.random()*c.length));return s;}
+function getReferralFromURL(){return new URLSearchParams(window.location.search).get('ref')||'';}
+function formatCurrency(a){return 'PKR '+Number(a).toLocaleString('en-PK');}
+function showNotification(m){let n=document.getElementById('notification');if(!n){n=document.createElement('div');n.id='notification';n.style.cssText='position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:12px 20px;border-radius:10px;z-index:999;font-weight:600;';document.body.appendChild(n);}n.textContent=m;n.style.display='block';clearTimeout(n._t);n._t=setTimeout(()=>n.style.display='none',3000);}
 
-        function formatCurrency(amount) { return 'PKR ' + Number(amount).toLocaleString('en-PK'); }
+function goHome(){document.getElementById('dashboardSection').classList.remove('hidden');document.getElementById('depositPage').classList.add('hidden');document.getElementById('adminDashboardSection').classList.add('hidden');updateBottomNav('home');}
+function showPackagesForDeposit(){document.getElementById('dashboardSection').classList.add('hidden');document.getElementById('depositPage').classList.remove('hidden');document.getElementById('adminDashboardSection').classList.add('hidden');renderPackages();updateBottomNav('deposit');}
+function goBackToDashboard(){goHome();}
+function updateBottomNav(active){document.querySelectorAll('.bottom-nav-item').forEach((item,idx)=>{item.classList.remove('active');if((active==='home'&&idx===0)||(active==='deposit'&&idx===1))item.classList.add('active');});}
 
-        function showNotification(message) {
-            let n = document.getElementById('notification');
-            if (!n) {
-                n = document.createElement('div');
-                n.id = 'notification';
-                n.style.cssText =
-                    'position:fixed; top:20px; right:20px; background:#4CAF50; color:white; padding:12px 20px; border-radius:10px; z-index:999; font-weight:600;';
-                document.body.appendChild(n);
+auth.onAuthStateChanged(async(user)=>{
+    currentUser=user;
+    if(user){
+        if(user.email===ADMIN_EMAIL){isAdmin=true;document.getElementById('authSection').classList.add('hidden');document.getElementById('dashboardSection').classList.add('hidden');document.getElementById('adminDashboardSection').classList.remove('hidden');showAdminDashboard();}
+        else{isAdmin=false;document.getElementById('authSection').classList.add('hidden');document.getElementById('adminDashboardSection').classList.add('hidden');document.getElementById('dashboardSection').classList.remove('hidden');document.getElementById('depositPage').classList.add('hidden');showUserDashboard(user);if(!localStorage.getItem('onboardingShown'))openOnboardingModal();}
+    }else{document.getElementById('dashboardSection').classList.add('hidden');document.getElementById('adminDashboardSection').classList.add('hidden');document.getElementById('depositPage').classList.add('hidden');document.getElementById('authSection').classList.remove('hidden');}
+});
+
+function toggleAuth(type){document.getElementById('signupForm').classList.toggle('hidden',type!=='signup');document.getElementById('loginForm').classList.toggle('hidden',type!=='login');document.getElementById('signupTab').classList.toggle('active',type==='signup');document.getElementById('loginTab').classList.toggle('active',type==='login');}
+
+async function signupUser(){
+    const email=document.getElementById('signupEmail').value.trim();
+    const password=document.getElementById('signupPassword').value;
+    const inviteCode=document.getElementById('inviteCodeInput').value.trim();
+    const acceptPrivacy=document.getElementById('acceptPrivacy').checked;
+    if(!email||!password)return showNotification('Fill all fields');
+    if(!acceptPrivacy)return showNotification('Accept Privacy Policy');
+    try{
+        const uc=await auth.createUserWithEmailAndPassword(email,password);
+        const user=uc.user;
+        const referralCode=generateReferralCode();
+        let referredBy=null,referredBy2=null,referredBy3=null;
+        if(inviteCode){
+            const rs=await db.collection('users').where('referralCode','==',inviteCode).limit(1).get();
+            if(!rs.empty){
+                const rd=rs.docs[0];referredBy=rd.id;
+                if(rd.data().referredBy){referredBy2=rd.data().referredBy;const l2=await db.collection('users').doc(referredBy2).get();if(l2.exists&&l2.data().referredBy)referredBy3=l2.data().referredBy;}
             }
-            n.textContent = message;
-            n.style.display = 'block';
-            clearTimeout(n._timeout);
-            n._timeout = setTimeout(() => n.style.display = 'none', 3000);
         }
-
-        // ----- NAVIGATION -----
-        function goHome() {
-            document.getElementById('dashboardSection').classList.remove('hidden');
-            document.getElementById('depositPage').classList.add('hidden');
-            document.getElementById('adminDashboardSection').classList.add('hidden');
-            updateBottomNav('home');
-        }
-
-        function showPackagesForDeposit() {
-            document.getElementById('dashboardSection').classList.add('hidden');
-            document.getElementById('depositPage').classList.remove('hidden');
-            document.getElementById('adminDashboardSection').classList.add('hidden');
-            renderPackages();
-            updateBottomNav('deposit');
-        }
-
-        function goBackToDashboard() {
-            document.getElementById('dashboardSection').classList.remove('hidden');
-            document.getElementById('depositPage').classList.add('hidden');
-            document.getElementById('adminDashboardSection').classList.add('hidden');
-            updateBottomNav('home');
-        }
-
-        function openAdminPanel() {
-            if (!isAdmin) {
-                showNotification('Admin access only');
-                return;
-            }
-            document.getElementById('dashboardSection').classList.add('hidden');
-            document.getElementById('depositPage').classList.add('hidden');
-            document.getElementById('adminDashboardSection').classList.remove('hidden');
-            showAdminDashboard();
-        }
-
-        function updateBottomNav(active) {
-            const items = document.querySelectorAll('.bottom-nav-item');
-            items.forEach((item, idx) => {
-                item.classList.remove('active');
-                if ((active === 'home' && idx === 0) ||
-                    (active === 'deposit' && (idx === 1 || idx === 3)) ||
-                    (active === 'withdraw' && idx === 2)) {
-                    item.classList.add('active');
-                }
-            });
-        }
-
-        // ----- AUTH -----
-        auth.onAuthStateChanged(async (user) => {
-            currentUser = user;
-            if (user) {
-                if (user.email === ADMIN_EMAIL) {
-                    isAdmin = true;
-                    document.getElementById('authSection').classList.add('hidden');
-                    document.getElementById('dashboardSection').classList.add('hidden');
-                    document.getElementById('adminDashboardSection').classList.remove('hidden');
-                    showAdminDashboard();
-                } else {
-                    isAdmin = false;
-                    document.getElementById('authSection').classList.add('hidden');
-                    document.getElementById('dashboardSection').classList.remove('hidden');
-                    document.getElementById('adminDashboardSection').classList.add('hidden');
-                    document.getElementById('depositPage').classList.add('hidden');
-                    showUserDashboard(user);
-                    if (!localStorage.getItem('onboardingShown')) openOnboardingModal();
-                }
-            } else {
-                document.getElementById('dashboardSection').classList.add('hidden');
-                document.getElementById('adminDashboardSection').classList.add('hidden');
-                document.getElementById('depositPage').classList.add('hidden');
-                document.getElementById('authSection').classList.remove('hidden');
-            }
+        await db.collection('users').doc(user.uid).set({
+            email:user.email,balance:WELCOME_BONUS,name:'',dob:'',referralCode,referredBy,referredBy2,referredBy3,
+            accountHolderName:'',accountType:'',accountNumber:'',cnic:'',
+            createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+            totalReferrals:0,referralDeposits:0,salaryEligible:false,salaryTier:0
         });
-
-        function toggleAuth(type) {
-            document.getElementById('signupForm').classList.toggle('hidden', type !== 'signup');
-            document.getElementById('loginForm').classList.toggle('hidden', type !== 'login');
-            document.getElementById('signupTab').classList.toggle('active', type === 'signup');
-            document.getElementById('loginTab').classList.toggle('active', type === 'login');
+        if(referredBy){
+            await db.collection('referrals').add({referrerId:referredBy,referredUserId:user.uid,referredEmail:user.email,status:'pending',bonusGiven:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+            await db.collection('users').doc(referredBy).update({totalReferrals:firebase.firestore.FieldValue.increment(1)});
         }
+        showNotification('Signup successful! PKR 20 bonus added.');
+        openOnboardingModal();
+    }catch(e){showNotification(e.message);}
+}
 
-        async function signupUser() {
-            const email = document.getElementById('signupEmail').value.trim();
-            const password = document.getElementById('signupPassword').value;
-            const inviteCode = document.getElementById('inviteCodeInput').value.trim();
-            const acceptPrivacy = document.getElementById('acceptPrivacy').checked;
-            if (!email || !password) return showNotification('Please fill all fields');
-            if (!acceptPrivacy) return showNotification('Please accept Privacy Policy');
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                const referralCode = generateReferralCode();
-                let referredBy = null,
-                    referredBy2 = null,
-                    referredBy3 = null;
-                if (inviteCode) {
-                    const refSnap = await db.collection('users').where('referralCode', '==', inviteCode).limit(1)
-                    .get();
-                    if (!refSnap.empty) {
-                        const refDoc = refSnap.docs[0];
-                        referredBy = refDoc.id;
-                        if (refDoc.data().referredBy) {
-                            referredBy2 = refDoc.data().referredBy;
-                            const l2 = await db.collection('users').doc(referredBy2).get();
-                            if (l2.exists && l2.data().referredBy) referredBy3 = l2.data().referredBy;
-                        }
-                    }
-                }
-                await db.collection('users').doc(user.uid).set({
-                    email: user.email,
-                    balance: 0,
-                    name: '',
-                    dob: '',
-                    referralCode,
-                    referredBy,
-                    referredBy2,
-                    referredBy3,
-                    accountHolderName: '',
-                    accountType: '',
-                    accountNumber: '',
-                    cnic: '',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                await db.collection('investments').add({
-                    userId: user.uid,
-                    userEmail: user.email,
-                    packageId: 'free',
-                    packageName: 'Free Starter',
-                    amount: 0,
-                    dailyReturn: FREE_PACKAGE_DAILY,
-                    durationDays: FREE_PACKAGE_DAYS,
-                    startDate: firebase.firestore.FieldValue.serverTimestamp(),
-                    paidAmount: 0,
-                    active: true
-                });
-                if (referredBy) {
-                    await db.collection('referrals').add({
-                        referrerId: referredBy,
-                        referredUserId: user.uid,
-                        referredEmail: user.email,
-                        status: 'pending',
-                        bonusGiven: false,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-                showNotification('Signup successful!');
-                openOnboardingModal();
-            } catch (e) { showNotification(e.message); }
+async function loginUser(){
+    const email=document.getElementById('loginEmail').value.trim();
+    const password=document.getElementById('loginPassword').value;
+    try{await auth.signInWithEmailAndPassword(email,password);showNotification('Login successful!');}catch(e){showNotification(e.message);}
+}
+function logout(){clearAllCountdowns();auth.signOut();}
+
+function showUserDashboard(user){
+    db.collection('users').doc(user.uid).onSnapshot(doc=>{
+        if(doc.exists){
+            const d=doc.data();
+            document.getElementById('balanceDisplay').innerText=formatCurrency(Math.floor(d.balance||0));
+            document.getElementById('accountHolderDisplay').innerText=d.name||user.email.charAt(0).toUpperCase();
+            document.getElementById('referredByDisplay').innerText=d.referredBy||'N/A';
+            if(d.referralCode)document.getElementById('referralLinkDisplay').innerText=window.location.origin+window.location.pathname+'?ref='+d.referralCode;
         }
+    });
+    loadInvestments(user);setupReferralSection(user);setupHistory(user);
+}
 
-        async function loginUser() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-                showNotification('Login successful!');
-            } catch (e) { showNotification(e.message); }
+function renderPackages(){
+    const grid=document.getElementById('packageGrid');
+    grid.innerHTML=packages.map(p=>`
+        <div class="invite-card" style="display:block; text-align:center; border-top:4px solid ${p.color};">
+            <div style="font-weight:700;">${p.name}</div>
+            <div style="font-size:1.2rem; font-weight:800;">${formatCurrency(p.amount)}</div>
+            <div style="font-size:0.8rem;">Daily: ${formatCurrency(p.dailyReturn)}</div>
+            <div style="font-size:0.8rem;">Duration: ${p.durationDays} Days</div>
+            <button class="action-btn deposit" style="width:100%; margin-top:8px; flex-direction:row; justify-content:center;" onclick="openDepositModal('${p.id}')">Deposit</button>
+        </div>`).join('');
+}
+
+function openDepositModal(packageId){
+    const pkg=packages.find(p=>p.id===packageId);if(!pkg)return;selectedPackage=pkg;
+    document.getElementById('depositDetails').innerHTML=`
+        <p><strong>Plan:</strong> ${pkg.name}</p>
+        <p><strong>Amount:</strong> ${formatCurrency(pkg.amount)}</p>
+        <p><strong>Daily:</strong> ${formatCurrency(pkg.dailyReturn)}</p>
+        <p><strong>Total:</strong> ${formatCurrency(pkg.totalReturn)}</p>
+        <div style="margin:10px 0; padding:10px; background:var(--lighter); border-radius:8px;">
+            <p style="font-size:0.85rem;">Easypaisa: <strong>${DEPOSIT_NUMBER}</strong> (${DEPOSIT_NAME})</p>
+        </div>
+        <input type="text" id="userTidInput" placeholder="Enter TID">`;
+    document.getElementById('depositModal').classList.remove('hidden');
+}
+function closeDepositModal(){document.getElementById('depositModal').classList.add('hidden');}
+
+async function submitDeposit(){
+    if(!selectedPackage||!currentUser)return;
+    const tid=document.getElementById('userTidInput').value.trim();
+    if(!tid)return showNotification('Enter TID');
+    await db.collection('deposits').add({userId:currentUser.uid,userEmail:currentUser.email,packageId:selectedPackage.id,packageName:selectedPackage.name,amount:selectedPackage.amount,dailyReturn:selectedPackage.dailyReturn,durationDays:selectedPackage.durationDays,tid,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    showNotification('Deposit submitted');closeDepositModal();goBackToDashboard();
+}
+
+function openWithdrawalModal(){
+    if(!currentUser)return;
+    document.getElementById('withdrawalModal').classList.remove('hidden');
+    const content=document.getElementById('withdrawalContent');
+    db.collection('users').doc(currentUser.uid).get().then(doc=>{
+        if(!doc.exists)return;const d=doc.data();
+        if(d.accountHolderName){
+            content.innerHTML=`<p><strong>Holder:</strong> ${d.accountHolderName}</p><p><strong>Type:</strong> ${d.accountType}</p><p><strong>Number:</strong> ${d.accountNumber}</p>
+            <input type="number" id="withdrawAmountInput" placeholder="Amount (PKR)" min="${MIN_WITHDRAWAL}"><p style="font-size:0.8rem;">Min: ${formatCurrency(MIN_WITHDRAWAL)} | Fee: ${WITHDRAWAL_FEE_PERCENT}%</p>
+            <button onclick="submitWithdrawal()">Proceed</button><button class="btn-secondary" onclick="closeWithdrawalModal()">Cancel</button>`;
+        }else{
+            content.innerHTML=`<input type="text" id="wdHolderName" placeholder="Account Holder Name"><select id="wdAccountType"><option>Easypaisa</option><option>JazzCash</option></select>
+            <input type="text" id="wdAccountNumber" placeholder="Account Number"><input type="text" id="wdCnic" placeholder="CNIC No">
+            <button onclick="saveAccountDetails()">Save Details</button><button class="btn-secondary" onclick="closeWithdrawalModal()">Cancel</button>`;
         }
+    });
+}
+function closeWithdrawalModal(){document.getElementById('withdrawalModal').classList.add('hidden');}
+async function saveAccountDetails(){
+    const h=document.getElementById('wdHolderName').value.trim();const t=document.getElementById('wdAccountType').value;const n=document.getElementById('wdAccountNumber').value.trim();const c=document.getElementById('wdCnic').value.trim();
+    if(!h||!n||!c)return showNotification('Fill all fields');
+    await db.collection('users').doc(currentUser.uid).update({accountHolderName:h,accountType:t,accountNumber:n,cnic:c});
+    showNotification('Saved');openWithdrawalModal();
+}
+async function submitWithdrawal(){
+    const amt=parseFloat(document.getElementById('withdrawAmountInput').value);
+    if(!amt||amt<MIN_WITHDRAWAL)return showNotification('Minimum '+formatCurrency(MIN_WITHDRAWAL));
+    const ud=await db.collection('users').doc(currentUser.uid).get();const d=ud.data();
+    if(!d.accountHolderName)return showNotification('Save details first');
+    const fee=(amt*WITHDRAWAL_FEE_PERCENT)/100;const net=amt-fee;
+    await db.runTransaction(async t=>{
+        const ref=db.collection('users').doc(currentUser.uid);const doc=await t.get(ref);const bal=doc.data().balance||0;
+        if(amt>bal)throw new Error('Insufficient');
+        t.update(ref,{balance:firebase.firestore.FieldValue.increment(-amt)});
+        t.set(db.collection('withdrawals').doc(),{userId:currentUser.uid,userEmail:currentUser.email,amount:amt,fee,netAmount:net,accountHolderName:d.accountHolderName,accountType:d.accountType,accountNumber:d.accountNumber,cnic:d.cnic,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    });
+    showNotification('Withdrawal submitted');closeWithdrawalModal();
+}
 
-        function logout() {
-            clearAllCountdowns();
-            auth.signOut();
-        }
-
-        // ----- DASHBOARD -----
-        function showUserDashboard(user) {
-            db.collection('users').doc(user.uid).onSnapshot(doc => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    document.getElementById('balanceDisplay').innerText = formatCurrency(Math.floor(data
-                        .balance || 0));
-                    document.getElementById('accountHolderDisplay').innerText = data.name || user.email
-                        .charAt(0).toUpperCase();
-                    document.getElementById('referredByDisplay').innerText = data.referredBy || 'N/A';
-                    if (data.referralCode) {
-                        const link = window.location.origin + window.location.pathname + '?ref=' + data
-                            .referralCode;
-                        document.getElementById('referralLinkDisplay').innerText = link;
-                        document.getElementById('referralLinkInput') && (document.getElementById(
-                            'referralLinkInput').value = link);
-                    }
-                }
-            });
-            loadInvestments(user);
-            setupReferralSection(user);
-            setupHistory(user);
-        }
-
-        function renderPackages() {
-            const grid = document.getElementById('packageGrid');
-            grid.innerHTML = packages.map(pkg => `
-            <div class="invite-card" style="display:block; text-align:center; border-top:4px solid ${pkg.color};">
-              <div style="font-weight:700;">${pkg.name}</div>
-              <div style="font-size:1.2rem; font-weight:800;">${formatCurrency(pkg.amount)}</div>
-              <div style="font-size:0.8rem;">Daily: ${formatCurrency(pkg.dailyReturn)}</div>
-              <div style="font-size:0.8rem;">Duration: ${pkg.durationDays} Days</div>
-              <button class="action-btn deposit" style="width:100%; margin-top:8px; flex-direction:row; justify-content:center;" onclick="openDepositModal('${pkg.id}')">Deposit</button>
-            </div>
-          `).join('');
-        }
-
-        function openDepositModal(packageId) {
-            const pkg = packages.find(p => p.id === packageId);
-            if (!pkg) return;
-            selectedPackage = pkg;
-            document.getElementById('depositDetails').innerHTML = `
-            <p><strong>Package:</strong> ${pkg.name}</p>
-            <p><strong>Amount:</strong> ${formatCurrency(pkg.amount)}</p>
-            <p><strong>Daily:</strong> ${formatCurrency(pkg.dailyReturn)}</p>
-            <p><strong>Total:</strong> ${formatCurrency(pkg.totalReturn)}</p>
-            <div style="margin:10px 0; padding:10px; background:var(--lighter-green); border-radius:8px;">
-              <p style="font-size:0.85rem;">Easypaisa: <strong>${DEPOSIT_NUMBER}</strong> (${DEPOSIT_NAME})</p>
-            </div>
-            <input type="text" id="userTidInput" placeholder="Enter TID">
-          `;
-            document.getElementById('depositModal').classList.remove('hidden');
-        }
-
-        function closeDepositModal() { document.getElementById('depositModal').classList.add('hidden'); }
-
-        async function submitDeposit() {
-            if (!selectedPackage || !currentUser) return;
-            const tid = document.getElementById('userTidInput').value.trim();
-            if (!tid) return showNotification('Enter TID');
-            await db.collection('deposits').add({
-                userId: currentUser.uid,
-                userEmail: currentUser.email,
-                packageId: selectedPackage.id,
-                packageName: selectedPackage.name,
-                amount: selectedPackage.amount,
-                dailyReturn: selectedPackage.dailyReturn,
-                durationDays: selectedPackage.durationDays,
-                tid,
-                status: 'pending',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            showNotification('Deposit submitted');
-            closeDepositModal();
-            goBackToDashboard();
-        }
-
-        // ----- WITHDRAW -----
-        function openWithdrawalModal() {
-            if (!currentUser) return;
-            document.getElementById('withdrawalModal').classList.remove('hidden');
-            const content = document.getElementById('withdrawalContent');
-            db.collection('users').doc(currentUser.uid).get().then(doc => {
-                if (!doc.exists) return;
-                const data = doc.data();
-                if (data.accountHolderName) {
-                    content.innerHTML = `
-                <p><strong>Holder:</strong> ${data.accountHolderName}</p>
-                <p><strong>Type:</strong> ${data.accountType}</p>
-                <p><strong>Number:</strong> ${data.accountNumber}</p>
-                <input type="number" id="withdrawAmountInput" placeholder="Amount (PKR)" min="${MIN_WITHDRAWAL}">
-                <p style="font-size:0.8rem;">Min: ${formatCurrency(MIN_WITHDRAWAL)} | Fee: ${WITHDRAWAL_FEE_PERCENT}%</p>
-                <button onclick="submitWithdrawal()">Proceed</button>
-                <button class="btn-secondary" onclick="closeWithdrawalModal()">Cancel</button>
-              `;
-                } else {
-                    content.innerHTML = `
-                <input type="text" id="wdHolderName" placeholder="Account Holder Name">
-                <select id="wdAccountType"><option>Easypaisa</option><option>JazzCash</option></select>
-                <input type="text" id="wdAccountNumber" placeholder="Account Number">
-                <input type="text" id="wdCnic" placeholder="CNIC No">
-                <button onclick="saveAccountDetails()">Save Details</button>
-                <button class="btn-secondary" onclick="closeWithdrawalModal()">Cancel</button>
-              `;
-                }
-            });
-        }
-
-        function closeWithdrawalModal() { document.getElementById('withdrawalModal').classList.add('hidden'); }
-
-        async function saveAccountDetails() {
-            const holder = document.getElementById('wdHolderName').value.trim();
-            const type = document.getElementById('wdAccountType').value;
-            const num = document.getElementById('wdAccountNumber').value.trim();
-            const cnic = document.getElementById('wdCnic').value.trim();
-            if (!holder || !num || !cnic) return showNotification('Fill all fields');
-            await db.collection('users').doc(currentUser.uid).update({ accountHolderName: holder,
-                accountType: type, accountNumber: num, cnic });
-            showNotification('Saved');
-            openWithdrawalModal();
-        }
-
-        async function submitWithdrawal() {
-            const amt = parseFloat(document.getElementById('withdrawAmountInput').value);
-            if (!amt || amt < MIN_WITHDRAWAL) return showNotification('Minimum ' + formatCurrency(MIN_WITHDRAWAL));
-            const userDoc = await db.collection('users').doc(currentUser.uid).get();
-            const d = userDoc.data();
-            if (!d.accountHolderName) return showNotification('Save details first');
-            const fee = (amt * WITHDRAWAL_FEE_PERCENT) / 100;
-            const net = amt - fee;
-            await db.runTransaction(async t => {
-                const ref = db.collection('users').doc(currentUser.uid);
-                const doc = await t.get(ref);
-                const bal = doc.data().balance || 0;
-                if (amt > bal) throw new Error('Insufficient');
-                t.update(ref, { balance: firebase.firestore.FieldValue.increment(-amt) });
-                t.set(db.collection('withdrawals').doc(), {
-                    userId: currentUser.uid,
-                    userEmail: currentUser.email,
-                    amount: amt,
-                    fee,
-                    netAmount: net,
-                    accountHolderName: d.accountHolderName,
-                    accountType: d.accountType,
-                    accountNumber: d.accountNumber,
-                    cnic: d.cnic,
-                    status: 'pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            });
-            showNotification('Withdrawal submitted');
-            closeWithdrawalModal();
-        }
-
-        // ----- INVESTMENTS -----
-        async function loadInvestments(user) {
-            db.collection('investments').where('userId', '==', user.uid).onSnapshot(snap => {
-                const container = document.getElementById('activeInvestmentsContainer');
-                if (snap.empty) { container.classList.add('hidden');
-                    container.innerHTML = ''; return; }
-                container.classList.remove('hidden');
-                let docs = snap.docs;
-                docs.sort((a, b) => (a.data().startDate?.toMillis() || 0) - (b.data().startDate?.toMillis() ||
-                    0));
-                let html = '';
-                docs.forEach(doc => {
-                    const inv = doc.data();
-                    const start = inv.startDate ? inv.startDate.toMillis() : Date.now();
-                    const now = Date.now();
-                    let days = Math.floor((now - start) / 86400000);
-                    days = Math.min(days, inv.durationDays);
-                    const pct = Math.floor((days / inv.durationDays) * 100);
-                    const earned = days * inv.dailyReturn;
-                    const cid = `cd-${doc.id}`;
-                    html += `
-                <div class="active-investment-card">
-                  <h4>📦 ${inv.packageName} ${inv.amount === 0 ? '(FREE)' : ''}</h4>
-                  <div class="inv-details">
-                    <div class="inv-detail-item"><div class="inv-detail-label">Invested</div><div class="inv-detail-value">${inv.amount === 0 ? 'FREE' : formatCurrency(inv.amount)}</div></div>
-                    <div class="inv-detail-item"><div class="inv-detail-label">Daily</div><div class="inv-detail-value">${formatCurrency(inv.dailyReturn)}</div></div>
-                    <div class="inv-detail-item"><div class="inv-detail-label">Earned</div><div class="inv-detail-value">${formatCurrency(earned)}</div></div>
-                    <div class="inv-detail-item"><div class="inv-detail-label">Days</div><div class="inv-detail-value">${days}/${inv.durationDays}</div></div>
-                  </div>
-                  <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
-                  <div class="countdown" id="${cid}">--:--:--</div>
-                  <div style="text-align:center; font-size:0.7rem;">Next Earnings</div>
+async function loadInvestments(user){
+    db.collection('investments').where('userId','==',user.uid).onSnapshot(snap=>{
+        const c=document.getElementById('activeInvestmentsContainer');
+        if(snap.empty){c.classList.add('hidden');c.innerHTML='';return;}
+        c.classList.remove('hidden');let docs=snap.docs;docs.sort((a,b)=>(a.data().startDate?.toMillis()||0)-(b.data().startDate?.toMillis()||0));let html='';
+        docs.forEach(doc=>{const inv=doc.data();const start=inv.startDate?inv.startDate.toMillis():Date.now();const now=Date.now();let days=Math.floor((now-start)/86400000);days=Math.min(days,inv.durationDays);const pct=Math.floor((days/inv.durationDays)*100);const earned=days*inv.dailyReturn;const cid=`cd-${doc.id}`;
+            html+=`<div class="invite-card" style="background:linear-gradient(135deg,#66BB6A,#388E3C); color:white; display:block;">
+                <h4>📦 ${inv.packageName}</h4>
+                <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:8px 0;">
+                    <div style="background:rgba(255,255,255,.2); border-radius:8px; padding:8px; text-align:center;"><div style="font-size:0.6rem;">Invested</div><div style="font-weight:700;">${inv.amount===0?'FREE':formatCurrency(inv.amount)}</div></div>
+                    <div style="background:rgba(255,255,255,.2); border-radius:8px; padding:8px; text-align:center;"><div style="font-size:0.6rem;">Daily</div><div style="font-weight:700;">${formatCurrency(inv.dailyReturn)}</div></div>
+                    <div style="background:rgba(255,255,255,.2); border-radius:8px; padding:8px; text-align:center;"><div style="font-size:0.6rem;">Earned</div><div style="font-weight:700;">${formatCurrency(earned)}</div></div>
+                    <div style="background:rgba(255,255,255,.2); border-radius:8px; padding:8px; text-align:center;"><div style="font-size:0.6rem;">Days</div><div style="font-weight:700;">${days}/${inv.durationDays}</div></div>
                 </div>
-              `;
-                });
-                container.innerHTML = html;
-                docs.forEach(doc => startCountdown(doc.data(), `cd-${doc.id}`, doc.id));
-            });
-        }
+                <div style="background:rgba(255,255,255,.3); height:8px; border-radius:10px; overflow:hidden;"><div style="background:white; height:100%; width:${pct}%;"></div></div>
+                <div style="text-align:center; font-size:1.2rem; font-weight:800;" id="${cid}">--:--:--</div>
+                <div style="text-align:center; font-size:0.7rem;">Next Earnings</div>
+            </div>`;});
+        c.innerHTML=html;docs.forEach(doc=>startCountdown(doc.data(),`cd-${doc.id}`,doc.id));
+    });
+}
+function startCountdown(inv,elId,docId){
+    if(countdownIntervals[docId])clearInterval(countdownIntervals[docId]);
+    const start=inv.startDate?inv.startDate.toMillis():Date.now();const paid=inv.paidAmount||0;const daily=inv.dailyReturn||0;const pd=daily>0?Math.floor(paid/daily):0;const next=start+(pd+1)*86400000;
+    function tick(){const diff=next-Date.now();if(diff<=0){if(currentUser){processInvestments(currentUser).then(()=>{});clearInterval(countdownIntervals[docId]);delete countdownIntervals[docId];showNotification('Profit credited!');}return;}
+        const h=Math.floor(diff/3600000);const m=Math.floor((diff%3600000)/60000);const s=Math.floor((diff%60000)/1000);const el=document.getElementById(elId);if(el)el.innerText=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+    tick();countdownIntervals[docId]=setInterval(tick,1000);
+}
+function clearAllCountdowns(){for(let k in countdownIntervals){clearInterval(countdownIntervals[k]);delete countdownIntervals[k];}}
+async function processInvestments(user){
+    const ref=db.collection('users').doc(user.uid);const snap=await db.collection('investments').where('userId','==',user.uid).where('active','==',true).get();
+    if(snap.empty)return;const batch=db.batch();let total=0;
+    snap.docs.forEach(doc=>{const inv=doc.data();if(!inv.startDate)return;const days=Math.min(Math.floor((Date.now()-inv.startDate.toMillis())/86400000),inv.durationDays);const earned=days*inv.dailyReturn;const oldPaid=inv.paidAmount||0;if(earned>oldPaid){total+=earned-oldPaid;batch.update(doc.ref,{paidAmount:earned});}if(days>=inv.durationDays)batch.update(doc.ref,{active:false});});
+    if(total>0)batch.update(ref,{balance:firebase.firestore.FieldValue.increment(total)});await batch.commit();
+}
 
-        function startCountdown(inv, elId, docId) {
-            if (countdownIntervals[docId]) clearInterval(countdownIntervals[docId]);
-            const start = inv.startDate ? inv.startDate.toMillis() : Date.now();
-            const paid = inv.paidAmount || 0;
-            const daily = inv.dailyReturn || 0;
-            const pd = daily > 0 ? Math.floor(paid / daily) : 0;
-            const next = start + (pd + 1) * 86400000;
+function setupReferralSection(user){
+    if(referralUnsubscribe)referralUnsubscribe();
+    referralUnsubscribe=db.collection('referrals').where('referrerId','==',user.uid).onSnapshot(snap=>{
+        const list=document.getElementById('referralList');if(!list)return;
+        if(snap.empty){list.innerHTML='No referrals yet.';return;}let html='';
+        snap.docs.forEach(doc=>{const r=doc.data();html+=`<div class="history-item"><span>${r.referredEmail}</span><span class="badge ${r.bonusGiven?'approved':'pending'}">${r.bonusGiven?'Bonus Given':'Pending'}</span></div>`;});
+        list.innerHTML=html;
+    });
+}
+function copyReferralLink(){const link=document.getElementById('referralLinkDisplay').innerText;if(!link||link==='-')return showNotification('No link');navigator.clipboard.writeText(link).then(()=>showNotification('Copied!'));}
 
-            function tick() {
-                const diff = next - Date.now();
-                if (diff <= 0) {
-                    if (currentUser) {
-                        processInvestments(currentUser).then(() => {});
-                        clearInterval(countdownIntervals[docId]);
-                        delete countdownIntervals[docId];
-                        showNotification('Profit credited!');
-                    }
-                    return;
-                }
-                const h = Math.floor(diff / 3600000);
-                const m = Math.floor((diff % 3600000) / 60000);
-                const s = Math.floor((diff % 60000) / 1000);
-                const el = document.getElementById(elId);
-                if (el) el.innerText =
-                    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-            }
-            tick();
-            countdownIntervals[docId] = setInterval(tick, 1000);
-        }
+function setupHistory(user){
+    if(historyUnsubscribe)historyUnsubscribe();const uid=user.uid;
+    const a=db.collection('investments').where('userId','==',uid).where('active','==',true).onSnapshot(()=>{if(historyTab==='activePlans')renderHistory(uid);});
+    const b=db.collection('deposits').where('userId','==',uid).onSnapshot(()=>{if(historyTab==='deposits')renderHistory(uid);});
+    const c=db.collection('withdrawals').where('userId','==',uid).onSnapshot(()=>{if(historyTab==='withdrawals')renderHistory(uid);});
+    historyUnsubscribe=()=>{a();b();c();};
+}
+function switchHistoryTab(tab){historyTab=tab;document.querySelectorAll('.history-tab').forEach(btn=>btn.classList.remove('active'));const tabs=['activePlans','deposits','withdrawals'];const idx=tabs.indexOf(tab);if(idx>=0)document.querySelectorAll('.history-tab')[idx].classList.add('active');if(currentUser)renderHistory(currentUser.uid);}
+async function renderHistory(uid){
+    const c=document.getElementById('historyContent');c.innerHTML='Loading...';
+    if(historyTab==='activePlans'){const snap=await db.collection('investments').where('userId','==',uid).where('active','==',true).get();if(snap.empty){c.innerHTML='No active plans.';return;}let h='';snap.docs.forEach(doc=>{const inv=doc.data();h+=`<div class="history-item"><span>${inv.packageName} (${formatCurrency(inv.amount)})</span><span class="badge active">ACTIVE</span></div>`;});c.innerHTML=h;}
+    else if(historyTab==='deposits'){const snap=await db.collection('deposits').where('userId','==',uid).get();if(snap.empty){c.innerHTML='No deposits.';return;}let h='';snap.docs.forEach(doc=>{const d=doc.data();h+=`<div class="history-item"><span>${d.packageName} (${formatCurrency(d.amount)})</span><span class="badge ${d.status}">${d.status.toUpperCase()}</span></div>`;});c.innerHTML=h;}
+    else if(historyTab==='withdrawals'){const snap=await db.collection('withdrawals').where('userId','==',uid).get();if(snap.empty){c.innerHTML='No withdrawals.';return;}let h='';snap.docs.forEach(doc=>{const w=doc.data();h+=`<div class="history-item"><span>${formatCurrency(w.amount)}</span><span class="badge ${w.status}">${w.status.toUpperCase()}</span></div>`;});c.innerHTML=h;}
+}
 
-        function clearAllCountdowns() {
-            for (let k in countdownIntervals) { clearInterval(countdownIntervals[k]);
-                delete countdownIntervals[k]; }
-        }
+function showMyTeam(){
+    if(!currentUser)return;
+    document.getElementById('teamModal').classList.remove('hidden');
+    const content=document.getElementById('teamContent');
+    db.collection('users').doc(currentUser.uid).get().then(async doc=>{
+        if(!doc.exists)return;const d=doc.data();
+        const refSnap=await db.collection('referrals').where('referrerId','==',currentUser.uid).get();
+        const totalMembers=refSnap.size;
+        const depositSnap=await db.collection('deposits').where('userId','in',refSnap.docs.map(r=>r.data().referredUserId).slice(0,10)).get();
+        content.innerHTML=`
+            <p><strong>Total Members:</strong> ${totalMembers}</p>
+            <p><strong>Total Bonus Earned:</strong> ${formatCurrency((d.totalReferrals||0)*REFERRAL_BONUS_L1)}</p>
+            <p><strong>Level 1:</strong> ${REFERRAL_BONUS_L1} PKR per referral</p>
+            <p><strong>Level 2:</strong> ${REFERRAL_BONUS_L2} PKR</p>
+            <p><strong>Level 3:</strong> ${REFERRAL_BONUS_L3} PKR</p>
+            <hr style="margin:10px 0;">
+            ${refSnap.empty?'<p>No members yet.</p>':refSnap.docs.map(r=>{const rd=r.data();return `<div class="history-item"><span>${rd.referredEmail}</span><span class="badge ${rd.bonusGiven?'approved':'pending'}">${rd.bonusGiven?'Bonus Given':'Pending'}</span></div>`;}).join('')}
+        `;
+    });
+}
+function closeTeamModal(){document.getElementById('teamModal').classList.add('hidden');}
 
-        async function processInvestments(user) {
-            const ref = db.collection('users').doc(user.uid);
-            const snap = await db.collection('investments').where('userId', '==', user.uid).where('active', '==',
-                true).get();
-            if (snap.empty) return;
-            const batch = db.batch();
-            let total = 0;
-            snap.docs.forEach(doc => {
-                const inv = doc.data();
-                if (!inv.startDate) return;
-                const days = Math.min(Math.floor((Date.now() - inv.startDate.toMillis()) / 86400000), inv
-                    .durationDays);
-                const earned = days * inv.dailyReturn;
-                const oldPaid = inv.paidAmount || 0;
-                if (earned > oldPaid) { total += earned - oldPaid;
-                    batch.update(doc.ref, { paidAmount: earned }); }
-                if (days >= inv.durationDays) batch.update(doc.ref, { active: false });
-            });
-            if (total > 0) batch.update(ref, { balance: firebase.firestore.FieldValue.increment(total) });
-            await batch.commit();
-        }
+function showTeamReward(){showMyTeam();}
 
-        // ----- REFERRAL -----
-        function setupReferralSection(user) {
-            if (referralUnsubscribe) referralUnsubscribe();
-            referralUnsubscribe = db.collection('referrals').where('referrerId', '==', user.uid).onSnapshot(
-            snap => {
-                const list = document.getElementById('referralList');
-                if (!list) return;
-                if (snap.empty) { list.innerHTML = 'No referrals yet.'; return; }
-                let html = '';
-                snap.docs.forEach(doc => {
-                    const r = doc.data();
-                    html +=
-                        `<div class="history-item"><span>${r.referredEmail}</span><span class="badge ${r.bonusGiven ? 'approved' : 'pending'}">${r.bonusGiven ? 'Bonus Given' : 'Pending'}</span></div>`;
-                });
-                list.innerHTML = html;
-            });
-        }
+function showSalary(){
+    if(!currentUser)return;
+    document.getElementById('salaryModal').classList.remove('hidden');
+    const content=document.getElementById('salaryContent');
+    db.collection('users').doc(currentUser.uid).get().then(async doc=>{
+        if(!doc.exists)return;const d=doc.data();
+        const refSnap=await db.collection('referrals').where('referrerId','==',currentUser.uid).get();
+        const totalMembers=refSnap.size;
+        let tier=0;let salary=0;
+        if(totalMembers>=200){tier=3;salary=20000;}else if(totalMembers>=100){tier=2;salary=10000;}else if(totalMembers>=50){tier=1;salary=5000;}
+        content.innerHTML=`
+            <p><strong>Total Referrals:</strong> ${totalMembers}</p>
+            <p><strong>Salary Tier:</strong> ${tier===0?'Not eligible':tier===1?'50+ Members (PKR 5,000)':tier===2?'100+ Members (PKR 10,000)':'200+ Members (PKR 20,000)'}</p>
+            <p><strong>Monthly Salary:</strong> ${formatCurrency(salary)}</p>
+            <hr style="margin:10px 0;">
+            <p style="font-size:0.85rem;">Milestones:</p>
+            <p>50 members = PKR 5,000/month</p>
+            <p>100 members = PKR 10,000/month</p>
+            <p>200 members = PKR 20,000/month</p>
+        `;
+    });
+}
+function closeSalaryModal(){document.getElementById('salaryModal').classList.add('hidden');}
 
-        function copyReferralLink() {
-            const link = document.getElementById('referralLinkDisplay').innerText;
-            if (!link || link === '-') return showNotification('No link');
-            navigator.clipboard.writeText(link).then(() => showNotification('Copied!'));
-        }
+function showCertificates(){showNotification('Certificates coming soon');}
+function openWhatsAppCommunity(){window.open(WHATSAPP_COMMUNITY_URL,'_blank');}
+function openWhatsAppChannel(){window.open(WHATSAPP_CHANNEL_URL,'_blank');}
+function openHelpline(){showNotification('Helpline: +92 300 1234567');}
+function openAdminPanel(){if(!isAdmin){showNotification('Admin access only');return;}document.getElementById('dashboardSection').classList.add('hidden');document.getElementById('depositPage').classList.add('hidden');document.getElementById('adminDashboardSection').classList.remove('hidden');showAdminDashboard();}
+function installApp(){showNotification('Install from browser menu');}
 
-        // ----- HISTORY -----
-        function setupHistory(user) {
-            if (historyUnsubscribe) historyUnsubscribe();
-            const uid = user.uid;
-            const a = db.collection('investments').where('userId', '==', uid).where('active', '==', true)
-                .onSnapshot(() => { if (historyTab === 'activePlans') renderHistory(uid); });
-            const b = db.collection('deposits').where('userId', '==', uid).onSnapshot(() => { if (historyTab ===
-                    'deposits') renderHistory(uid); });
-            const c = db.collection('withdrawals').where('userId', '==', uid).onSnapshot(() => { if (historyTab ===
-                    'withdrawals') renderHistory(uid); });
-            historyUnsubscribe = () => { a();
-                b();
-                c(); };
-        }
+function showAdminDashboard(){initAdminDashboard();loadAdminStats();}
+function initAdminDashboard(){renderAdminContent();loadAdminStats();}
+function loadAdminStats(){
+    const c=document.getElementById('adminStats');
+    Promise.all([db.collection('users').get(),db.collection('investments').where('active','==',true).get(),db.collection('deposits').where('status','==','approved').get(),db.collection('withdrawals').where('status','==','approved').get()]).then(([u,i,d,w])=>{
+        c.innerHTML=`<div class="feature-card"><div class="feature-icon">👥</div><div class="feature-title">${u.size}</div><div class="feature-sub">Users</div></div>
+        <div class="feature-card"><div class="feature-icon">📦</div><div class="feature-title">${i.size}</div><div class="feature-sub">Active Inv.</div></div>
+        <div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">${d.size}</div><div class="feature-sub">Approved Dep.</div></div>
+        <div class="feature-card"><div class="feature-icon">💸</div><div class="feature-title">${w.size}</div><div class="feature-sub">Approved Wd.</div></div>`;
+    });
+}
+function switchAdminTab(tab){adminTab=tab;document.querySelectorAll('.history-tab').forEach(btn=>btn.classList.remove('active'));const tabs=['pending','all','withdrawals','referrals','users','investments'];const idx=tabs.indexOf(tab);if(idx>=0)document.querySelectorAll('.history-tab')[idx].classList.add('active');document.getElementById('adminFilterBar').style.display=['pending','all','withdrawals','users','investments'].includes(tab)?'flex':'none';renderAdminContent();}
+function applyFilter(){renderAdminContent();}
+async function renderAdminContent(){
+    const c=document.getElementById('adminContent');c.innerHTML='Loading...';
+    const search=(document.getElementById('searchInput')?.value||'').toLowerCase();const filter=document.getElementById('filterSelect')?.value||'';
+    if(adminTab==='pending'||adminTab==='all'){const snap=await db.collection('deposits').get();let docs=snap.docs;if(adminTab==='pending')docs=docs.filter(d=>d.data().status==='pending');if(filter)docs=docs.filter(d=>d.data().status===filter);if(search)docs=docs.filter(d=>d.data().userEmail.includes(search)||d.data().packageName.includes(search));if(docs.length===0){c.innerHTML='No deposits';return;}let h='';docs.forEach(doc=>{const d=doc.data();h+=`<div class="history-item"><span>${d.userEmail}<br><small>${d.packageName} - ${formatCurrency(d.amount)}</small></span><span class="badge ${d.status}">${d.status.toUpperCase()}</span>${d.status==='pending'?`<button onclick="approveDeposit('${doc.id}')" style="padding:4px 8px; background:var(--primary); color:white; border:none; border-radius:6px;">Approve</button> <button onclick="rejectDeposit('${doc.id}')" style="padding:4px 8px; background:#f44336; color:white; border:none; border-radius:6px;">Reject</button>`:''}</div>`;});c.innerHTML=h;}
+    else if(adminTab==='withdrawals'){const snap=await db.collection('withdrawals').get();let docs=snap.docs;if(filter)docs=docs.filter(d=>d.data().status===filter);if(search)docs=docs.filter(d=>d.data().userEmail.includes(search));if(docs.length===0){c.innerHTML='No withdrawals';return;}let h='';docs.forEach(doc=>{const w=doc.data();h+=`<div class="history-item"><span>${w.userEmail}<br><small>${formatCurrency(w.amount)}</small></span><span class="badge ${w.status}">${w.status.toUpperCase()}</span>${w.status==='pending'?`<button onclick="approveWithdrawal('${doc.id}')" style="padding:4px 8px; background:var(--primary); color:white; border:none; border-radius:6px;">Approve</button> <button onclick="rejectWithdrawal('${doc.id}')" style="padding:4px 8px; background:#f44336; color:white; border:none; border-radius:6px;">Reject</button>`:''}</div>`;});c.innerHTML=h;}
+    else if(adminTab==='referrals'){const snap=await db.collection('referrals').get();let docs=snap.docs;if(search)docs=docs.filter(d=>d.data().referredEmail.includes(search));if(docs.length===0){c.innerHTML='No referrals';return;}let h='';docs.forEach(doc=>{const r=doc.data();h+=`<div class="history-item"><span>${r.referredEmail}<br><small>Referrer: ${r.referrerId}</small></span><span class="badge ${r.bonusGiven?'approved':'pending'}">${r.bonusGiven?'Bonus Given':'Pending'}</span>${!r.bonusGiven?`<button onclick="giveReferralBonus('${doc.id}')" style="padding:4px 8px; background:var(--primary); color:white; border:none; border-radius:6px;">Give Bonus</button>`:''}</div>`;});c.innerHTML=h;}
+    else if(adminTab==='users'){const snap=await db.collection('users').get();let docs=snap.docs;if(search)docs=docs.filter(d=>d.data().email?.includes(search));if(docs.length===0){c.innerHTML='No users';return;}let h='';for(const doc of docs){const u=doc.data();h+=`<div class="history-item"><span>${u.email||'No Email'}<br><small>Balance: ${formatCurrency(Math.floor(u.balance||0))}</small></span></div>`;}c.innerHTML=h;}
+    else if(adminTab==='investments'){const snap=await db.collection('investments').get();let docs=snap.docs;if(search)docs=docs.filter(d=>d.data().userEmail.includes(search)||d.data().packageName.includes(search));if(docs.length===0){c.innerHTML='No investments';return;}let h='';docs.forEach(doc=>{const inv=doc.data();h+=`<div class="history-item"><span>${inv.userEmail}<br><small>${inv.packageName} - ${inv.amount===0?'FREE':formatCurrency(inv.amount)}</small></span><span class="badge ${inv.active?'active':'completed'}">${inv.active?'ACTIVE':'COMPLETED'}</span></div>`;});c.innerHTML=h;}
+}
+async function approveDeposit(depId){
+    try{
+        const depRef=db.collection('deposits').doc(depId);const depSnap=await depRef.get();if(!depSnap.exists)return;const dep=depSnap.data();if(dep.status!=='pending')return;
+        const userRef=db.collection('users').doc(dep.userId);const userSnap=await userRef.get();const ud=userSnap.data();const r1=ud.referredBy||null,r2=ud.referredBy2||null,r3=ud.referredBy3||null;
+        await db.runTransaction(async t=>{const fd=await t.get(depRef);if(!fd.exists||fd.data().status!=='pending')throw new Error('Already processed');
+            t.update(depRef,{status:'approved',approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
+            t.set(db.collection('investments').doc(),{userId:dep.userId,userEmail:dep.userEmail,packageId:dep.packageId,packageName:dep.packageName,amount:dep.amount,dailyReturn:dep.dailyReturn,durationDays:dep.durationDays,startDate:firebase.firestore.FieldValue.serverTimestamp(),paidAmount:0,active:true});
+            if(r1)t.update(db.collection('users').doc(r1),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L1),referralDeposits:firebase.firestore.FieldValue.increment(1)});
+            if(r2)t.update(db.collection('users').doc(r2),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L2)});
+            if(r3)t.update(db.collection('users').doc(r3),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L3)});
+        });
+        showNotification('Deposit approved');renderAdminContent();loadAdminStats();
+    }catch(e){showNotification(e.message);}
+}
+async function rejectDeposit(depId){await db.collection('deposits').doc(depId).update({status:'rejected'});showNotification('Deposit rejected');renderAdminContent();}
+async function approveWithdrawal(wdId){await db.collection('withdrawals').doc(wdId).update({status:'approved',approvedAt:firebase.firestore.FieldValue.serverTimestamp()});showNotification('Withdrawal approved');renderAdminContent();}
+async function rejectWithdrawal(wdId){await db.runTransaction(async t=>{const ref=db.collection('withdrawals').doc(wdId);const doc=await t.get(ref);if(!doc.exists)return;const w=doc.data();if(w.status!=='pending')return;t.update(db.collection('users').doc(w.userId),{balance:firebase.firestore.FieldValue.increment(w.amount)});t.update(ref,{status:'rejected',rejectedAt:firebase.firestore.FieldValue.serverTimestamp()});});showNotification('Withdrawal rejected');renderAdminContent();}
+async function giveReferralBonus(refId){await db.runTransaction(async t=>{const ref=db.collection('referrals').doc(refId);const doc=await t.get(ref);if(!doc.exists)return;const r=doc.data();if(r.bonusGiven)return;t.update(db.collection('users').doc(r.referrerId),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L1)});t.update(ref,{bonusGiven:true,status:'completed',bonusAmount:REFERRAL_BONUS_L1});});showNotification('Bonus given');renderAdminContent();}
 
-        function switchHistoryTab(tab) {
-            historyTab = tab;
-            document.querySelectorAll('.history-tab').forEach(btn => btn.classList.remove('active'));
-            const tabs = ['activePlans', 'deposits', 'withdrawals'];
-            const idx = tabs.indexOf(tab);
-            if (idx >= 0) document.querySelectorAll('.history-tab')[idx].classList.add('active');
-            if (currentUser) renderHistory(currentUser.uid);
-            document.getElementById('historyContent').scrollIntoView({ behavior: 'smooth' });
-        }
+function openOnboardingModal(){document.getElementById('onboardingModal').classList.remove('hidden');}
+function closeOnboardingModal(){document.getElementById('onboardingModal').classList.add('hidden');localStorage.setItem('onboardingShown','true');}
+function openPrivacyModal(){document.getElementById('privacyModal').classList.remove('hidden');}
+function closePrivacyModal(){document.getElementById('privacyModal').classList.add('hidden');}
+function openBroadcastModal(){document.getElementById('broadcastModal').classList.remove('hidden');}
+function closeBroadcastModal(){document.getElementById('broadcastModal').classList.add('hidden');}
+async function sendBroadcast(){const msg=document.getElementById('broadcastMessage').value.trim();if(!msg)return showNotification('Type message');await db.collection('announcements').add({message:msg,createdAt:firebase.firestore.FieldValue.serverTimestamp()});showNotification('Broadcast sent');closeBroadcastModal();}
+function openProfileModal(){if(!currentUser)return;document.getElementById('profileModal').classList.remove('hidden');db.collection('users').doc(currentUser.uid).get().then(doc=>{if(doc.exists){const d=doc.data();document.getElementById('profileEmail').value=d.email||currentUser.email;document.getElementById('profileName').value=d.name||'';document.getElementById('profileReferralCode').value=d.referralCode||'';document.getElementById('profileDob').value=d.dob||'';}});}
+function closeProfileModal(){document.getElementById('profileModal').classList.add('hidden');}
+async function saveProfile(){if(!currentUser)return;const name=document.getElementById('profileName').value.trim();const dob=document.getElementById('profileDob').value;try{await db.collection('users').doc(currentUser.uid).update({name,dob});showNotification('Profile saved');closeProfileModal();}catch(e){showNotification(e.message);}}
 
-        async function renderHistory(uid) {
-            const container = document.getElementById('historyContent');
-            container.innerHTML = 'Loading...';
-            if (historyTab === 'activePlans') {
-                const snap = await db.collection('investments').where('userId', '==', uid).where('active', '==',
-                    true).get();
-                if (snap.empty) { container.innerHTML = 'No active plans.'; return; }
-                let html = '';
-                snap.docs.forEach(doc => {
-                    const inv = doc.data();
-                    html +=
-                        `<div class="history-item"><span>${inv.packageName} (${formatCurrency(inv.amount)})</span><span class="badge active">ACTIVE</span></div>`;
-                });
-                container.innerHTML = html;
-            } else if (historyTab === 'deposits') {
-                const snap = await db.collection('deposits').where('userId', '==', uid).get();
-                if (snap.empty) { container.innerHTML = 'No deposits.'; return; }
-                let html = '';
-                snap.docs.forEach(doc => {
-                    const d = doc.data();
-                    html +=
-                        `<div class="history-item"><span>${d.packageName} (${formatCurrency(d.amount)})</span><span class="badge ${d.status}">${d.status.toUpperCase()}</span></div>`;
-                });
-                container.innerHTML = html;
-            } else if (historyTab === 'withdrawals') {
-                const snap = await db.collection('withdrawals').where('userId', '==', uid).get();
-                if (snap.empty) { container.innerHTML = 'No withdrawals.'; return; }
-                let html = '';
-                snap.docs.forEach(doc => {
-                    const w = doc.data();
-                    html +=
-                        `<div class="history-item"><span>${formatCurrency(w.amount)}</span><span class="badge ${w.status}">${w.status.toUpperCase()}</span></div>`;
-                });
-                container.innerHTML = html;
-            }
-        }
+let deferredPrompt;window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;});
+function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});}else{showNotification('Install from browser menu');}}
 
-        // ----- SHORTCUT FUNCTIONS -----
-        function showTransactions() { switchHistoryTab('withdrawals');
-            showNotification('Transactions shown'); }
-
-        function showMyTeam() { showNotification('My Team coming soon'); }
-
-        function showMyPlan() { showPackagesForDeposit(); }
-
-        function showCertificates() { showNotification('Certificates coming soon'); }
-
-        function showPlanChart() { showNotification('Plan Chart coming soon'); }
-
-        function showTeamReward() { showNotification('Team Reward coming soon'); }
-
-        function showSalary() { showNotification('Salary coming soon'); }
-
-        function openWhatsAppGroup() { window.open('https://chat.whatsapp.com/example', '_blank'); }
-
-        function openWhatsAppChannel() { window.open(WHATSAPP_CHANNEL_URL, '_blank'); }
-
-        function openHelpline() { showNotification('Helpline: +92 300 1234567'); }
-
-        // ----- ADMIN -----
-        function showAdminDashboard() {
-            initAdminDashboard();
-            loadAdminStats();
-        }
-
-        function initAdminDashboard() { renderAdminContent();
-            loadAdminStats(); }
-
-        function loadAdminStats() {
-            const container = document.getElementById('adminStats');
-            Promise.all([
-                db.collection('users').get(),
-                db.collection('investments').where('active', '==', true).get(),
-                db.collection('deposits').where('status', '==', 'approved').get(),
-                db.collection('withdrawals').where('status', '==', 'approved').get()
-            ]).then(([users, inv, dep, wd]) => {
-                container.innerHTML = `
-              <div class="feature-card"><div class="feature-icon">👥</div><div class="feature-title">${users.size}</div><div class="feature-sub">Users</div></div>
-              <div class="feature-card"><div class="feature-icon">📦</div><div class="feature-title">${inv.size}</div><div class="feature-sub">Active Inv.</div></div>
-              <div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">${dep.size}</div><div class="feature-sub">Approved Dep.</div></div>
-              <div class="feature-card"><div class="feature-icon">💸</div><div class="feature-title">${wd.size}</div><div class="feature-sub">Approved Wd.</div></div>
-            `;
-            });
-        }
-
-        function switchAdminTab(tab) {
-            adminTab = tab;
-            document.querySelectorAll('.history-tab').forEach(btn => btn.classList.remove('active'));
-            const tabs = ['pending', 'all', 'withdrawals', 'referrals', 'users', 'investments'];
-            const idx = tabs.indexOf(tab);
-            if (idx >= 0) document.querySelectorAll('.history-tab')[idx].classList.add('active');
-            document.getElementById('adminFilterBar').style.display = ['pending', 'all', 'withdrawals', 'users',
-                'investments'
-            ].includes(tab) ? 'flex' : 'none';
-            renderAdminContent();
-        }
-
-        function applyFilter() { renderAdminContent(); }
-
-        async function renderAdminContent() {
-            const container = document.getElementById('adminContent');
-            container.innerHTML = 'Loading...';
-            const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
-            const filter = document.getElementById('filterSelect')?.value || '';
-            if (adminTab === 'pending' || adminTab === 'all') {
-                const snap = await db.collection('deposits').get();
-                let docs = snap.docs;
-                if (adminTab === 'pending') docs = docs.filter(d => d.data().status === 'pending');
-                if (filter) docs = docs.filter(d => d.data().status === filter);
-                if (search) docs = docs.filter(d => d.data().userEmail.includes(search) || d.data().packageName
-                    .includes(search));
-                if (docs.length === 0) { container.innerHTML = 'No deposits'; return; }
-                let html = '';
-                docs.forEach(doc => {
-                    const d = doc.data();
-                    html +=
-                        `<div class="history-item"><span>${d.userEmail}<br><small>${d.packageName} - ${formatCurrency(d.amount)}</small></span><span class="badge ${d.status}">${d.status.toUpperCase()}</span>${d.status === 'pending' ? `<button onclick="approveDeposit('${doc.id}')" style="padding:4px 8px; background:var(--primary); color:white; border:none; border-radius:6px;">Approve</button> <button onclick="rejectDeposit('${doc.id}')" style="padding:4px 8px; background:#f44336; color:white; border:none; border-radius:6px;">Reject</button>` : ''}</div>`;
-                });
-                container.innerHTML = html;
-            } else if (adminTab === 'withdrawals') {
-                const snap = await db.collection('withdrawals').get();
-                let docs = snap.docs;
-                if (filter) docs = docs.filter(d => d.data().status === filter);
-                if (search) docs = docs.filter(d => d.data().userEmail.includes(search));
-                if (docs.length === 0) { container.innerHTML = 'No withdrawals'; return; }
-                let html = '';
-                docs.forEach(doc => {
-                    const w = doc.data();
-                    html +=
-                        `<div class="history-item"><span>${w.userEmail}<br><small>${formatCurrency(w.amount)}</small></span><span class="badge ${w.status}">${w.status.toUpperCase()}</span>${w.status === 'pending' ? `<button onclick="approveWithdrawal('${doc.id}')" style="padding:4px 8px; background:var(--primary); color:white; border:none; border-radius:6px;">Approve</button> <button onclick="rejectWithdrawal('${doc.id}')" style="padding:4px 8px; background:#f44336; color:white; border:none; border-radius:6px;">Reject</button>` : ''}</div>`;
-                });
-                container.innerHTML = html;
-            } else if (adminTab === 'referrals') {
-                const snap = await db.collection('referrals').get();
-                let docs = snap.docs;
-                if (search) docs = docs.filter(d => d.data().referredEmail.includes(search));
-                if (docs.length === 0) { container.innerHTML = 'No referrals'; return; }
-                let html = '';
-                docs.forEach(doc => {
-                    const r = doc.data();
-                    html +=
-                        `<div class="history-item"><span>${r.referredEmail}<br><small>Referrer: ${r.referrerId}</small></span><span class="badge ${r.bonusGiven ? 'approved' : 'pending'}">${r.bonusGiven ? 'Bonus Given' : 'Pending'}</span>${!r.bonusGiven ? `<button onclick="giveReferralBonus('${doc.id}')" style="padding:4px 8px; background:var(--primary); color:white; border:none; border-radius:6px;">Give Bonus</button>` : ''}</div>`;
-                });
-                container.innerHTML = html;
-            } else if (adminTab === 'users') {
-                const snap = await db.collection('users').get();
-                let docs = snap.docs;
-                if (search) docs = docs.filter(d => d.data().email?.includes(search));
-                if (docs.length === 0) { container.innerHTML = 'No users'; return; }
-                let html = '';
-                for (const doc of docs) {
-                    const u = doc.data();
-                    const invSnap = await db.collection('investments').where('userId', '==', doc.id).where(
-                        'active', '==', true).where('amount', '>', 0).get();
-                    if (invSnap.size > 0 || !search) {
-                        html +=
-                            `<div class="history-item"><span>${u.email || 'No Email'}<br><small>Balance: ${formatCurrency(Math.floor(u.balance || 0))}</small></span></div>`;
-                    }
-                }
-                container.innerHTML = html || 'No users with paid packages';
-            } else if (adminTab === 'investments') {
-                const snap = await db.collection('investments').get();
-                let docs = snap.docs;
-                if (search) docs = docs.filter(d => d.data().userEmail.includes(search) || d.data().packageName
-                    .includes(search));
-                if (docs.length === 0) { container.innerHTML = 'No investments'; return; }
-                let html = '';
-                docs.forEach(doc => {
-                    const inv = doc.data();
-                    html +=
-                        `<div class="history-item"><span>${inv.userEmail}<br><small>${inv.packageName} - ${inv.amount === 0 ? 'FREE' : formatCurrency(inv.amount)}</small></span><span class="badge ${inv.active ? 'active' : 'completed'}">${inv.active ? 'ACTIVE' : 'COMPLETED'}</span></div>`;
-                });
-                container.innerHTML = html;
-            }
-        }
-
-        async function approveDeposit(depId) {
-            try {
-                const depRef = db.collection('deposits').doc(depId);
-                const depSnap = await depRef.get();
-                if (!depSnap.exists) return;
-                const dep = depSnap.data();
-                if (dep.status !== 'pending') return;
-                const userRef = db.collection('users').doc(dep.userId);
-                const userSnap = await userRef.get();
-                const ud = userSnap.data();
-                const r1 = ud.referredBy || null,
-                    r2 = ud.referredBy2 || null,
-                    r3 = ud.referredBy3 || null;
-                await db.runTransaction(async t => {
-                    const fd = await t.get(depRef);
-                    if (!fd.exists || fd.data().status !== 'pending') throw new Error('Already processed');
-                    t.update(depRef, { status: 'approved', approvedAt: firebase.firestore.FieldValue
-                            .serverTimestamp() });
-                    t.set(db.collection('investments').doc(), {
-                        userId: dep.userId,
-                        userEmail: dep.userEmail,
-                        packageId: dep.packageId,
-                        packageName: dep.packageName,
-                        amount: dep.amount,
-                        dailyReturn: dep.dailyReturn,
-                        durationDays: dep.durationDays,
-                        startDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        paidAmount: 0,
-                        active: true
-                    });
-                    if (r1) t.update(db.collection('users').doc(r1), { balance: firebase.firestore.FieldValue
-                            .increment(REFERRAL_BONUS_L1) });
-                    if (r2) t.update(db.collection('users').doc(r2), { balance: firebase.firestore.FieldValue
-                            .increment(REFERRAL_BONUS_L2) });
-                    if (r3) t.update(db.collection('users').doc(r3), { balance: firebase.firestore.FieldValue
-                            .increment(REFERRAL_BONUS_L3) });
-                });
-                showNotification('Deposit approved');
-                renderAdminContent();
-                loadAdminStats();
-            } catch (e) { showNotification(e.message); }
-        }
-
-        async function rejectDeposit(depId) { await db.collection('deposits').doc(depId).update({ status: 'rejected' });
-            showNotification('Deposit rejected');
-            renderAdminContent(); }
-
-        async function approveWithdrawal(wdId) { await db.collection('withdrawals').doc(wdId).update({ status: 'approved',
-                approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
-            showNotification('Withdrawal approved');
-            renderAdminContent(); }
-
-        async function rejectWithdrawal(wdId) {
-            await db.runTransaction(async t => {
-                const ref = db.collection('withdrawals').doc(wdId);
-                const doc = await t.get(ref);
-                if (!doc.exists) return;
-                const w = doc.data();
-                if (w.status !== 'pending') return;
-                t.update(db.collection('users').doc(w.userId), { balance: firebase.firestore.FieldValue.increment(
-                        w.amount) });
-                t.update(ref, { status: 'rejected', rejectedAt: firebase.firestore.FieldValue.serverTimestamp() });
-            });
-            showNotification('Withdrawal rejected');
-            renderAdminContent();
-        }
-
-        async function giveReferralBonus(refId) {
-            await db.runTransaction(async t => {
-                const ref = db.collection('referrals').doc(refId);
-                const doc = await t.get(ref);
-                if (!doc.exists) return;
-                const r = doc.data();
-                if (r.bonusGiven) return;
-                t.update(db.collection('users').doc(r.referrerId), { balance: firebase.firestore.FieldValue
-                        .increment(REFERRAL_BONUS_L1) });
-                t.update(ref, { bonusGiven: true, status: 'completed', bonusAmount: REFERRAL_BONUS_L1 });
-            });
-            showNotification('Bonus given');
-            renderAdminContent();
-        }
-
-        // ----- MODALS -----
-        function openOnboardingModal() { document.getElementById('onboardingModal').classList.remove('hidden'); }
-
-        function closeOnboardingModal() { document.getElementById('onboardingModal').classList.add('hidden');
-            localStorage.setItem('onboardingShown', 'true'); }
-
-        function openPrivacyModal() { document.getElementById('privacyModal').classList.remove('hidden'); }
-
-        function closePrivacyModal() { document.getElementById('privacyModal').classList.add('hidden'); }
-
-        function openAboutModal() { document.getElementById('aboutModal').classList.remove('hidden'); }
-
-        function closeAboutModal() { document.getElementById('aboutModal').classList.add('hidden'); }
-
-        function openBroadcastModal() { document.getElementById('broadcastModal').classList.remove('hidden'); }
-
-        function closeBroadcastModal() { document.getElementById('broadcastModal').classList.add('hidden'); }
-
-        async function sendBroadcast() {
-            const msg = document.getElementById('broadcastMessage').value.trim();
-            if (!msg) return showNotification('Type a message');
-            await db.collection('announcements').add({ message: msg, createdAt: firebase.firestore.FieldValue
-                    .serverTimestamp() });
-            showNotification('Broadcast sent');
-            closeBroadcastModal();
-        }
-
-        // ----- PWA -----
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault();
-            deferredPrompt = e; });
-
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-            } else {
-                showNotification('Install from browser menu');
-            }
-        }
-
-        // ----- INIT -----
-        const refCode = getReferralFromURL();
-        if (refCode) document.getElementById('inviteCodeInput').value = refCode;
-        if (localStorage.getItem('onboardingShown') === 'true') onboardingShown = true;
-    </script>
+const refCode=getReferralFromURL();if(refCode)document.getElementById('inviteCodeInput').value=refCode;
+if(localStorage.getItem('onboardingShown')==='true')onboardingShown=true;
+</script>
 </body>
 </html>
