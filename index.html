@@ -1,565 +1,1614 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jetour Private Solution - Investment Game</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4CAF50">
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter','Segoe UI',sans-serif; }
-        :root {
-            --primary:#4CAF50; --primary-dark:#388E3C; --primary-light:#66BB6A;
-            --lighter:#E8F5E9; --pale:#C8E6C9; --bg:#F4F9F1; --white:#fff;
-            --dark-text:#1a2a1a; --muted:#6a7a6a; --whatsapp:#25D366;
-            --shadow-sm:0 2px 8px rgba(0,0,0,.06); --shadow-md:0 6px 18px rgba(0,0,0,.08);
-            --radius-sm:10px; --radius-md:16px; --radius-lg:22px;
-        }
-        body { background:var(--bg); min-height:100vh; display:flex; justify-content:center; align-items:center; color:var(--dark-text); -webkit-tap-highlight-color:transparent; }
-        .app-wrapper { width:100%; max-width:430px; padding:0 14px 90px; position:relative; }
-        .top-header { display:flex; flex-direction:column; align-items:center; padding:16px 0 12px; text-align:center; }
-        .brand-logo { width:52px; height:52px; background:linear-gradient(135deg,var(--primary-light),var(--primary-dark)); border-radius:14px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(76,175,80,.3); margin-bottom:6px; }
-        .brand-logo svg { width:30px; height:30px; fill:white; }
-        .brand-name { font-size:1.3rem; font-weight:800; color:var(--primary-dark); }
-        .brand-sub { font-size:0.65rem; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
-        .balance-card { background:linear-gradient(135deg,#4CAF50,#2E7D32); border-radius:var(--radius-lg); padding:18px 20px; color:white; box-shadow:0 8px 20px rgba(76,175,80,.35); margin-bottom:12px; }
-        .balance-card .label { font-size:0.7rem; text-transform:uppercase; letter-spacing:2px; opacity:.85; }
-        .balance-card .amount { font-size:2rem; font-weight:800; margin:4px 0 8px; }
-        .balance-info-row { display:flex; justify-content:space-between; gap:10px; font-size:0.75rem; border-top:1px solid rgba(255,255,255,.2); padding-top:10px; }
-        .action-buttons-row { display:flex; gap:12px; margin-bottom:12px; }
-        .action-btn { flex:1; padding:14px 10px; border-radius:var(--radius-md); border:none; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; transition:.25s; box-shadow:0 4px 12px rgba(0,0,0,.1); }
-        .action-btn:active { transform:scale(.96); }
-        .action-btn.deposit { background:var(--white); color:var(--primary-dark); }
-        .action-btn.withdraw { background:var(--dark-text); color:white; }
-        .invite-card { background:var(--white); border-radius:var(--radius-md); padding:14px 16px; box-shadow:var(--shadow-sm); margin-bottom:12px; display:flex; align-items:center; gap:12px; }
-        .invite-icon { width:36px; height:36px; border-radius:10px; background:var(--lighter); display:flex; align-items:center; justify-content:center; }
-        .invite-info { flex:1; }
-        .invite-title { font-weight:700; font-size:0.85rem; }
-        .invite-link { font-size:0.7rem; color:var(--muted); word-break:break-all; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .copy-btn-small { background:var(--primary); color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:600; font-size:0.75rem; cursor:pointer; }
-        .shortcut-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
-        .shortcut-item { display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; transition:.25s; }
-        .shortcut-item:active { transform:scale(.95); }
-        .shortcut-icon { width:48px; height:48px; border-radius:14px; background:var(--primary); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(76,175,80,.25); color:white; font-size:1.2rem; }
-        .shortcut-label { font-size:0.65rem; font-weight:500; text-align:center; }
-        .community-card { background:var(--white); border-radius:var(--radius-md); padding:14px 16px; box-shadow:var(--shadow-sm); margin-bottom:10px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:.25s; }
-        .community-card:active { transform:scale(.98); }
-        .community-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
-        .community-icon.whatsapp { background:#E8F5E9; color:#25D366; }
-        .community-icon.channel { background:#E8F5E9; color:#4CAF50; }
-        .community-icon.admin { background:#FFF3E0; color:#FF9800; }
-        .community-icon.helpline { background:#E3F2FD; color:#2196F3; }
-        .community-info { flex:1; }
-        .community-title { font-weight:700; font-size:0.85rem; }
-        .community-sub { font-size:0.7rem; color:var(--muted); }
-        .feature-two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
-        .feature-card { background:var(--white); border-radius:var(--radius-md); padding:16px 14px; box-shadow:var(--shadow-sm); text-align:center; cursor:pointer; }
-        .feature-icon { font-size:1.5rem; margin-bottom:6px; }
-        .feature-title { font-weight:700; font-size:0.85rem; }
-        .feature-sub { font-size:0.65rem; color:var(--muted); }
-        .history-tabs { display:flex; gap:8px; margin:16px 0 10px; }
-        .history-tab { padding:8px 14px; border-radius:20px; border:none; background:var(--white); font-weight:600; font-size:0.8rem; cursor:pointer; color:var(--muted); box-shadow:var(--shadow-sm); }
-        .history-tab.active { background:var(--primary); color:white; }
-        .history-content { background:var(--white); border-radius:var(--radius-md); padding:14px; box-shadow:var(--shadow-sm); }
-        .history-item { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; font-size:0.85rem; }
-        .bottom-nav { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); width:calc(100% - 28px); max-width:402px; background:var(--white); border-radius:30px; display:flex; justify-content:space-around; align-items:center; padding:8px 6px; box-shadow:0 8px 25px rgba(0,0,0,.12); z-index:200; }
-        .bottom-nav-item { display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; padding:6px 10px; border-radius:20px; font-size:0.6rem; font-weight:600; color:var(--muted); }
-        .bottom-nav-item.active { background:var(--primary-dark); color:white; }
-        .bottom-nav-icon { font-size:1.2rem; }
-        .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:300; backdrop-filter:blur(4px); }
-        .modal { background:var(--white); border-radius:var(--radius-lg); padding:20px; width:90%; max-width:400px; box-shadow:0 12px 30px rgba(0,0,0,.2); max-height:85vh; overflow-y:auto; }
-        .modal h3 { font-size:1.1rem; margin-bottom:12px; }
-        .modal input, .modal select { width:100%; padding:12px 14px; border:2px solid var(--pale); border-radius:var(--radius-sm); font-size:0.9rem; margin-bottom:10px; }
-        .modal button { width:100%; padding:12px; border:none; border-radius:var(--radius-sm); font-weight:700; cursor:pointer; background:var(--primary); color:white; margin-top:6px; }
-        .modal .btn-secondary { background:#777; }
-        .badge { padding:4px 10px; border-radius:12px; font-size:0.7rem; font-weight:700; }
-        .badge.active { background:#E8F5E9; color:#388E3C; }
-        .badge.pending { background:#FFF3E0; color:#E65100; }
-        .badge.approved { background:#E8F5E9; color:#388E3C; }
-        .badge.rejected { background:#FFEBEE; color:#C62828; }
-        .badge.completed { background:#F5F5F5; color:#777; }
-        .hidden { display:none !important; }
-        .package-grid { display:grid; gap:12px; }
-        @media (max-width:400px) { .shortcut-grid { grid-template-columns:repeat(4,1fr); gap:8px; } .shortcut-icon { width:42px; height:42px; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jetour Private Solution</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a6b3c">
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --g1:#1a6b3c;--g2:#27a35a;--g3:#43c97a;--g4:#d4f5e2;--g5:#f0faf5;
+  --dark:#0d1f14;--text:#1c2e22;--muted:#6b836f;--white:#fff;
+  --gold:#c8a84b;--red:#e03030;--orange:#e07c30;
+  --shadow:0 4px 20px rgba(26,107,60,.12);--shadow-lg:0 12px 40px rgba(26,107,60,.2);
+  --r1:12px;--r2:20px;--r3:28px;
+  font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+}
+html,body{overflow-x:hidden;background:var(--g5)}
+body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
+.wrap{width:100%;max-width:430px;padding:0 0 90px;position:relative;min-height:100vh}
+
+/* ── HEADER ── */
+.hdr{background:var(--g1);padding:18px 20px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.hdr-logo{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-logo svg{width:22px;height:22px;fill:#fff}
+.hdr-title{flex:1}
+.hdr-title h1{font-size:1rem;font-weight:800;color:#fff;letter-spacing:-.2px}
+.hdr-title p{font-size:.65rem;color:rgba(255,255,255,.6);margin-top:1px}
+.hdr-profile{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:.8rem;font-weight:700}
+
+/* ── BALANCE CARD ── */
+.bal-card{margin:16px;background:linear-gradient(145deg,var(--g1) 0%,#0d5c32 100%);border-radius:var(--r2);padding:22px 20px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+.bal-card::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:rgba(255,255,255,.06);border-radius:50%}
+.bal-card::after{content:'';position:absolute;right:30px;top:40px;width:60px;height:60px;background:rgba(255,255,255,.04);border-radius:50%}
+.bal-label{font-size:.65rem;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.6);margin-bottom:6px}
+.bal-amount{font-size:2.2rem;font-weight:900;color:#fff;letter-spacing:-1px;margin-bottom:14px}
+.bal-row{display:flex;justify-content:space-between;gap:10px;border-top:1px solid rgba(255,255,255,.15);padding-top:12px}
+.bal-row-item{font-size:.72rem;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px}
+.bal-row-item strong{color:#fff}
+
+/* ── ACTION BUTTONS ── */
+.action-row{display:flex;gap:10px;padding:0 16px;margin-bottom:14px}
+.act-btn{flex:1;padding:14px 10px;border-radius:var(--r1);border:none;font-weight:700;font-size:.85rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:transform .15s,box-shadow .15s}
+.act-btn:active{transform:scale(.95)}
+.act-btn .ico{font-size:1.3rem}
+.act-btn.dep{background:#fff;color:var(--g1);box-shadow:var(--shadow)}
+.act-btn.wd{background:var(--dark);color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+
+/* ── SECTION TITLE ── */
+.sec-title{padding:4px 16px 10px;font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+/* ── INVITE CARD ── */
+.invite-card{margin:0 16px 14px;background:#fff;border-radius:var(--r1);padding:14px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.inv-ico{width:38px;height:38px;border-radius:10px;background:var(--g4);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.inv-info{flex:1;min-width:0}
+.inv-info h4{font-size:.82rem;font-weight:700;margin-bottom:2px}
+.inv-link{font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.copy-btn{background:var(--g1);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:.72rem;cursor:pointer;flex-shrink:0}
+.copy-btn:active{background:var(--g2)}
+
+/* ── SHORTCUT GRID ── */
+.sc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px;margin-bottom:16px}
+.sc-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform .15s}
+.sc-item:active{transform:scale(.9)}
+.sc-ico{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.sc-ico.green{background:var(--g4);color:var(--g1)}
+.sc-ico.dark{background:#e8eae9;color:var(--dark)}
+.sc-ico.gold{background:#fef8e6;color:var(--gold)}
+.sc-ico.red{background:#fdeaea;color:var(--red)}
+.sc-label{font-size:.6rem;font-weight:600;color:var(--text);text-align:center;line-height:1.2}
+
+/* ── COMMUNITY CARDS ── */
+.comm-card{margin:0 16px 10px;background:#fff;border-radius:var(--r1);padding:14px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .15s}
+.comm-card:active{transform:scale(.98)}
+.comm-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.comm-ico.wa{background:#e7f9ee;color:#25D366}
+.comm-ico.ch{background:var(--g4);color:var(--g1)}
+.comm-ico.adm{background:#fff8e6;color:var(--gold)}
+.comm-info h4{font-size:.82rem;font-weight:700}
+.comm-info p{font-size:.7rem;color:var(--muted);margin-top:2px}
+.comm-arr{margin-left:auto;color:var(--muted);font-size:.8rem}
+
+/* ── FEATURE 2COL ── */
+.f2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:16px}
+.f-card{background:#fff;border-radius:var(--r1);padding:16px 14px;box-shadow:var(--shadow);text-align:center;cursor:pointer;transition:transform .15s}
+.f-card:active{transform:scale(.97)}
+.f-card .fi{font-size:1.5rem;margin-bottom:6px}
+.f-card h4{font-size:.82rem;font-weight:700}
+.f-card p{font-size:.65rem;color:var(--muted);margin-top:3px}
+
+/* ── ACTIVE INVESTMENT ── */
+.inv-section{padding:0 16px;margin-bottom:14px}
+.inv-card{background:linear-gradient(135deg,var(--g2),var(--g1));border-radius:var(--r1);padding:16px;color:#fff;margin-bottom:10px;box-shadow:var(--shadow)}
+.inv-card h4{font-size:.9rem;font-weight:700;margin-bottom:10px}
+.inv-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.inv-stat{background:rgba(255,255,255,.15);border-radius:8px;padding:8px;text-align:center}
+.inv-stat .lbl{font-size:.58rem;opacity:.8;margin-bottom:3px}
+.inv-stat .val{font-size:.78rem;font-weight:700}
+.prog-track{background:rgba(255,255,255,.25);height:6px;border-radius:10px;overflow:hidden;margin-bottom:8px}
+.prog-fill{background:#fff;height:100%;border-radius:10px;transition:width .5s}
+.countdown{text-align:center;font-size:1.1rem;font-weight:800;letter-spacing:1px}
+.cd-label{text-align:center;font-size:.6rem;opacity:.75;margin-top:2px}
+
+/* ── HISTORY ── */
+.hist-wrap{padding:0 16px}
+.hist-tabs{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px}
+.hist-tabs::-webkit-scrollbar{display:none}
+.h-tab{padding:7px 16px;border-radius:20px;border:none;background:#fff;font-weight:600;font-size:.75rem;cursor:pointer;color:var(--muted);box-shadow:var(--shadow);white-space:nowrap;flex-shrink:0}
+.h-tab.active{background:var(--g1);color:#fff}
+.hist-box{background:#fff;border-radius:var(--r1);padding:14px;box-shadow:var(--shadow)}
+.h-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:.8rem}
+.h-item:last-child{border-bottom:none}
+.h-item-left strong{display:block;font-size:.82rem}
+.h-item-left small{color:var(--muted);font-size:.7rem}
+.empty-state{text-align:center;padding:24px;color:var(--muted);font-size:.82rem}
+
+/* ── BADGE ── */
+.badge{padding:4px 10px;border-radius:10px;font-size:.65rem;font-weight:700;white-space:nowrap}
+.badge.approved,.badge.active{background:#d4f5e2;color:var(--g1)}
+.badge.pending{background:#fff3e0;color:#c05e00}
+.badge.rejected{background:#fdeaea;color:var(--red)}
+.badge.completed{background:#f0f0f0;color:#888}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:398px;background:#fff;border-radius:24px;display:flex;justify-content:space-around;align-items:center;padding:6px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:100}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:7px 10px;border-radius:16px;font-size:.58rem;font-weight:600;color:var(--muted);transition:all .2s;flex:1}
+.bn-item.active{background:var(--g1);color:#fff}
+.bn-ico{font-size:1.1rem}
+
+/* ── PAGES ── */
+.page{display:none}
+.page.active{display:block}
+
+/* ── DEPOSIT PAGE ── */
+.dep-page-hdr{padding:16px;display:flex;align-items:center;gap:10px;background:#fff;box-shadow:var(--shadow)}
+.back-btn{width:34px;height:34px;border-radius:10px;background:var(--g5);border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.dep-page-hdr h2{font-size:1rem;font-weight:800;color:var(--text)}
+.pkg-grid{padding:14px 16px;display:grid;gap:12px}
+.pkg-card{background:#fff;border-radius:var(--r1);padding:16px;box-shadow:var(--shadow);border-top:4px solid var(--g2);position:relative;overflow:hidden}
+.pkg-badge{position:absolute;top:12px;right:12px;font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:8px}
+.pkg-badge.popular{background:#fff8e6;color:var(--gold)}
+.pkg-badge.premium{background:#f0e8ff;color:#7c3aed}
+.pkg-badge.elite{background:var(--g4);color:var(--g1)}
+.pkg-name{font-size:.95rem;font-weight:800;margin-bottom:8px;padding-right:60px}
+.pkg-price{font-size:1.6rem;font-weight:900;color:var(--g1);letter-spacing:-1px}
+.pkg-details{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.pkg-detail{background:var(--g5);border-radius:8px;padding:8px 10px}
+.pkg-detail .pd-label{font-size:.6rem;color:var(--muted);margin-bottom:2px}
+.pkg-detail .pd-val{font-size:.82rem;font-weight:700;color:var(--text)}
+.pkg-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--g1);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;margin-top:4px}
+.pkg-btn:active{background:var(--g2)}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:500;padding:0}
+.overlay.center{align-items:center;padding:16px}
+.modal{background:#fff;border-radius:var(--r3) var(--r3) 0 0;padding:24px 20px;width:100%;max-width:430px;max-height:90vh;overflow-y:auto;animation:slideUp .25s ease}
+.overlay.center .modal{border-radius:var(--r2);max-width:400px}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-drag{width:36px;height:4px;background:#ddd;border-radius:4px;margin:0 auto 18px}
+.modal-close{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;background:var(--g5);border:none;cursor:pointer;font-size:1rem;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.modal h3{font-size:1.05rem;font-weight:800;margin-bottom:16px;color:var(--text)}
+.inp{width:100%;padding:13px 14px;border:2px solid #e8f0eb;border-radius:10px;font-size:16px;margin-bottom:10px;background:#fff;outline:none;color:var(--text);font-family:inherit;transition:border-color .2s}
+.inp:focus{border-color:var(--g2)}
+select.inp{cursor:pointer}
+textarea.inp{resize:vertical;min-height:80px}
+.modal-btn{width:100%;padding:13px;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.92rem;margin-top:4px;font-family:inherit;transition:opacity .2s}
+.modal-btn:disabled{opacity:.5;cursor:not-allowed}
+.modal-btn.primary{background:var(--g1);color:#fff}
+.modal-btn.secondary{background:var(--g5);color:var(--text)}
+.modal-btn.danger{background:var(--red);color:#fff}
+
+/* ── DEPOSIT BOX ── */
+.dep-box{background:var(--g4);border-radius:12px;padding:14px;margin:12px 0;border-left:4px solid var(--g1)}
+.dep-box .db-label{font-size:.7rem;color:var(--muted);margin-bottom:4px}
+.dep-box .db-num{font-size:1.2rem;font-weight:900;color:var(--g1);letter-spacing:.5px;margin:4px 0}
+.dep-box .db-name{font-size:.82rem;font-weight:600}
+.dep-box .db-note{font-size:.72rem;color:var(--muted);margin-top:8px;line-height:1.5}
+
+/* ── UPLOAD AREA ── */
+.upload-area{border:2px dashed var(--g3);border-radius:10px;padding:18px;text-align:center;cursor:pointer;margin-bottom:10px;transition:border-color .2s,background .2s}
+.upload-area:hover{border-color:var(--g1);background:var(--g4)}
+.upload-area p{font-size:.8rem;color:var(--muted)}
+.upload-area .ico{font-size:1.6rem;margin-bottom:6px}
+.upload-preview{width:100%;border-radius:10px;max-height:160px;object-fit:cover;margin-bottom:10px;display:none}
+
+/* ── LOCKED BALANCE ── */
+.locked-row{display:flex;gap:6px;margin:0 16px 14px}
+.locked-pill{flex:1;background:#fff;border-radius:10px;padding:10px 12px;box-shadow:var(--shadow);text-align:center}
+.locked-pill .lp-val{font-size:1rem;font-weight:800;color:var(--text)}
+.locked-pill .lp-label{font-size:.62rem;color:var(--muted);margin-top:2px}
+
+/* ── AUTH ── */
+.auth-wrap{padding:20px 16px}
+.auth-logo{text-align:center;margin-bottom:24px}
+.auth-logo .al-ico{width:64px;height:64px;background:var(--g1);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;box-shadow:var(--shadow-lg)}
+.auth-logo .al-ico svg{width:36px;height:36px;fill:#fff}
+.auth-logo h2{font-size:1.3rem;font-weight:900;color:var(--g1)}
+.auth-logo p{font-size:.72rem;color:var(--muted)}
+.auth-tabs{display:flex;background:#fff;border-radius:12px;padding:4px;margin-bottom:16px;box-shadow:var(--shadow)}
+.auth-tab{flex:1;padding:10px;border:none;background:transparent;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;color:var(--muted);transition:all .2s;font-family:inherit}
+.auth-tab.active{background:var(--g1);color:#fff}
+.auth-form{background:#fff;border-radius:var(--r1);padding:20px;box-shadow:var(--shadow)}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:.8rem}
+.checkbox-row input{width:16px;height:16px;accent-color:var(--g1)}
+.checkbox-row a{color:var(--g1);text-decoration:none}
+
+/* ── ADMIN ── */
+.admin-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 16px;margin-bottom:14px}
+.admin-stat{background:#fff;border-radius:var(--r1);padding:14px;text-align:center;box-shadow:var(--shadow)}
+.admin-stat .as-val{font-size:1.5rem;font-weight:900;color:var(--g1)}
+.admin-stat .as-label{font-size:.68rem;color:var(--muted);margin-top:2px}
+.admin-filter{display:flex;gap:8px;padding:0 16px;margin-bottom:10px}
+.admin-filter .inp{margin-bottom:0;font-size:.85rem}
+.admin-content{margin:0 16px;background:#fff;border-radius:var(--r1);padding:12px;box-shadow:var(--shadow)}
+.admin-item{padding:12px 0;border-bottom:1px solid #f0f0f0}
+.admin-item:last-child{border-bottom:none}
+.admin-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.admin-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.admin-btn{padding:6px 12px;border:none;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit}
+.admin-btn.approve{background:var(--g4);color:var(--g1)}
+.admin-btn.reject{background:#fdeaea;color:var(--red)}
+
+/* ── NOTIFICATION ── */
+.notif{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:12px 20px;border-radius:12px;z-index:9999;font-weight:600;font-size:.82rem;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:90%;text-align:center;display:none;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.notif.success{background:var(--g1)}
+.notif.error{background:var(--red)}
+.notif.warn{background:var(--orange)}
+
+/* ── TEAM MODAL ── */
+.team-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.team-stat{background:var(--g5);border-radius:10px;padding:12px;text-align:center}
+.team-stat .ts-val{font-size:1.2rem;font-weight:800;color:var(--g1)}
+.team-stat .ts-label{font-size:.62rem;color:var(--muted);margin-top:2px}
+.level-badge{display:inline-block;font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px}
+.level-badge.l1{background:#d4f5e2;color:var(--g1)}
+.level-badge.l2{background:#fff3e0;color:var(--orange)}
+.level-badge.l3{background:#f0e8ff;color:#7c3aed}
+
+/* ── SALARY ── */
+.salary-tier{background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.salary-tier.achieved{border-left:4px solid var(--g1)}
+.salary-tier .tier-ico{font-size:1.4rem;width:40px;text-align:center}
+.salary-tier .tier-info{flex:1}
+.salary-tier .tier-info h4{font-size:.85rem;font-weight:700}
+.salary-tier .tier-info p{font-size:.72rem;color:var(--muted)}
+.salary-tier .tier-amount{font-size:1rem;font-weight:800;color:var(--g1)}
+
+/* ── PROFILE ── */
+.profile-header{text-align:center;margin-bottom:16px}
+.profile-avatar{width:60px;height:60px;border-radius:50%;background:var(--g1);color:#fff;font-size:1.4rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.profile-header h4{font-size:.95rem;font-weight:700}
+.profile-header p{font-size:.72rem;color:var(--muted)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:360px){
+  .sc-ico{width:46px;height:46px;font-size:1.05rem}
+  .sc-label{font-size:.57rem}
+  .bal-amount{font-size:1.8rem}
+}
+
+.hidden{display:none!important}
+</style>
 </head>
 <body>
-<div class="app-wrapper" id="appWrapper">
-    <div class="top-header">
-        <div class="brand-logo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7l-10-5z"/></svg></div>
-        <div class="brand-name">Jetour Private Solution</div>
-        <div class="brand-sub">Investment Game</div>
-    </div>
-    <div id="authSection">
-        <div class="history-tabs" style="justify-content:center;">
-            <button id="signupTab" class="history-tab active" onclick="toggleAuth('signup')">Sign Up</button>
-            <button id="loginTab" class="history-tab" onclick="toggleAuth('login')">Login</button>
-        </div>
-        <div id="signupForm" class="modal" style="position:static; width:100%; max-width:100%; box-shadow:var(--shadow-sm);">
-            <h3>Create Account</h3>
-            <input type="email" id="signupEmail" placeholder="Email address">
-            <input type="password" id="signupPassword" placeholder="Password">
-            <input type="text" id="inviteCodeInput" placeholder="Invitation Code (Optional)">
-            <label style="display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:0.85rem;">
-                <input type="checkbox" id="acceptPrivacy" style="width:auto; margin:0;">
-                I accept the <a href="#" onclick="event.preventDefault(); openPrivacyModal();" style="color:var(--primary);">Privacy Policy</a>
-            </label>
-            <button onclick="signupUser()">Create Account</button>
-        </div>
-        <div id="loginForm" class="modal hidden" style="position:static; width:100%; max-width:100%; box-shadow:var(--shadow-sm);">
-            <h3>Login</h3>
-            <input type="email" id="loginEmail" placeholder="Email address">
-            <input type="password" id="loginPassword" placeholder="Password">
-            <button onclick="loginUser()">Login</button>
-        </div>
-    </div>
-    <div id="dashboardSection" class="hidden">
-        <div class="balance-card">
-            <div class="label">Available Balance</div>
-            <div class="amount" id="balanceDisplay">PKR 0</div>
-            <div class="balance-info-row">
-                <span>👤 <span id="accountHolderDisplay">-</span></span>
-                <span>🔗 <span id="referredByDisplay">-</span></span>
-            </div>
-        </div>
-        <div class="action-buttons-row">
-            <button class="action-btn deposit" onclick="showPackagesForDeposit()">💰 Deposit</button>
-            <button class="action-btn withdraw" onclick="openWithdrawalModal()">💸 Withdraw</button>
-        </div>
-        <div class="invite-card">
-            <div class="invite-icon">🔗</div>
-            <div class="invite-info">
-                <div class="invite-title">Invite & Earn</div>
-                <div class="invite-link" id="referralLinkDisplay">-</div>
-            </div>
-            <button class="copy-btn-small" onclick="copyReferralLink()">Copy</button>
-        </div>
-        <div class="shortcut-grid">
-            <div class="shortcut-item" onclick="switchHistoryTab('withdrawals')"><div class="shortcut-icon">💸</div><span class="shortcut-label">Withdraw Log</span></div>
-            <div class="shortcut-item" onclick="switchHistoryTab('deposits')"><div class="shortcut-icon">💰</div><span class="shortcut-label">Deposit Log</span></div>
-            <div class="shortcut-item" onclick="showMyTeam()"><div class="shortcut-icon">👥</div><span class="shortcut-label">My Team</span></div>
-            <div class="shortcut-item" onclick="showTeamReward()"><div class="shortcut-icon">🏆</div><span class="shortcut-label">Team Reward</span></div>
-            <div class="shortcut-item" onclick="showSalary()"><div class="shortcut-icon">💵</div><span class="shortcut-label">Salary</span></div>
-            <div class="shortcut-item" onclick="showPackagesForDeposit()"><div class="shortcut-icon">📦</div><span class="shortcut-label">Plans</span></div>
-            <div class="shortcut-item" onclick="showCertificates()"><div class="shortcut-icon">📜</div><span class="shortcut-label">Certificates</span></div>
-            <div class="shortcut-item" onclick="installApp()"><div class="shortcut-icon">📲</div><span class="shortcut-label">App Install</span></div>
-        </div>
-        <div class="community-card" onclick="openWhatsAppCommunity()"><div class="community-icon whatsapp">💬</div><div class="community-info"><div class="community-title">Join WhatsApp Community</div><div class="community-sub">Connect with members</div></div></div>
-        <div class="community-card" onclick="openWhatsAppChannel()"><div class="community-icon channel">📢</div><div class="community-info"><div class="community-title">Join WhatsApp Channel</div><div class="community-sub">Latest updates</div></div></div>
-        <div class="community-card" onclick="openAdminPanel()"><div class="community-icon admin">🛠️</div><div class="community-info"><div class="community-title">Admin</div><div class="community-sub">Administrator access</div></div></div>
-        <div class="feature-two-col">
-            <div class="feature-card" onclick="showTeamReward()"><div class="feature-icon">🏆</div><div class="feature-title">Team Reward</div><div class="feature-sub">Earn from team</div></div>
-            <div class="feature-card" onclick="showSalary()"><div class="feature-icon">💵</div><div class="feature-title">Salary</div><div class="feature-sub">Monthly income</div></div>
-        </div>
-        <div id="activeInvestmentsContainer" class="hidden"></div>
-        <div class="history-tabs">
-            <button class="history-tab active" onclick="switchHistoryTab('activePlans')">Active</button>
-            <button class="history-tab" onclick="switchHistoryTab('deposits')">Deposits</button>
-            <button class="history-tab" onclick="switchHistoryTab('withdrawals')">Withdrawals</button>
-        </div>
-        <div class="history-content" id="historyContent">Loading...</div>
-    </div>
-    <div id="depositPage" class="hidden">
-        <h3 style="text-align:center; margin-bottom:12px;">Choose Jetour Plan</h3>
-        <div class="package-grid" id="packageGrid"></div>
-        <button class="action-btn withdraw" onclick="goBackToDashboard()" style="width:100%; flex-direction:row; justify-content:center; margin-top:16px;">← Back</button>
-    </div>
-    <div id="adminDashboardSection" class="hidden">
-        <h3 style="text-align:center; margin-bottom:12px;">Admin Panel</h3>
-        <div id="adminStats" style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px;"></div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-            <button class="history-tab active" onclick="switchAdminTab('pending')">Pending</button>
-            <button class="history-tab" onclick="switchAdminTab('all')">All Deposits</button>
-            <button class="history-tab" onclick="switchAdminTab('withdrawals')">Withdrawals</button>
-            <button class="history-tab" onclick="switchAdminTab('referrals')">Referrals</button>
-            <button class="history-tab" onclick="switchAdminTab('users')">Users</button>
-            <button class="history-tab" onclick="switchAdminTab('investments')">Investments</button>
-            <button class="history-tab" onclick="openBroadcastModal()">📢 Broadcast</button>
-        </div>
-        <div id="adminFilterBar" style="display:none; gap:8px; margin-bottom:10px;">
-            <input type="text" id="searchInput" placeholder="Search..." oninput="applyFilter()" style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--pale);">
-            <select id="filterSelect" onchange="applyFilter()" style="padding:10px; border-radius:8px; border:1px solid var(--pale);">
-                <option value="">All</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
-            </select>
-        </div>
-        <div id="adminContent" style="background:white; border-radius:12px; padding:12px; box-shadow:var(--shadow-sm);">Loading...</div>
-        <button class="action-btn withdraw" onclick="goBackToDashboard()" style="width:100%; flex-direction:row; justify-content:center; margin-top:16px;">← Back</button>
-    </div>
-</div>
-<div class="bottom-nav">
-    <div class="bottom-nav-item active" onclick="goHome()"><span class="bottom-nav-icon">🏠</span>Home</div>
-    <div class="bottom-nav-item" onclick="showPackagesForDeposit()"><span class="bottom-nav-icon">💰</span>Deposit</div>
-    <div class="bottom-nav-item" onclick="openWithdrawalModal()"><span class="bottom-nav-icon">💸</span>Withdraw</div>
-    <div class="bottom-nav-item" onclick="showMyTeam()"><span class="bottom-nav-icon">👥</span>Team</div>
-    <div class="bottom-nav-item" onclick="logout()"><span class="bottom-nav-icon">🚪</span>Logout</div>
-</div>
-<div id="depositModal" class="modal-overlay hidden"><div class="modal"><h3>Deposit Details</h3><div id="depositDetails"></div><button onclick="submitDeposit()">Submit</button><button class="btn-secondary" onclick="closeDepositModal()">Cancel</button></div></div>
-<div id="withdrawalModal" class="modal-overlay hidden"><div class="modal"><h3>Withdraw Funds</h3><div id="withdrawalContent"></div></div></div>
-<div id="profileModal" class="modal-overlay hidden"><div class="modal"><h3>My Profile</h3><input type="email" id="profileEmail" placeholder="Email" disabled><input type="text" id="profileName" placeholder="Full Name"><input type="text" id="profileReferralCode" placeholder="Code" readonly><input type="date" id="profileDob"><button onclick="saveProfile()">Save</button><button class="btn-secondary" onclick="closeProfileModal()">Cancel</button></div></div>
-<div id="privacyModal" class="modal-overlay hidden"><div class="modal"><h3>Privacy Policy</h3><p style="font-size:0.85rem; color:var(--muted);">Jetour Private Solution privacy policy...</p><button onclick="closePrivacyModal()">Close</button></div></div>
-<div id="onboardingModal" class="modal-overlay hidden"><div class="modal"><h3>Welcome! 🎉</h3><p>PKR 20 welcome bonus added to your account!</p><button onclick="closeOnboardingModal()">Start!</button></div></div>
-<div id="broadcastModal" class="modal-overlay hidden"><div class="modal"><h3>Broadcast</h3><textarea id="broadcastMessage" rows="4" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--pale); resize:none;"></textarea><button onclick="sendBroadcast()">Send</button><button class="btn-secondary" onclick="closeBroadcastModal()">Cancel</button></div></div>
-<div id="teamModal" class="modal-overlay hidden"><div class="modal"><h3>My Team</h3><div id="teamContent"></div><button class="btn-secondary" onclick="closeTeamModal()">Close</button></div></div>
-<div id="salaryModal" class="modal-overlay hidden"><div class="modal"><h3>Salary System</h3><div id="salaryContent"></div><button class="btn-secondary" onclick="closeSalaryModal()">Close</button></div></div>
+<div class="notif" id="notif"></div>
+<div class="wrap" id="wrap">
 
+  <!-- ── AUTH PAGE ── -->
+  <div id="authPage" class="page active">
+    <div class="auth-wrap">
+      <div class="auth-logo">
+        <div class="al-ico">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7l-10-5z"/></svg>
+        </div>
+        <h2>Jetour Private</h2>
+        <p>Investment Platform</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="signupTab" onclick="toggleAuth('signup')">Create Account</button>
+        <button class="auth-tab" id="loginTab" onclick="toggleAuth('login')">Login</button>
+      </div>
+
+      <div class="auth-form" id="signupForm">
+        <input type="email" class="inp" id="suEmail" placeholder="Email address" autocomplete="email">
+        <input type="password" class="inp" id="suPass" placeholder="Password (min 6 characters)" autocomplete="new-password">
+        <input type="text" class="inp" id="suRef" placeholder="Invitation Code (Optional)">
+        <div class="checkbox-row">
+          <input type="checkbox" id="acceptPP">
+          <label for="acceptPP">I agree to the <a href="#" onclick="event.preventDefault();openModal('privacyModal')">Privacy Policy</a></label>
+        </div>
+        <button class="modal-btn primary" id="signupBtn" onclick="signupUser()">Create Account</button>
+      </div>
+
+      <div class="auth-form hidden" id="loginForm">
+        <input type="email" class="inp" id="liEmail" placeholder="Email address" autocomplete="email">
+        <input type="password" class="inp" id="liPass" placeholder="Password" autocomplete="current-password">
+        <button class="modal-btn primary" id="loginBtn" onclick="loginUser()">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HOME PAGE ── -->
+  <div id="homePage" class="page">
+    <div class="hdr">
+      <div class="hdr-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7l-10-5z"/></svg>
+      </div>
+      <div class="hdr-title">
+        <h1>Jetour Private</h1>
+        <p id="hdrEmail">Welcome back</p>
+      </div>
+      <div class="hdr-profile" onclick="openProfileModal()" id="hdrAvatar">?</div>
+    </div>
+
+    <div class="bal-card">
+      <div class="bal-label">Available Balance</div>
+      <div class="bal-amount" id="balDisplay">PKR 0</div>
+      <div class="bal-row">
+        <div class="bal-row-item">👤 <strong id="balName">-</strong></div>
+        <div class="bal-row-item">🔗 Referred: <strong id="balRef">No</strong></div>
+      </div>
+    </div>
+
+    <div class="locked-row">
+      <div class="locked-pill">
+        <div class="lp-val" id="lockedDisplay">PKR 0</div>
+        <div class="lp-label">Pending Withdrawal</div>
+      </div>
+      <div class="locked-pill">
+        <div class="lp-val" id="earnedDisplay">PKR 0</div>
+        <div class="lp-label">Total Earned</div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="act-btn dep" onclick="showPage('depositPage')">
+        <span class="ico">💰</span>Deposit
+      </button>
+      <button class="act-btn wd" onclick="openModal('withdrawModal')">
+        <span class="ico">💸</span>Withdraw
+      </button>
+    </div>
+
+    <div class="invite-card">
+      <div class="inv-ico">🔗</div>
+      <div class="inv-info">
+        <h4>Invite &amp; Earn</h4>
+        <span class="inv-link" id="refLinkDisplay">Loading...</span>
+      </div>
+      <button class="copy-btn" onclick="copyReferralLink()">Copy</button>
+    </div>
+
+    <div class="sec-title">Quick Access</div>
+    <div class="sc-grid">
+      <div class="sc-item" onclick="switchHistTab('withdrawals');showPage('homePage')">
+        <div class="sc-ico dark">💸</div><span class="sc-label">Withdraw Log</span>
+      </div>
+      <div class="sc-item" onclick="switchHistTab('deposits');showPage('homePage')">
+        <div class="sc-ico dark">💰</div><span class="sc-label">Deposit Log</span>
+      </div>
+      <div class="sc-item" onclick="openModal('teamModal')">
+        <div class="sc-ico green">👥</div><span class="sc-label">My Team</span>
+      </div>
+      <div class="sc-item" onclick="openModal('teamRewardModal')">
+        <div class="sc-ico gold">🏆</div><span class="sc-label">Team Reward</span>
+      </div>
+      <div class="sc-item" onclick="openModal('salaryModal')">
+        <div class="sc-ico green">💵</div><span class="sc-label">Salary</span>
+      </div>
+      <div class="sc-item" onclick="showPage('depositPage')">
+        <div class="sc-ico green">📦</div><span class="sc-label">Plans</span>
+      </div>
+      <div class="sc-item" onclick="openModal('certsModal')">
+        <div class="sc-ico gold">📜</div><span class="sc-label">Certificates</span>
+      </div>
+      <div class="sc-item" onclick="installApp()">
+        <div class="sc-ico dark">📲</div><span class="sc-label">Install App</span>
+      </div>
+    </div>
+
+    <div class="comm-card" onclick="openWhatsApp('community')">
+      <div class="comm-ico wa">💬</div>
+      <div class="comm-info"><h4>WhatsApp Community</h4><p>Connect with all members</p></div>
+      <span class="comm-arr">›</span>
+    </div>
+    <div class="comm-card" onclick="openWhatsApp('channel')">
+      <div class="comm-ico ch">📢</div>
+      <div class="comm-info"><h4>WhatsApp Channel</h4><p>Latest updates &amp; announcements</p></div>
+      <span class="comm-arr">›</span>
+    </div>
+    <div class="comm-card" onclick="openModal('adminLoginModal')">
+      <div class="comm-ico adm">🛠️</div>
+      <div class="comm-info"><h4>Admin Panel</h4><p>Administrator access</p></div>
+      <span class="comm-arr">›</span>
+    </div>
+
+    <div class="f2col">
+      <div class="f-card" onclick="openModal('teamRewardModal')">
+        <div class="fi">🏆</div><h4>Team Reward</h4><p>Earn from your team</p>
+      </div>
+      <div class="f-card" onclick="openModal('salaryModal')">
+        <div class="fi">💵</div><h4>Monthly Salary</h4><p>Referral income</p>
+      </div>
+    </div>
+
+    <div id="activeInvSection" class="inv-section hidden"></div>
+
+    <div class="hist-wrap">
+      <div class="hist-tabs">
+        <button class="h-tab active" onclick="switchHistTab('activePlans')">Active Plans</button>
+        <button class="h-tab" onclick="switchHistTab('deposits')">Deposits</button>
+        <button class="h-tab" onclick="switchHistTab('withdrawals')">Withdrawals</button>
+      </div>
+      <div class="hist-box" id="histContent"><div class="empty-state">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- ── DEPOSIT PAGE ── -->
+  <div id="depositPage" class="page">
+    <div class="dep-page-hdr">
+      <button class="back-btn" onclick="showPage('homePage')">←</button>
+      <h2>Choose a Plan</h2>
+    </div>
+    <div class="pkg-grid" id="pkgGrid"></div>
+  </div>
+
+  <!-- ── ADMIN PAGE ── -->
+  <div id="adminPage" class="page">
+    <div class="hdr" style="background:var(--dark)">
+      <div class="hdr-logo" style="background:rgba(255,255,255,.1)">
+        <svg viewBox="0 0 24 24" style="fill:#fff"><path d="M12 2L2 7v10l10 5 10-5V7l-10-5z"/></svg>
+      </div>
+      <div class="hdr-title">
+        <h1 style="color:#fff">Admin Panel</h1>
+        <p style="color:rgba(255,255,255,.5)">Jetour Private Solution</p>
+      </div>
+      <button onclick="adminLogout()" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600">Logout</button>
+    </div>
+
+    <div class="admin-stats" id="adminStats"></div>
+
+    <div class="hist-wrap" style="margin-bottom:10px">
+      <div class="hist-tabs" id="adminTabs">
+        <button class="h-tab active" onclick="switchAdminTab('pending')">Pending</button>
+        <button class="h-tab" onclick="switchAdminTab('all')">All Deposits</button>
+        <button class="h-tab" onclick="switchAdminTab('withdrawals')">Withdrawals</button>
+        <button class="h-tab" onclick="switchAdminTab('referrals')">Referrals</button>
+        <button class="h-tab" onclick="switchAdminTab('users')">Users</button>
+        <button class="h-tab" onclick="switchAdminTab('investments')">Investments</button>
+      </div>
+    </div>
+
+    <div class="admin-filter" id="adminFilterBar">
+      <input type="text" class="inp" id="adminSearch" placeholder="Search by email..." oninput="renderAdminContent()">
+      <select class="inp" id="adminFilter" onchange="renderAdminContent()" style="max-width:120px">
+        <option value="">All</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+
+    <div class="admin-content" id="adminContent"><div class="empty-state">Loading...</div></div>
+  </div>
+
+</div><!-- end wrap -->
+
+<!-- ── BOTTOM NAV ── -->
+<div class="bnav hidden" id="bnav">
+  <div class="bn-item active" data-tab="home" onclick="showPage('homePage')"><span class="bn-ico">🏠</span>Home</div>
+  <div class="bn-item" data-tab="deposit" onclick="showPage('depositPage')"><span class="bn-ico">💰</span>Deposit</div>
+  <div class="bn-item" data-tab="withdraw" onclick="openModal('withdrawModal');setNavActive('withdraw')"><span class="bn-ico">💸</span>Withdraw</div>
+  <div class="bn-item" data-tab="team" onclick="openModal('teamModal');setNavActive('team')"><span class="bn-ico">👥</span>Team</div>
+  <div class="bn-item" data-tab="logout" onclick="logout()"><span class="bn-ico">🚪</span>Logout</div>
+</div>
+
+<!-- ════════════════════ MODALS ════════════════════ -->
+
+<!-- Deposit Confirm Modal -->
+<div class="overlay hidden" id="depositModal" onclick="closeModalOutside(event,'depositModal')">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>Confirm Deposit</h3>
+    <div id="depositModalContent"></div>
+    <div class="dep-box">
+      <div class="db-label">Send payment via Easypaisa to:</div>
+      <div class="db-num" id="depNumber">03162806904</div>
+      <div class="db-name">Account: <strong id="depName">AAREN KHAN</strong></div>
+      <div class="db-note">After sending, enter your Transaction ID (TID) and upload screenshot below. Admin will verify and approve within 24 hours.</div>
+    </div>
+    <input type="text" class="inp" id="tidInput" placeholder="Enter TID (Transaction ID)" maxlength="30">
+    <div class="upload-area" onclick="document.getElementById('ssInput').click()">
+      <div class="ico">📷</div>
+      <p>Tap to upload payment screenshot</p>
+      <input type="file" id="ssInput" accept="image/*" style="display:none" onchange="previewScreenshot(event)">
+    </div>
+    <img id="ssPreview" class="upload-preview" alt="Screenshot preview">
+    <button class="modal-btn primary" id="submitDepBtn" onclick="submitDeposit()">Submit Deposit Request</button>
+    <button class="modal-btn secondary" onclick="closeModal('depositModal')" style="margin-top:6px">Cancel</button>
+  </div>
+</div>
+
+<!-- Withdraw Modal -->
+<div class="overlay hidden" id="withdrawModal" onclick="closeModalOutside(event,'withdrawModal')">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>Withdraw Funds</h3>
+    <div id="withdrawContent"></div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="overlay center hidden" id="profileModal" onclick="closeModalOutside(event,'profileModal')">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar">?</div>
+      <h4 id="profileEmailDisplay">-</h4>
+      <p id="profileCodeDisplay">Code: -</p>
+    </div>
+    <h3>Edit Profile</h3>
+    <input type="text" class="inp" id="pName" placeholder="Full Name">
+    <input type="date" class="inp" id="pDob">
+    <button class="modal-btn primary" onclick="saveProfile()">Save Profile</button>
+  </div>
+</div>
+
+<!-- Team Modal -->
+<div class="overlay hidden" id="teamModal" onclick="closeModalOutside(event,'teamModal')">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>My Team</h3>
+    <div id="teamContent"><div class="empty-state">Loading...</div></div>
+    <button class="modal-btn secondary" onclick="closeModal('teamModal')" style="margin-top:12px">Close</button>
+  </div>
+</div>
+
+<!-- Team Reward Modal -->
+<div class="overlay hidden" id="teamRewardModal" onclick="closeModalOutside(event,'teamRewardModal')">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>Team Reward</h3>
+    <div id="teamRewardContent"><div class="empty-state">Loading...</div></div>
+    <button class="modal-btn secondary" onclick="closeModal('teamRewardModal')" style="margin-top:12px">Close</button>
+  </div>
+</div>
+
+<!-- Salary Modal -->
+<div class="overlay hidden" id="salaryModal" onclick="closeModalOutside(event,'salaryModal')">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>Salary System</h3>
+    <div id="salaryContent"><div class="empty-state">Loading...</div></div>
+    <button class="modal-btn secondary" onclick="closeModal('salaryModal')" style="margin-top:12px">Close</button>
+  </div>
+</div>
+
+<!-- Certificates Modal -->
+<div class="overlay center hidden" id="certsModal" onclick="closeModalOutside(event,'certsModal')">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModal('certsModal')">✕</button>
+    <h3>Certificates</h3>
+    <div id="certsContent"><div class="empty-state">Loading...</div></div>
+    <button class="modal-btn secondary" onclick="closeModal('certsModal')" style="margin-top:12px">Close</button>
+  </div>
+</div>
+
+<!-- Admin Login Modal -->
+<div class="overlay center hidden" id="adminLoginModal" onclick="closeModalOutside(event,'adminLoginModal')">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModal('adminLoginModal')">✕</button>
+    <h3>Admin Login</h3>
+    <input type="email" class="inp" id="adminEmail" placeholder="Admin email">
+    <input type="password" class="inp" id="adminPass" placeholder="Admin password">
+    <button class="modal-btn primary" onclick="adminLogin()">Login as Admin</button>
+  </div>
+</div>
+
+<!-- Privacy Modal -->
+<div class="overlay center hidden" id="privacyModal" onclick="closeModalOutside(event,'privacyModal')">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModal('privacyModal')">✕</button>
+    <h3>Privacy Policy</h3>
+    <p style="font-size:.82rem;color:var(--muted);line-height:1.7;max-height:260px;overflow-y:auto">
+      Jetour Private Solution collects only essential information (email, wallet details) to operate this platform. Your data is stored securely on Firebase and is never shared with or sold to any third party. Investment returns are based on plan terms. By using this platform, you agree to these terms.
+    </p>
+    <button class="modal-btn primary" onclick="closeModal('privacyModal');document.getElementById('acceptPP').checked=true" style="margin-top:14px">Accept &amp; Close</button>
+  </div>
+</div>
+
+<!-- Onboarding Modal -->
+<div class="overlay center hidden" id="onboardingModal">
+  <div class="modal" style="position:relative;text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:10px">🎉</div>
+    <h3 style="text-align:center">Welcome to Jetour!</h3>
+    <p style="font-size:.84rem;color:var(--muted);line-height:1.7;margin:12px 0">
+      ✅ <strong>PKR 20</strong> welcome bonus added!<br><br>
+      📦 Choose a Jetour car plan<br>
+      💰 Deposit via Easypaisa<br>
+      👥 Refer friends to earn bonuses<br>
+      💵 50+ referrals = monthly salary
+    </p>
+    <button class="modal-btn primary" onclick="closeModal('onboardingModal');markOnboarded()">Let's Start! 🚀</button>
+  </div>
+</div>
+
+<!-- ════════════════════ SCRIPT ════════════════════ -->
 <script>
-const firebaseConfig = { apiKey:"AIzaSyBUUvgeDFSWUYZEg7QdmXRMGSe8okAEXrc", authDomain:"halal-pk.firebaseapp.com", projectId:"halal-pk", storageBucket:"halal-pk.firebasestorage.app", messagingSenderId:"806259174926", appId:"1:806259174926:web:79147c363c041cdf16d65f" };
+// ── FIREBASE CONFIG ──
+const firebaseConfig = {
+  apiKey:"AIzaSyBUUvgeDFSWUYZEg7QdmXRMGSe8okAEXrc",
+  authDomain:"halal-pk.firebaseapp.com",
+  projectId:"halal-pk",
+  storageBucket:"halal-pk.firebasestorage.app",
+  messagingSenderId:"806259174926",
+  appId:"1:806259174926:web:79147c363c041cdf16d65f"
+};
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const ADMIN_EMAIL='admin@engro.com';
-const REFERRAL_BONUS_L1=100, REFERRAL_BONUS_L2=50, REFERRAL_BONUS_L3=25;
-const WELCOME_BONUS=20;
-const MIN_WITHDRAWAL=500, WITHDRAWAL_FEE_PERCENT=2;
-const WHATSAPP_CHANNEL_URL='https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
-const WHATSAPP_COMMUNITY_URL='https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
-const DEPOSIT_NUMBER='03162806904', DEPOSIT_NAME='AAREN KHAN';
+// ── CONSTANTS ──
+const ADMIN_EMAIL = 'admin@engro.com';
+const REFERRAL_BONUS = {l1:100, l2:50, l3:25};
+const WELCOME_BONUS = 20;
+const MIN_WITHDRAWAL = 500;
+const WITHDRAWAL_FEE = 2; // percent
+const DEPOSIT_NUMBER = '03162806904';
+const DEPOSIT_NAME = 'AAREN KHAN';
+const WA_COMMUNITY = 'https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
+const WA_CHANNEL = 'https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
 
-let currentUser=null, isAdmin=false, selectedPackage=null, adminTab='pending';
-let activeInvestmentListener=null, historyTab='activePlans', historyUnsubscribe=null, referralUnsubscribe=null, countdownIntervals={};
-
-const jetourCars = ['Jetour X70','Jetour X90','Jetour Dashing','Jetour T2','Jetour Ice Cream','Jetour Shanhai L9','Jetour X70 Plus','Jetour X90 Plus','Jetour Traveller','Jetour Freedom','Jetour Voyage'];
-
-const packages = [
-    { id:'p1', name:jetourCars[0], amount:300, dailyReturn:75, durationDays:30, totalReturn:2250, color:'#4CAF50' },
-    { id:'p2', name:jetourCars[1], amount:500, dailyReturn:125, durationDays:30, totalReturn:3750, color:'#CD7F32' },
-    { id:'p3', name:jetourCars[2], amount:800, dailyReturn:200, durationDays:30, totalReturn:6000, color:'#C0C0C0' },
-    { id:'p4', name:jetourCars[3], amount:1400, dailyReturn:350, durationDays:30, totalReturn:10500, color:'#FFD700' },
-    { id:'p5', name:jetourCars[4], amount:2000, dailyReturn:500, durationDays:30, totalReturn:15000, color:'#E5E4E2' },
-    { id:'p6', name:jetourCars[5], amount:2500, dailyReturn:625, durationDays:30, totalReturn:18750, color:'#B9F2FF' },
-    { id:'p7', name:jetourCars[6], amount:4000, dailyReturn:1000, durationDays:30, totalReturn:30000, color:'#4169E1' },
-    { id:'p8', name:jetourCars[7], amount:6000, dailyReturn:1500, durationDays:30, totalReturn:45000, color:'#800080' },
-    { id:'p9', name:jetourCars[8], amount:10000, dailyReturn:2500, durationDays:30, totalReturn:75000, color:'#FF4500' },
-    { id:'p10', name:jetourCars[9], amount:15000, dailyReturn:3750, durationDays:30, totalReturn:112500, color:'#008080' },
-    { id:'p11', name:jetourCars[10], amount:25000, dailyReturn:6250, durationDays:30, totalReturn:187500, color:'#B8860B' }
+// ── PACKAGES ──
+const PACKAGES = [
+  {id:'p1', name:'Jetour X70',        amount:300,   daily:75,   days:30, total:2250,  color:'#2ecc71'},
+  {id:'p2', name:'Jetour X90',        amount:500,   daily:125,  days:30, total:3750,  color:'#cd7f32'},
+  {id:'p3', name:'Jetour Dashing',    amount:800,   daily:200,  days:30, total:6000,  color:'#95a5a6'},
+  {id:'p4', name:'Jetour T2',         amount:1400,  daily:350,  days:30, total:10500, color:'#f1c40f', badge:'Popular'},
+  {id:'p5', name:'Jetour Ice Cream',  amount:2000,  daily:500,  days:30, total:15000, color:'#e8e0d0'},
+  {id:'p6', name:'Jetour Shanhai L9', amount:2500,  daily:625,  days:30, total:18750, color:'#74b9ff'},
+  {id:'p7', name:'Jetour X70 Plus',   amount:4000,  daily:1000, days:30, total:30000, color:'#4169e1', badge:'Premium'},
+  {id:'p8', name:'Jetour X90 Plus',   amount:6000,  daily:1500, days:30, total:45000, color:'#8e44ad', badge:'Premium'},
+  {id:'p9', name:'Jetour Traveller',  amount:10000, daily:2500, days:30, total:75000, color:'#e74c3c', badge:'Elite'},
+  {id:'p10',name:'Jetour Freedom',    amount:15000, daily:3750, days:30, total:112500,color:'#1abc9c', badge:'Elite'},
+  {id:'p11',name:'Jetour Voyage',     amount:25000, daily:6250, days:30, total:187500,color:'#b8860b', badge:'Elite'},
 ];
 
-function generateReferralCode(){const c='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';let s='';for(let i=0;i<6;i++)s+=c.charAt(Math.floor(Math.random()*c.length));return s;}
-function getReferralFromURL(){return new URLSearchParams(window.location.search).get('ref')||'';}
-function formatCurrency(a){return 'PKR '+Number(a).toLocaleString('en-PK');}
-function showNotification(m){let n=document.getElementById('notification');if(!n){n=document.createElement('div');n.id='notification';n.style.cssText='position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:12px 20px;border-radius:10px;z-index:999;font-weight:600;';document.body.appendChild(n);}n.textContent=m;n.style.display='block';clearTimeout(n._t);n._t=setTimeout(()=>n.style.display='none',3000);}
+// ── STATE ──
+let currentUser = null;
+let isAdmin = false;
+let selectedPkg = null;
+let histTab = 'activePlans';
+let adminTab = 'pending';
+let countdownTimers = {};
+let unsubscribers = [];
+let deferredInstall = null;
 
-function goHome(){document.getElementById('dashboardSection').classList.remove('hidden');document.getElementById('depositPage').classList.add('hidden');document.getElementById('adminDashboardSection').classList.add('hidden');updateBottomNav('home');}
-function showPackagesForDeposit(){document.getElementById('dashboardSection').classList.add('hidden');document.getElementById('depositPage').classList.remove('hidden');document.getElementById('adminDashboardSection').classList.add('hidden');renderPackages();updateBottomNav('deposit');}
-function goBackToDashboard(){goHome();}
-function updateBottomNav(active){document.querySelectorAll('.bottom-nav-item').forEach((item,idx)=>{item.classList.remove('active');if((active==='home'&&idx===0)||(active==='deposit'&&idx===1))item.classList.add('active');});}
+// ── UTILS ──
+function fmt(n){ return 'PKR ' + Math.floor(Number(n)||0).toLocaleString('en-US'); }
+function genCode(){ const c='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let s=''; for(let i=0;i<6;i++) s+=c[Math.floor(Math.random()*c.length)]; return s; }
+function getRefFromURL(){ return new URLSearchParams(window.location.search).get('ref')||''; }
 
-auth.onAuthStateChanged(async(user)=>{
-    currentUser=user;
-    if(user){
-        if(user.email===ADMIN_EMAIL){isAdmin=true;document.getElementById('authSection').classList.add('hidden');document.getElementById('dashboardSection').classList.add('hidden');document.getElementById('adminDashboardSection').classList.remove('hidden');showAdminDashboard();}
-        else{isAdmin=false;document.getElementById('authSection').classList.add('hidden');document.getElementById('adminDashboardSection').classList.add('hidden');document.getElementById('dashboardSection').classList.remove('hidden');document.getElementById('depositPage').classList.add('hidden');showUserDashboard(user);if(!localStorage.getItem('onboardingShown'))openOnboardingModal();}
-    }else{document.getElementById('dashboardSection').classList.add('hidden');document.getElementById('adminDashboardSection').classList.add('hidden');document.getElementById('depositPage').classList.add('hidden');document.getElementById('authSection').classList.remove('hidden');}
+function notify(msg, type='success'){
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.className = 'notif ' + type;
+  n.style.display = 'block';
+  clearTimeout(n._t);
+  n._t = setTimeout(()=>{ n.style.display='none'; }, 2800);
+}
+
+function setLoading(btnId, loading, text){
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Please wait...' : text;
+}
+
+// ── PAGE / MODAL SYSTEM ──
+function showPage(pageId){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  if(pageId === 'depositPage') renderPackages();
+  if(pageId === 'homePage') setNavActive('home');
+  if(pageId === 'depositPage') setNavActive('deposit');
+}
+
+function openModal(id){
+  const m = document.getElementById(id);
+  if(m) m.classList.remove('hidden');
+  // Populate modal content
+  if(id==='teamModal') loadTeamModal();
+  if(id==='teamRewardModal') loadTeamRewardModal();
+  if(id==='salaryModal') loadSalaryModal();
+  if(id==='certsModal') loadCertsModal();
+  if(id==='withdrawModal') loadWithdrawModal();
+  if(id==='profileModal') loadProfileModal();
+}
+
+function closeModal(id){
+  const m = document.getElementById(id);
+  if(m) m.classList.add('hidden');
+}
+
+function closeModalOutside(e, id){
+  if(e.target === document.getElementById(id)) closeModal(id);
+}
+
+function setNavActive(tab){
+  document.querySelectorAll('.bn-item').forEach(i => i.classList.remove('active'));
+  const el = document.querySelector(`.bn-item[data-tab="${tab}"]`);
+  if(el) el.classList.add('active');
+}
+
+// ── AUTH STATE ──
+auth.onAuthStateChanged(async user => {
+  currentUser = user;
+  clearTimers();
+  unsubscribers.forEach(u => u());
+  unsubscribers = [];
+
+  if(user){
+    if(user.email === ADMIN_EMAIL){
+      isAdmin = true;
+      document.getElementById('bnav').classList.add('hidden');
+      showPage('adminPage');
+      loadAdminStats();
+      renderAdminContent();
+    } else {
+      isAdmin = false;
+      document.getElementById('bnav').classList.remove('hidden');
+      showPage('homePage');
+      initDashboard(user);
+    }
+  } else {
+    isAdmin = false;
+    document.getElementById('bnav').classList.add('hidden');
+    showPage('authPage');
+  }
 });
 
-function toggleAuth(type){document.getElementById('signupForm').classList.toggle('hidden',type!=='signup');document.getElementById('loginForm').classList.toggle('hidden',type!=='login');document.getElementById('signupTab').classList.toggle('active',type==='signup');document.getElementById('loginTab').classList.toggle('active',type==='login');}
+function toggleAuth(type){
+  document.getElementById('signupForm').classList.toggle('hidden', type!=='signup');
+  document.getElementById('loginForm').classList.toggle('hidden', type!=='login');
+  document.getElementById('signupTab').classList.toggle('active', type==='signup');
+  document.getElementById('loginTab').classList.toggle('active', type==='login');
+}
 
 async function signupUser(){
-    const email=document.getElementById('signupEmail').value.trim();
-    const password=document.getElementById('signupPassword').value;
-    const inviteCode=document.getElementById('inviteCodeInput').value.trim();
-    const acceptPrivacy=document.getElementById('acceptPrivacy').checked;
-    if(!email||!password)return showNotification('Fill all fields');
-    if(!acceptPrivacy)return showNotification('Accept Privacy Policy');
-    try{
-        const uc=await auth.createUserWithEmailAndPassword(email,password);
-        const user=uc.user;
-        const referralCode=generateReferralCode();
-        let referredBy=null,referredBy2=null,referredBy3=null;
-        if(inviteCode){
-            const rs=await db.collection('users').where('referralCode','==',inviteCode).limit(1).get();
-            if(!rs.empty){
-                const rd=rs.docs[0];referredBy=rd.id;
-                if(rd.data().referredBy){referredBy2=rd.data().referredBy;const l2=await db.collection('users').doc(referredBy2).get();if(l2.exists&&l2.data().referredBy)referredBy3=l2.data().referredBy;}
-            }
+  const email = document.getElementById('suEmail').value.trim();
+  const pass = document.getElementById('suPass').value;
+  const ref = document.getElementById('suRef').value.trim();
+  const pp = document.getElementById('acceptPP').checked;
+  if(!email||!pass) return notify('Please fill all fields','error');
+  if(pass.length<6) return notify('Password must be at least 6 characters','error');
+  if(!pp) return notify('Please accept the Privacy Policy','warn');
+
+  setLoading('signupBtn', true, 'Create Account');
+  try{
+    const uc = await auth.createUserWithEmailAndPassword(email, pass);
+    const user = uc.user;
+    const code = genCode();
+    let r1=null, r2=null, r3=null;
+    if(ref){
+      const rs = await db.collection('users').where('referralCode','==',ref).limit(1).get();
+      if(!rs.empty){
+        const rd = rs.docs[0]; r1 = rd.id;
+        if(rd.data().referredBy){ r2 = rd.data().referredBy;
+          const l2 = await db.collection('users').doc(r2).get();
+          if(l2.exists && l2.data().referredBy) r3 = l2.data().referredBy;
         }
-        await db.collection('users').doc(user.uid).set({
-            email:user.email,balance:WELCOME_BONUS,name:'',dob:'',referralCode,referredBy,referredBy2,referredBy3,
-            accountHolderName:'',accountType:'',accountNumber:'',cnic:'',
-            createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-            totalReferrals:0,referralDeposits:0,salaryEligible:false,salaryTier:0
-        });
-        if(referredBy){
-            await db.collection('referrals').add({referrerId:referredBy,referredUserId:user.uid,referredEmail:user.email,status:'pending',bonusGiven:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-            await db.collection('users').doc(referredBy).update({totalReferrals:firebase.firestore.FieldValue.increment(1)});
-        }
-        showNotification('Signup successful! PKR 20 bonus added.');
-        openOnboardingModal();
-    }catch(e){showNotification(e.message);}
+      }
+    }
+    await db.collection('users').doc(user.uid).set({
+      email: user.email, balance: WELCOME_BONUS, name:'', dob:'',
+      referralCode: code, referredBy: r1, referredBy2: r2, referredBy3: r3,
+      accountHolderName:'', accountType:'', accountNumber:'', cnic:'',
+      totalReferrals:0, totalEarned:0, pendingWithdrawal:0, onboarded:false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    if(r1){
+      await db.collection('referrals').add({
+        referrerId:r1, referredUserId:user.uid, referredEmail:user.email,
+        level:1, bonusGiven:false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      await db.collection('users').doc(r1).update({totalReferrals: firebase.firestore.FieldValue.increment(1)});
+    }
+    notify('Account created! PKR 20 welcome bonus added 🎉');
+    setTimeout(()=> openModal('onboardingModal'), 800);
+  } catch(e){
+    notify(e.message, 'error');
+  }
+  setLoading('signupBtn', false, 'Create Account');
 }
 
 async function loginUser(){
-    const email=document.getElementById('loginEmail').value.trim();
-    const password=document.getElementById('loginPassword').value;
-    try{await auth.signInWithEmailAndPassword(email,password);showNotification('Login successful!');}catch(e){showNotification(e.message);}
-}
-function logout(){clearAllCountdowns();auth.signOut();}
-
-function showUserDashboard(user){
-    db.collection('users').doc(user.uid).onSnapshot(doc=>{
-        if(doc.exists){
-            const d=doc.data();
-            document.getElementById('balanceDisplay').innerText=formatCurrency(Math.floor(d.balance||0));
-            document.getElementById('accountHolderDisplay').innerText=d.name||user.email.charAt(0).toUpperCase();
-            document.getElementById('referredByDisplay').innerText=d.referredBy||'N/A';
-            if(d.referralCode)document.getElementById('referralLinkDisplay').innerText=window.location.origin+window.location.pathname+'?ref='+d.referralCode;
-        }
-    });
-    loadInvestments(user);setupReferralSection(user);setupHistory(user);
+  const email = document.getElementById('liEmail').value.trim();
+  const pass = document.getElementById('liPass').value;
+  if(!email||!pass) return notify('Fill all fields','error');
+  setLoading('loginBtn', true, 'Login');
+  try{
+    await auth.signInWithEmailAndPassword(email, pass);
+    notify('Login successful!');
+  } catch(e){
+    notify(e.message,'error');
+  }
+  setLoading('loginBtn', false, 'Login');
 }
 
+function logout(){ clearTimers(); auth.signOut(); }
+
+// ── DASHBOARD ──
+function initDashboard(user){
+  // Real-time user data
+  const unsub1 = db.collection('users').doc(user.uid).onSnapshot(doc => {
+    if(!doc.exists) return;
+    const d = doc.data();
+    document.getElementById('balDisplay').textContent = fmt(d.balance||0);
+    document.getElementById('balName').textContent = d.name || user.email.split('@')[0];
+    document.getElementById('balRef').textContent = d.referredBy ? 'Yes' : 'No';
+    document.getElementById('hdrEmail').textContent = d.name || user.email;
+    document.getElementById('hdrAvatar').textContent = (d.name||user.email).charAt(0).toUpperCase();
+    document.getElementById('lockedDisplay').textContent = fmt(d.pendingWithdrawal||0);
+    document.getElementById('earnedDisplay').textContent = fmt(d.totalEarned||0);
+    if(d.referralCode)
+      document.getElementById('refLinkDisplay').textContent = window.location.origin + window.location.pathname + '?ref=' + d.referralCode;
+    // Show onboarding if not done
+    if(!d.onboarded) openModal('onboardingModal');
+  });
+  unsubscribers.push(unsub1);
+  loadActiveInvestments(user);
+  setupHistory(user);
+  processInvestmentsDue(user);
+}
+
+function markOnboarded(){
+  if(!currentUser) return;
+  db.collection('users').doc(currentUser.uid).update({onboarded:true}).catch(()=>{});
+}
+
+// ── PACKAGES ──
 function renderPackages(){
-    const grid=document.getElementById('packageGrid');
-    grid.innerHTML=packages.map(p=>`
-        <div class="invite-card" style="display:block; text-align:center; border-top:4px solid ${p.color};">
-            <div style="font-weight:700;">${p.name}</div>
-            <div style="font-size:1.2rem; font-weight:800;">${formatCurrency(p.amount)}</div>
-            <div style="font-size:0.8rem;">Daily: ${formatCurrency(p.dailyReturn)}</div>
-            <div style="font-size:0.8rem;">Duration: ${p.durationDays} Days</div>
-            <button class="action-btn deposit" style="width:100%; margin-top:8px; flex-direction:row; justify-content:center;" onclick="openDepositModal('${p.id}')">Deposit</button>
-        </div>`).join('');
+  const grid = document.getElementById('pkgGrid');
+  grid.innerHTML = PACKAGES.map(p => {
+    const badgeClass = p.badge==='Popular'?'popular':p.badge==='Premium'?'premium':p.badge==='Elite'?'elite':'';
+    return `<div class="pkg-card" style="border-top-color:${p.color}">
+      ${p.badge?`<span class="pkg-badge ${badgeClass}">${p.badge}</span>`:''}
+      <div class="pkg-name">${p.name}</div>
+      <div class="pkg-price">${fmt(p.amount)}</div>
+      <div class="pkg-details">
+        <div class="pkg-detail"><div class="pd-label">Daily Return</div><div class="pd-val">${fmt(p.daily)}</div></div>
+        <div class="pkg-detail"><div class="pd-label">Duration</div><div class="pd-val">${p.days} Days</div></div>
+        <div class="pkg-detail"><div class="pd-label">Total Return</div><div class="pd-val">${fmt(p.total)}</div></div>
+        <div class="pkg-detail"><div class="pd-label">Daily %</div><div class="pd-val">${((p.daily/p.amount)*100).toFixed(1)}%</div></div>
+      </div>
+      <button class="pkg-btn" onclick="openDepositModal('${p.id}')">Select Plan</button>
+    </div>`;
+  }).join('');
 }
 
-function openDepositModal(packageId){
-    const pkg=packages.find(p=>p.id===packageId);if(!pkg)return;selectedPackage=pkg;
-    document.getElementById('depositDetails').innerHTML=`
-        <p><strong>Plan:</strong> ${pkg.name}</p>
-        <p><strong>Amount:</strong> ${formatCurrency(pkg.amount)}</p>
-        <p><strong>Daily:</strong> ${formatCurrency(pkg.dailyReturn)}</p>
-        <p><strong>Total:</strong> ${formatCurrency(pkg.totalReturn)}</p>
-        <div style="margin:10px 0; padding:10px; background:var(--lighter); border-radius:8px;">
-            <p style="font-size:0.85rem;">Easypaisa: <strong>${DEPOSIT_NUMBER}</strong> (${DEPOSIT_NAME})</p>
-        </div>
-        <input type="text" id="userTidInput" placeholder="Enter TID">`;
-    document.getElementById('depositModal').classList.remove('hidden');
+function openDepositModal(pkgId){
+  const pkg = PACKAGES.find(p => p.id===pkgId);
+  if(!pkg) return;
+  selectedPkg = pkg;
+  document.getElementById('depositModalContent').innerHTML = `
+    <div style="background:var(--g5);border-radius:10px;padding:12px;margin-bottom:12px">
+      <strong style="font-size:.95rem">${pkg.name}</strong>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px">
+        ${fmt(pkg.amount)} → ${fmt(pkg.daily)}/day × ${pkg.days} days = ${fmt(pkg.total)}
+      </div>
+    </div>`;
+  document.getElementById('tidInput').value = '';
+  document.getElementById('ssPreview').style.display = 'none';
+  document.getElementById('ssPreview').src = '';
+  openModal('depositModal');
+  showPage('homePage');
 }
-function closeDepositModal(){document.getElementById('depositModal').classList.add('hidden');}
+
+function previewScreenshot(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = document.getElementById('ssPreview');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    document.querySelector('.upload-area p').textContent = 'Screenshot selected ✓';
+  };
+  reader.readAsDataURL(file);
+}
 
 async function submitDeposit(){
-    if(!selectedPackage||!currentUser)return;
-    const tid=document.getElementById('userTidInput').value.trim();
-    if(!tid)return showNotification('Enter TID');
-    await db.collection('deposits').add({userId:currentUser.uid,userEmail:currentUser.email,packageId:selectedPackage.id,packageName:selectedPackage.name,amount:selectedPackage.amount,dailyReturn:selectedPackage.dailyReturn,durationDays:selectedPackage.durationDays,tid,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    showNotification('Deposit submitted');closeDepositModal();goBackToDashboard();
+  if(!selectedPkg||!currentUser) return;
+  const tid = document.getElementById('tidInput').value.trim();
+  if(!tid) return notify('Enter Transaction ID (TID)','warn');
+
+  setLoading('submitDepBtn', true, 'Submit Deposit Request');
+  try{
+    // Get screenshot as base64 if provided
+    let screenshotBase64 = '';
+    const ssFile = document.getElementById('ssInput').files[0];
+    if(ssFile){
+      screenshotBase64 = await new Promise(res => {
+        const r = new FileReader();
+        r.onload = e => res(e.target.result);
+        r.readAsDataURL(ssFile);
+      });
+    }
+    await db.collection('deposits').add({
+      userId: currentUser.uid,
+      userEmail: currentUser.email,
+      packageId: selectedPkg.id,
+      packageName: selectedPkg.name,
+      amount: selectedPkg.amount,
+      dailyReturn: selectedPkg.daily,
+      durationDays: selectedPkg.days,
+      totalReturn: selectedPkg.total,
+      tid, screenshot: screenshotBase64,
+      status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    notify('Deposit submitted! Admin will verify within 24hrs ✅');
+    closeModal('depositModal');
+  } catch(e){ notify(e.message,'error'); }
+  setLoading('submitDepBtn', false, 'Submit Deposit Request');
 }
 
-function openWithdrawalModal(){
-    if(!currentUser)return;
-    document.getElementById('withdrawalModal').classList.remove('hidden');
-    const content=document.getElementById('withdrawalContent');
-    db.collection('users').doc(currentUser.uid).get().then(doc=>{
-        if(!doc.exists)return;const d=doc.data();
-        if(d.accountHolderName){
-            content.innerHTML=`<p><strong>Holder:</strong> ${d.accountHolderName}</p><p><strong>Type:</strong> ${d.accountType}</p><p><strong>Number:</strong> ${d.accountNumber}</p>
-            <input type="number" id="withdrawAmountInput" placeholder="Amount (PKR)" min="${MIN_WITHDRAWAL}"><p style="font-size:0.8rem;">Min: ${formatCurrency(MIN_WITHDRAWAL)} | Fee: ${WITHDRAWAL_FEE_PERCENT}%</p>
-            <button onclick="submitWithdrawal()">Proceed</button><button class="btn-secondary" onclick="closeWithdrawalModal()">Cancel</button>`;
-        }else{
-            content.innerHTML=`<input type="text" id="wdHolderName" placeholder="Account Holder Name"><select id="wdAccountType"><option>Easypaisa</option><option>JazzCash</option></select>
-            <input type="text" id="wdAccountNumber" placeholder="Account Number"><input type="text" id="wdCnic" placeholder="CNIC No">
-            <button onclick="saveAccountDetails()">Save Details</button><button class="btn-secondary" onclick="closeWithdrawalModal()">Cancel</button>`;
-        }
-    });
+// ── WITHDRAWAL ──
+function loadWithdrawModal(){
+  if(!currentUser) return;
+  const c = document.getElementById('withdrawContent');
+  c.innerHTML = '<div class="empty-state">Loading...</div>';
+  db.collection('users').doc(currentUser.uid).get().then(doc => {
+    if(!doc.exists) return;
+    const d = doc.data();
+    if(d.accountHolderName){
+      c.innerHTML = `
+        <div style="background:var(--g5);border-radius:10px;padding:12px;margin-bottom:12px">
+          <strong>${d.accountHolderName}</strong>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:4px">${d.accountType} — ${d.accountNumber}</div>
+          <div style="font-size:.72rem;color:var(--muted)">CNIC: ${d.cnic}</div>
+        </div>
+        <input type="number" class="inp" id="wdAmt" placeholder="Amount (PKR)" min="${MIN_WITHDRAWAL}">
+        <p style="font-size:.72rem;color:var(--muted);margin-bottom:10px">Min: ${fmt(MIN_WITHDRAWAL)} | Fee: ${WITHDRAWAL_FEE}% | Balance: ${fmt(d.balance)}</p>
+        <button class="modal-btn primary" onclick="submitWithdrawal()">Request Withdrawal</button>
+        <button class="modal-btn secondary" onclick="showAccountForm()" style="margin-top:6px">Edit Account Details</button>`;
+    } else {
+      showAccountForm();
+    }
+  });
 }
-function closeWithdrawalModal(){document.getElementById('withdrawalModal').classList.add('hidden');}
+
+function showAccountForm(){
+  if(!currentUser) return;
+  const c = document.getElementById('withdrawContent');
+  db.collection('users').doc(currentUser.uid).get().then(doc => {
+    const d = doc.exists ? doc.data() : {};
+    c.innerHTML = `
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:10px">Enter your payment account details:</p>
+      <input type="text" class="inp" id="wdHolder" placeholder="Account Holder Name" value="${d.accountHolderName||''}">
+      <select class="inp" id="wdType">
+        <option ${d.accountType==='Easypaisa'?'selected':''}>Easypaisa</option>
+        <option ${d.accountType==='JazzCash'?'selected':''}>JazzCash</option>
+        <option ${d.accountType==='Bank Transfer'?'selected':''}>Bank Transfer</option>
+      </select>
+      <input type="text" class="inp" id="wdNum" placeholder="Account Number" value="${d.accountNumber||''}">
+      <input type="text" class="inp" id="wdCnic" placeholder="CNIC Number" value="${d.cnic||''}">
+      <button class="modal-btn primary" onclick="saveAccountDetails()">Save Details</button>
+      ${d.accountHolderName?'<button class="modal-btn secondary" onclick="loadWithdrawModal()" style="margin-top:6px">Back</button>':''}`;
+  });
+}
+
 async function saveAccountDetails(){
-    const h=document.getElementById('wdHolderName').value.trim();const t=document.getElementById('wdAccountType').value;const n=document.getElementById('wdAccountNumber').value.trim();const c=document.getElementById('wdCnic').value.trim();
-    if(!h||!n||!c)return showNotification('Fill all fields');
-    await db.collection('users').doc(currentUser.uid).update({accountHolderName:h,accountType:t,accountNumber:n,cnic:c});
-    showNotification('Saved');openWithdrawalModal();
+  const h = document.getElementById('wdHolder').value.trim();
+  const t = document.getElementById('wdType').value;
+  const n = document.getElementById('wdNum').value.trim();
+  const c = document.getElementById('wdCnic').value.trim();
+  if(!h||!n||!c) return notify('Fill all account fields','warn');
+  try{
+    await db.collection('users').doc(currentUser.uid).update({
+      accountHolderName:h, accountType:t, accountNumber:n, cnic:c
+    });
+    notify('Account details saved ✅');
+    loadWithdrawModal();
+  } catch(e){ notify(e.message,'error'); }
 }
+
 async function submitWithdrawal(){
-    const amt=parseFloat(document.getElementById('withdrawAmountInput').value);
-    if(!amt||amt<MIN_WITHDRAWAL)return showNotification('Minimum '+formatCurrency(MIN_WITHDRAWAL));
-    const ud=await db.collection('users').doc(currentUser.uid).get();const d=ud.data();
-    if(!d.accountHolderName)return showNotification('Save details first');
-    const fee=(amt*WITHDRAWAL_FEE_PERCENT)/100;const net=amt-fee;
-    await db.runTransaction(async t=>{
-        const ref=db.collection('users').doc(currentUser.uid);const doc=await t.get(ref);const bal=doc.data().balance||0;
-        if(amt>bal)throw new Error('Insufficient');
-        t.update(ref,{balance:firebase.firestore.FieldValue.increment(-amt)});
-        t.set(db.collection('withdrawals').doc(),{userId:currentUser.uid,userEmail:currentUser.email,amount:amt,fee,netAmount:net,accountHolderName:d.accountHolderName,accountType:d.accountType,accountNumber:d.accountNumber,cnic:d.cnic,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  const amt = parseFloat(document.getElementById('wdAmt')?.value||0);
+  if(!amt || amt < MIN_WITHDRAWAL) return notify(`Minimum withdrawal is ${fmt(MIN_WITHDRAWAL)}`,'warn');
+  try{
+    const ud = await db.collection('users').doc(currentUser.uid).get();
+    const d = ud.data();
+    if(!d.accountHolderName) return notify('Save account details first','warn');
+    const fee = (amt * WITHDRAWAL_FEE) / 100;
+    const net = amt - fee;
+    await db.runTransaction(async t => {
+      const ref = db.collection('users').doc(currentUser.uid);
+      const doc = await t.get(ref);
+      const bal = doc.data().balance||0;
+      const pending = doc.data().pendingWithdrawal||0;
+      if(amt > bal) throw new Error('Insufficient balance');
+      t.update(ref, {
+        balance: firebase.firestore.FieldValue.increment(-amt),
+        pendingWithdrawal: firebase.firestore.FieldValue.increment(amt)
+      });
+      t.set(db.collection('withdrawals').doc(), {
+        userId: currentUser.uid, userEmail: currentUser.email,
+        amount:amt, fee, netAmount:net,
+        accountHolderName:d.accountHolderName, accountType:d.accountType,
+        accountNumber:d.accountNumber, cnic:d.cnic,
+        status:'pending',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
     });
-    showNotification('Withdrawal submitted');closeWithdrawalModal();
+    notify(`Withdrawal submitted. Net: ${fmt(net)} ✅`);
+    closeModal('withdrawModal');
+  } catch(e){ notify(e.message,'error'); }
 }
 
-async function loadInvestments(user){
-    db.collection('investments').where('userId','==',user.uid).onSnapshot(snap=>{
-        const c=document.getElementById('activeInvestmentsContainer');
-        if(snap.empty){c.classList.add('hidden');c.innerHTML='';return;}
-        c.classList.remove('hidden');let docs=snap.docs;docs.sort((a,b)=>(a.data().startDate?.toMillis()||0)-(b.data().startDate?.toMillis()||0));let html='';
-        docs.forEach(doc=>{const inv=doc.data();const start=inv.startDate?inv.startDate.toMillis():Date.now();const now=Date.now();let days=Math.floor((now-start)/86400000);days=Math.min(days,inv.durationDays);const pct=Math.floor((days/inv.durationDays)*100);const earned=days*inv.dailyReturn;const cid=`cd-${doc.id}`;
-            html+=`<div class="invite-card" style="background:linear-gradient(135deg,#66BB6A,#388E3C); color:white; display:block;">
-                <h4>📦 ${inv.packageName}</h4>
-                <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:8px 0;">
-                    <div style="background:rgba(255,255,255,.2); border-radius:8px; padding:8px; text-align:center;"><div style="font-size:0.6rem;">Invested</div><div style="font-weight:700;">${inv.amount===0?'FREE':formatCurrency(inv.amount)}</div></div>
-                    <div style="background:rgba(255,255,255,.2); border-radius:8px; padding:8px; text-align:center;"><div style="font-size:0.6rem;">Daily</div><div style="font-weight:700;">${formatCurrency(inv.dailyReturn)}</div></div>
-                    <div style="background:rgba(255,255,255,.2); border-radius:8px; padding:8px; text-align:center;"><div style="font-size:0.6rem;">Earned</div><div style="font-weight:700;">${formatCurrency(earned)}</div></div>
-                    <div style="background:rgba(255,255,255,.2); border-radius:8px; padding:8px; text-align:center;"><div style="font-size:0.6rem;">Days</div><div style="font-weight:700;">${days}/${inv.durationDays}</div></div>
-                </div>
-                <div style="background:rgba(255,255,255,.3); height:8px; border-radius:10px; overflow:hidden;"><div style="background:white; height:100%; width:${pct}%;"></div></div>
-                <div style="text-align:center; font-size:1.2rem; font-weight:800;" id="${cid}">--:--:--</div>
-                <div style="text-align:center; font-size:0.7rem;">Next Earnings</div>
-            </div>`;});
-        c.innerHTML=html;docs.forEach(doc=>startCountdown(doc.data(),`cd-${doc.id}`,doc.id));
+// ── INVESTMENTS ──
+function loadActiveInvestments(user){
+  const sec = document.getElementById('activeInvSection');
+  const unsub = db.collection('investments')
+    .where('userId','==',user.uid)
+    .where('active','==',true)
+    .onSnapshot(snap => {
+      if(snap.empty){ sec.classList.add('hidden'); sec.innerHTML=''; clearTimers(); return; }
+      sec.classList.remove('hidden');
+      clearTimers();
+      let html = '<div class="sec-title">Active Investments</div>';
+      snap.docs.forEach(doc => {
+        const inv = doc.data();
+        const id = doc.id;
+        const start = inv.startDate ? inv.startDate.toMillis() : Date.now();
+        const now = Date.now();
+        const days = Math.min(Math.floor((now-start)/86400000), inv.durationDays);
+        const pct = Math.round((days/inv.durationDays)*100);
+        const earned = days * inv.dailyReturn;
+        const cdId = 'cd-'+id;
+        html += `<div class="inv-card">
+          <h4>📦 ${inv.packageName}</h4>
+          <div class="inv-stats">
+            <div class="inv-stat"><div class="lbl">Invested</div><div class="val">${fmt(inv.amount)}</div></div>
+            <div class="inv-stat"><div class="lbl">Daily</div><div class="val">${fmt(inv.dailyReturn)}</div></div>
+            <div class="inv-stat"><div class="lbl">Earned</div><div class="val">${fmt(earned)}</div></div>
+            <div class="inv-stat"><div class="lbl">Day</div><div class="val">${days}/${inv.durationDays}</div></div>
+          </div>
+          <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+          <div class="countdown" id="${cdId}">--:--:--</div>
+          <div class="cd-label">Until Next Earning</div>
+        </div>`;
+      });
+      sec.innerHTML = html;
+      snap.docs.forEach(doc => startCountdown(doc.data(), 'cd-'+doc.id, doc.id));
     });
-}
-function startCountdown(inv,elId,docId){
-    if(countdownIntervals[docId])clearInterval(countdownIntervals[docId]);
-    const start=inv.startDate?inv.startDate.toMillis():Date.now();const paid=inv.paidAmount||0;const daily=inv.dailyReturn||0;const pd=daily>0?Math.floor(paid/daily):0;const next=start+(pd+1)*86400000;
-    function tick(){const diff=next-Date.now();if(diff<=0){if(currentUser){processInvestments(currentUser).then(()=>{});clearInterval(countdownIntervals[docId]);delete countdownIntervals[docId];showNotification('Profit credited!');}return;}
-        const h=Math.floor(diff/3600000);const m=Math.floor((diff%3600000)/60000);const s=Math.floor((diff%60000)/1000);const el=document.getElementById(elId);if(el)el.innerText=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
-    tick();countdownIntervals[docId]=setInterval(tick,1000);
-}
-function clearAllCountdowns(){for(let k in countdownIntervals){clearInterval(countdownIntervals[k]);delete countdownIntervals[k];}}
-async function processInvestments(user){
-    const ref=db.collection('users').doc(user.uid);const snap=await db.collection('investments').where('userId','==',user.uid).where('active','==',true).get();
-    if(snap.empty)return;const batch=db.batch();let total=0;
-    snap.docs.forEach(doc=>{const inv=doc.data();if(!inv.startDate)return;const days=Math.min(Math.floor((Date.now()-inv.startDate.toMillis())/86400000),inv.durationDays);const earned=days*inv.dailyReturn;const oldPaid=inv.paidAmount||0;if(earned>oldPaid){total+=earned-oldPaid;batch.update(doc.ref,{paidAmount:earned});}if(days>=inv.durationDays)batch.update(doc.ref,{active:false});});
-    if(total>0)batch.update(ref,{balance:firebase.firestore.FieldValue.increment(total)});await batch.commit();
+  unsubscribers.push(unsub);
 }
 
-function setupReferralSection(user){
-    if(referralUnsubscribe)referralUnsubscribe();
-    referralUnsubscribe=db.collection('referrals').where('referrerId','==',user.uid).onSnapshot(snap=>{
-        const list=document.getElementById('referralList');if(!list)return;
-        if(snap.empty){list.innerHTML='No referrals yet.';return;}let html='';
-        snap.docs.forEach(doc=>{const r=doc.data();html+=`<div class="history-item"><span>${r.referredEmail}</span><span class="badge ${r.bonusGiven?'approved':'pending'}">${r.bonusGiven?'Bonus Given':'Pending'}</span></div>`;});
-        list.innerHTML=html;
-    });
+function startCountdown(inv, elId, docId){
+  if(countdownTimers[docId]) clearInterval(countdownTimers[docId]);
+  const start = inv.startDate ? inv.startDate.toMillis() : Date.now();
+  const paid = inv.paidAmount||0;
+  const daily = inv.dailyReturn||0;
+  const pd = daily>0 ? Math.floor(paid/daily) : 0;
+  const next = start + (pd+1)*86400000;
+  function tick(){
+    const diff = next - Date.now();
+    if(diff <= 0){
+      if(currentUser) processInvestmentsDue(currentUser);
+      clearInterval(countdownTimers[docId]);
+      delete countdownTimers[docId]; return;
+    }
+    const h = Math.floor(diff/3600000);
+    const m = Math.floor((diff%3600000)/60000);
+    const s = Math.floor((diff%60000)/1000);
+    const el = document.getElementById(elId);
+    if(el) el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  tick(); countdownTimers[docId] = setInterval(tick,1000);
 }
-function copyReferralLink(){const link=document.getElementById('referralLinkDisplay').innerText;if(!link||link==='-')return showNotification('No link');navigator.clipboard.writeText(link).then(()=>showNotification('Copied!'));}
 
+function clearTimers(){
+  Object.keys(countdownTimers).forEach(k => clearInterval(countdownTimers[k]));
+  countdownTimers = {};
+}
+
+// Process due earnings — called client-side as backup trigger
+// Real production should use Cloud Functions
+async function processInvestmentsDue(user){
+  try{
+    const snap = await db.collection('investments')
+      .where('userId','==',user.uid).where('active','==',true).get();
+    if(snap.empty) return;
+    const batch = db.batch();
+    let totalNew = 0;
+    snap.docs.forEach(doc => {
+      const inv = doc.data();
+      if(!inv.startDate) return;
+      const days = Math.min(Math.floor((Date.now()-inv.startDate.toMillis())/86400000), inv.durationDays);
+      const shouldHaveEarned = days * inv.dailyReturn;
+      const alreadyPaid = inv.paidAmount||0;
+      const delta = shouldHaveEarned - alreadyPaid;
+      if(delta > 0){
+        totalNew += delta;
+        batch.update(doc.ref, {paidAmount: shouldHaveEarned});
+      }
+      if(days >= inv.durationDays) batch.update(doc.ref, {active:false});
+    });
+    if(totalNew > 0){
+      batch.update(db.collection('users').doc(user.uid), {
+        balance: firebase.firestore.FieldValue.increment(totalNew),
+        totalEarned: firebase.firestore.FieldValue.increment(totalNew)
+      });
+      await batch.commit();
+      notify(`+${fmt(totalNew)} credited to your balance 💰`);
+    } else {
+      await batch.commit();
+    }
+  } catch(e){ console.error('processInvestments:', e); }
+}
+
+// ── HISTORY ──
 function setupHistory(user){
-    if(historyUnsubscribe)historyUnsubscribe();const uid=user.uid;
-    const a=db.collection('investments').where('userId','==',uid).where('active','==',true).onSnapshot(()=>{if(historyTab==='activePlans')renderHistory(uid);});
-    const b=db.collection('deposits').where('userId','==',uid).onSnapshot(()=>{if(historyTab==='deposits')renderHistory(uid);});
-    const c=db.collection('withdrawals').where('userId','==',uid).onSnapshot(()=>{if(historyTab==='withdrawals')renderHistory(uid);});
-    historyUnsubscribe=()=>{a();b();c();};
+  const tabs = [
+    {col:'investments', q:q=>q.where('userId','==',user.uid), tab:'activePlans'},
+    {col:'deposits',    q:q=>q.where('userId','==',user.uid), tab:'deposits'},
+    {col:'withdrawals', q:q=>q.where('userId','==',user.uid), tab:'withdrawals'},
+  ];
+  tabs.forEach(({col, q, tab}) => {
+    const unsub = q(db.collection(col)).onSnapshot(()=>{
+      if(histTab===tab) renderHistory(user.uid);
+    });
+    unsubscribers.push(unsub);
+  });
+  renderHistory(user.uid);
 }
-function switchHistoryTab(tab){historyTab=tab;document.querySelectorAll('.history-tab').forEach(btn=>btn.classList.remove('active'));const tabs=['activePlans','deposits','withdrawals'];const idx=tabs.indexOf(tab);if(idx>=0)document.querySelectorAll('.history-tab')[idx].classList.add('active');if(currentUser)renderHistory(currentUser.uid);}
+
+function switchHistTab(tab){
+  histTab = tab;
+  document.querySelectorAll('#homePage .h-tab').forEach((b,i) => {
+    b.classList.toggle('active', ['activePlans','deposits','withdrawals'][i]===tab);
+  });
+  if(currentUser) renderHistory(currentUser.uid);
+}
+
 async function renderHistory(uid){
-    const c=document.getElementById('historyContent');c.innerHTML='Loading...';
-    if(historyTab==='activePlans'){const snap=await db.collection('investments').where('userId','==',uid).where('active','==',true).get();if(snap.empty){c.innerHTML='No active plans.';return;}let h='';snap.docs.forEach(doc=>{const inv=doc.data();h+=`<div class="history-item"><span>${inv.packageName} (${formatCurrency(inv.amount)})</span><span class="badge active">ACTIVE</span></div>`;});c.innerHTML=h;}
-    else if(historyTab==='deposits'){const snap=await db.collection('deposits').where('userId','==',uid).get();if(snap.empty){c.innerHTML='No deposits.';return;}let h='';snap.docs.forEach(doc=>{const d=doc.data();h+=`<div class="history-item"><span>${d.packageName} (${formatCurrency(d.amount)})</span><span class="badge ${d.status}">${d.status.toUpperCase()}</span></div>`;});c.innerHTML=h;}
-    else if(historyTab==='withdrawals'){const snap=await db.collection('withdrawals').where('userId','==',uid).get();if(snap.empty){c.innerHTML='No withdrawals.';return;}let h='';snap.docs.forEach(doc=>{const w=doc.data();h+=`<div class="history-item"><span>${formatCurrency(w.amount)}</span><span class="badge ${w.status}">${w.status.toUpperCase()}</span></div>`;});c.innerHTML=h;}
+  const c = document.getElementById('histContent');
+  c.innerHTML = '<div class="empty-state">Loading...</div>';
+  try{
+    if(histTab==='activePlans'){
+      const snap = await db.collection('investments').where('userId','==',uid).get();
+      const docs = snap.docs;
+      if(docs.length===0){ c.innerHTML='<div class="empty-state">No active plans yet</div>'; return; }
+      c.innerHTML = docs.map(doc => {
+        const inv = doc.data();
+        return `<div class="h-item">
+          <div class="h-item-left"><strong>${inv.packageName}</strong><small>${fmt(inv.amount)} — ${fmt(inv.dailyReturn)}/day</small></div>
+          <span class="badge ${inv.active?'active':'completed'}">${inv.active?'ACTIVE':'DONE'}</span>
+        </div>`;
+      }).join('');
+    } else if(histTab==='deposits'){
+      const snap = await db.collection('deposits').where('userId','==',uid).get();
+      if(snap.empty){ c.innerHTML='<div class="empty-state">No deposits yet</div>'; return; }
+      c.innerHTML = snap.docs.map(doc => {
+        const d = doc.data();
+        return `<div class="h-item">
+          <div class="h-item-left"><strong>${d.packageName}</strong><small>${fmt(d.amount)} · TID: ${d.tid||'-'}</small></div>
+          <span class="badge ${d.status}">${d.status.toUpperCase()}</span>
+        </div>`;
+      }).join('');
+    } else if(histTab==='withdrawals'){
+      const snap = await db.collection('withdrawals').where('userId','==',uid).get();
+      if(snap.empty){ c.innerHTML='<div class="empty-state">No withdrawals yet</div>'; return; }
+      c.innerHTML = snap.docs.map(doc => {
+        const w = doc.data();
+        return `<div class="h-item">
+          <div class="h-item-left"><strong>${fmt(w.amount)}</strong><small>${w.accountType} · Net: ${fmt(w.netAmount)}</small></div>
+          <span class="badge ${w.status}">${w.status.toUpperCase()}</span>
+        </div>`;
+      }).join('');
+    }
+  } catch(e){ c.innerHTML='<div class="empty-state">Error loading data</div>'; }
 }
 
-function showMyTeam(){
-    if(!currentUser)return;
-    document.getElementById('teamModal').classList.remove('hidden');
-    const content=document.getElementById('teamContent');
-    db.collection('users').doc(currentUser.uid).get().then(async doc=>{
-        if(!doc.exists)return;const d=doc.data();
-        const refSnap=await db.collection('referrals').where('referrerId','==',currentUser.uid).get();
-        const totalMembers=refSnap.size;
-        const depositSnap=await db.collection('deposits').where('userId','in',refSnap.docs.map(r=>r.data().referredUserId).slice(0,10)).get();
-        content.innerHTML=`
-            <p><strong>Total Members:</strong> ${totalMembers}</p>
-            <p><strong>Total Bonus Earned:</strong> ${formatCurrency((d.totalReferrals||0)*REFERRAL_BONUS_L1)}</p>
-            <p><strong>Level 1:</strong> ${REFERRAL_BONUS_L1} PKR per referral</p>
-            <p><strong>Level 2:</strong> ${REFERRAL_BONUS_L2} PKR</p>
-            <p><strong>Level 3:</strong> ${REFERRAL_BONUS_L3} PKR</p>
-            <hr style="margin:10px 0;">
-            ${refSnap.empty?'<p>No members yet.</p>':refSnap.docs.map(r=>{const rd=r.data();return `<div class="history-item"><span>${rd.referredEmail}</span><span class="badge ${rd.bonusGiven?'approved':'pending'}">${rd.bonusGiven?'Bonus Given':'Pending'}</span></div>`;}).join('')}
-        `;
-    });
+// ── REFERRAL ──
+function copyReferralLink(){
+  const link = document.getElementById('refLinkDisplay').textContent;
+  if(!link||link==='Loading...') return notify('Link not ready','warn');
+  navigator.clipboard.writeText(link)
+    .then(()=>notify('Referral link copied! 🔗'))
+    .catch(()=>notify('Copy failed','error'));
 }
-function closeTeamModal(){document.getElementById('teamModal').classList.add('hidden');}
 
-function showTeamReward(){showMyTeam();}
-
-function showSalary(){
-    if(!currentUser)return;
-    document.getElementById('salaryModal').classList.remove('hidden');
-    const content=document.getElementById('salaryContent');
-    db.collection('users').doc(currentUser.uid).get().then(async doc=>{
-        if(!doc.exists)return;const d=doc.data();
-        const refSnap=await db.collection('referrals').where('referrerId','==',currentUser.uid).get();
-        const totalMembers=refSnap.size;
-        let tier=0;let salary=0;
-        if(totalMembers>=200){tier=3;salary=20000;}else if(totalMembers>=100){tier=2;salary=10000;}else if(totalMembers>=50){tier=1;salary=5000;}
-        content.innerHTML=`
-            <p><strong>Total Referrals:</strong> ${totalMembers}</p>
-            <p><strong>Salary Tier:</strong> ${tier===0?'Not eligible':tier===1?'50+ Members (PKR 5,000)':tier===2?'100+ Members (PKR 10,000)':'200+ Members (PKR 20,000)'}</p>
-            <p><strong>Monthly Salary:</strong> ${formatCurrency(salary)}</p>
-            <hr style="margin:10px 0;">
-            <p style="font-size:0.85rem;">Milestones:</p>
-            <p>50 members = PKR 5,000/month</p>
-            <p>100 members = PKR 10,000/month</p>
-            <p>200 members = PKR 20,000/month</p>
-        `;
-    });
+// ── TEAM MODAL ──
+async function loadTeamModal(){
+  const c = document.getElementById('teamContent');
+  if(!currentUser){ c.innerHTML='<div class="empty-state">Not logged in</div>'; return; }
+  c.innerHTML = '<div class="empty-state">Loading...</div>';
+  try{
+    const refSnap = await db.collection('referrals').where('referrerId','==',currentUser.uid).get();
+    const total = refSnap.size;
+    const bonusCount = refSnap.docs.filter(r=>r.data().bonusGiven).length;
+    c.innerHTML = `
+      <div class="team-stats">
+        <div class="team-stat"><div class="ts-val">${total}</div><div class="ts-label">Members</div></div>
+        <div class="team-stat"><div class="ts-val">${fmt(bonusCount*REFERRAL_BONUS.l1)}</div><div class="ts-label">Bonus Earned</div></div>
+        <div class="team-stat"><div class="ts-val">${bonusCount}</div><div class="ts-label">Confirmed</div></div>
+      </div>
+      <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">
+        L1: ${fmt(REFERRAL_BONUS.l1)} | L2: ${fmt(REFERRAL_BONUS.l2)} | L3: ${fmt(REFERRAL_BONUS.l3)} per referral
+      </p>
+      ${refSnap.empty
+        ? '<div class="empty-state">No team members yet. Share your referral link!</div>'
+        : refSnap.docs.map(doc => {
+            const r = doc.data();
+            return `<div class="h-item">
+              <div class="h-item-left"><strong>${r.referredEmail}</strong><small>Joined via your link</small></div>
+              <span class="badge ${r.bonusGiven?'approved':'pending'}">${r.bonusGiven?'Confirmed':'Pending'}</span>
+            </div>`;
+          }).join('')}`;
+  } catch(e){ c.innerHTML='<div class="empty-state">Error loading team</div>'; }
 }
-function closeSalaryModal(){document.getElementById('salaryModal').classList.add('hidden');}
 
-function showCertificates(){showNotification('Certificates coming soon');}
-function openWhatsAppCommunity(){window.open(WHATSAPP_COMMUNITY_URL,'_blank');}
-function openWhatsAppChannel(){window.open(WHATSAPP_CHANNEL_URL,'_blank');}
-function openHelpline(){showNotification('Helpline: +92 300 1234567');}
-function openAdminPanel(){if(!isAdmin){showNotification('Admin access only');return;}document.getElementById('dashboardSection').classList.add('hidden');document.getElementById('depositPage').classList.add('hidden');document.getElementById('adminDashboardSection').classList.remove('hidden');showAdminDashboard();}
-function installApp(){showNotification('Install from browser menu');}
+// ── TEAM REWARD MODAL ──
+async function loadTeamRewardModal(){
+  const c = document.getElementById('teamRewardContent');
+  if(!currentUser){ c.innerHTML='<div class="empty-state">Not logged in</div>'; return; }
+  c.innerHTML = '<div class="empty-state">Loading...</div>';
+  try{
+    const refSnap = await db.collection('referrals').where('referrerId','==',currentUser.uid).get();
+    const total = refSnap.size;
+    const confirmed = refSnap.docs.filter(r=>r.data().bonusGiven).length;
+    const earned = confirmed * REFERRAL_BONUS.l1;
+    c.innerHTML = `
+      <div style="background:var(--g5);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px">
+        <div style="font-size:2rem;font-weight:900;color:var(--g1)">${fmt(earned)}</div>
+        <div style="font-size:.72rem;color:var(--muted)">Total Referral Rewards Earned</div>
+      </div>
+      <div style="font-size:.82rem;line-height:2;color:var(--muted)">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0">
+          <span>Total Team Members</span><strong style="color:var(--text)">${total}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0">
+          <span>Deposit Confirmed</span><strong style="color:var(--text)">${confirmed}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0">
+          <span>Pending Confirmation</span><strong style="color:var(--orange)">${total-confirmed}</strong>
+        </div>
+      </div>
+      <div style="background:var(--g4);border-radius:10px;padding:12px;margin-top:12px;font-size:.78rem;color:var(--g1)">
+        💡 Referral bonus is credited when your referred member's deposit is approved by admin.
+      </div>`;
+  } catch(e){ c.innerHTML='<div class="empty-state">Error loading rewards</div>'; }
+}
 
-function showAdminDashboard(){initAdminDashboard();loadAdminStats();}
-function initAdminDashboard(){renderAdminContent();loadAdminStats();}
+// ── SALARY MODAL ──
+async function loadSalaryModal(){
+  const c = document.getElementById('salaryContent');
+  if(!currentUser){ c.innerHTML='<div class="empty-state">Not logged in</div>'; return; }
+  c.innerHTML = '<div class="empty-state">Loading...</div>';
+  try{
+    const refSnap = await db.collection('referrals').where('referrerId','==',currentUser.uid).get();
+    const total = refSnap.size;
+    const tiers = [
+      {refs:50,  salary:5000,  ico:'🥉', label:'Bronze'},
+      {refs:100, salary:10000, ico:'🥈', label:'Silver'},
+      {refs:200, salary:20000, ico:'🥇', label:'Gold'},
+    ];
+    const current = tiers.slice().reverse().find(t=>total>=t.refs);
+    const next = tiers.find(t=>total<t.refs);
+    c.innerHTML = `
+      <div style="background:${current?'var(--g4)':'#fff3e0'};border-radius:12px;padding:16px;text-align:center;margin-bottom:16px">
+        <div style="font-size:1.8rem;margin-bottom:4px">${current?current.ico:'😊'}</div>
+        <div style="font-size:.72rem;color:var(--muted)">Current Monthly Salary</div>
+        <div style="font-size:1.8rem;font-weight:900;color:var(--g1)">${fmt(current?current.salary:0)}</div>
+        ${next?`<div style="font-size:.72rem;color:var(--muted);margin-top:6px">${next.refs-total} more referrals to unlock ${fmt(next.salary)}</div>`:'<div style="font-size:.72rem;color:var(--g1);margin-top:6px">✓ Maximum tier reached!</div>'}
+      </div>
+      <div style="font-size:.8rem;font-weight:700;margin-bottom:8px">Salary Tiers</div>
+      ${tiers.map(t => `
+        <div class="salary-tier ${total>=t.refs?'achieved':''}">
+          <span class="tier-ico">${t.ico}</span>
+          <div class="tier-info">
+            <h4>${t.label} — ${t.refs} Referrals</h4>
+            <p>${total>=t.refs?'✅ Achieved':'Need '+(t.refs-total)+' more referrals'}</p>
+          </div>
+          <span class="tier-amount">${fmt(t.salary)}</span>
+        </div>`).join('')}
+      <div style="font-size:.72rem;color:var(--muted);margin-top:12px;line-height:1.5">
+        Your referrals: <strong style="color:var(--text)">${total}</strong>
+      </div>`;
+  } catch(e){ c.innerHTML='<div class="empty-state">Error loading salary info</div>'; }
+}
+
+// ── CERTIFICATES ──
+async function loadCertsModal(){
+  const c = document.getElementById('certsContent');
+  if(!currentUser){ c.innerHTML='<div class="empty-state">Not logged in</div>'; return; }
+  c.innerHTML = '<div class="empty-state">Loading...</div>';
+  try{
+    const snap = await db.collection('investments').where('userId','==',currentUser.uid).get();
+    if(snap.empty){ c.innerHTML='<div class="empty-state">Complete an investment to earn certificates</div>'; return; }
+    c.innerHTML = snap.docs.map(doc => {
+      const inv = doc.data();
+      return `<div style="background:var(--g5);border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid var(--g2)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong style="font-size:.88rem">${inv.packageName}</strong>
+            <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Invested: ${fmt(inv.amount)}</div>
+          </div>
+          <span class="badge ${inv.active?'active':'completed'}">${inv.active?'ACTIVE':'COMPLETED'}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){ c.innerHTML='<div class="empty-state">Error loading certificates</div>'; }
+}
+
+// ── PROFILE ──
+function loadProfileModal(){
+  if(!currentUser) return;
+  db.collection('users').doc(currentUser.uid).get().then(doc => {
+    if(!doc.exists) return;
+    const d = doc.data();
+    const initials = (d.name||currentUser.email).charAt(0).toUpperCase();
+    document.getElementById('profileAvatar').textContent = initials;
+    document.getElementById('profileEmailDisplay').textContent = currentUser.email;
+    document.getElementById('profileCodeDisplay').textContent = 'Referral Code: ' + (d.referralCode||'-');
+    document.getElementById('pName').value = d.name||'';
+    document.getElementById('pDob').value = d.dob||'';
+  });
+}
+
+async function saveProfile(){
+  if(!currentUser) return;
+  const name = document.getElementById('pName').value.trim();
+  const dob = document.getElementById('pDob').value;
+  try{
+    await db.collection('users').doc(currentUser.uid).update({name, dob});
+    notify('Profile saved ✅');
+    closeModal('profileModal');
+  } catch(e){ notify(e.message,'error'); }
+}
+
+// ── WHATSAPP ──
+function openWhatsApp(type){
+  window.open(type==='community' ? WA_COMMUNITY : WA_CHANNEL, '_blank');
+}
+
+// ── ADMIN AUTH ──
+async function adminLogin(){
+  const email = document.getElementById('adminEmail').value.trim();
+  const pass = document.getElementById('adminPass').value;
+  if(email !== ADMIN_EMAIL) return notify('Not an admin email','error');
+  try{
+    await auth.signInWithEmailAndPassword(email, pass);
+    notify('Admin logged in ✅');
+    closeModal('adminLoginModal');
+  } catch(e){ notify(e.message,'error'); }
+}
+
+function adminLogout(){ clearTimers(); auth.signOut(); }
+
+// ── ADMIN DASHBOARD ──
 function loadAdminStats(){
-    const c=document.getElementById('adminStats');
-    Promise.all([db.collection('users').get(),db.collection('investments').where('active','==',true).get(),db.collection('deposits').where('status','==','approved').get(),db.collection('withdrawals').where('status','==','approved').get()]).then(([u,i,d,w])=>{
-        c.innerHTML=`<div class="feature-card"><div class="feature-icon">👥</div><div class="feature-title">${u.size}</div><div class="feature-sub">Users</div></div>
-        <div class="feature-card"><div class="feature-icon">📦</div><div class="feature-title">${i.size}</div><div class="feature-sub">Active Inv.</div></div>
-        <div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">${d.size}</div><div class="feature-sub">Approved Dep.</div></div>
-        <div class="feature-card"><div class="feature-icon">💸</div><div class="feature-title">${w.size}</div><div class="feature-sub">Approved Wd.</div></div>`;
-    });
+  const c = document.getElementById('adminStats');
+  Promise.all([
+    db.collection('users').get(),
+    db.collection('investments').where('active','==',true).get(),
+    db.collection('deposits').where('status','==','pending').get(),
+    db.collection('withdrawals').where('status','==','pending').get(),
+  ]).then(([u,i,d,w]) => {
+    c.innerHTML = [
+      {val:u.size, label:'Total Users'},
+      {val:i.size, label:'Active Plans'},
+      {val:d.size, label:'Pending Deposits'},
+      {val:w.size, label:'Pending Withdrawals'},
+    ].map(s => `<div class="admin-stat"><div class="as-val">${s.val}</div><div class="as-label">${s.label}</div></div>`).join('');
+  });
 }
-function switchAdminTab(tab){adminTab=tab;document.querySelectorAll('.history-tab').forEach(btn=>btn.classList.remove('active'));const tabs=['pending','all','withdrawals','referrals','users','investments'];const idx=tabs.indexOf(tab);if(idx>=0)document.querySelectorAll('.history-tab')[idx].classList.add('active');document.getElementById('adminFilterBar').style.display=['pending','all','withdrawals','users','investments'].includes(tab)?'flex':'none';renderAdminContent();}
-function applyFilter(){renderAdminContent();}
+
+function switchAdminTab(tab){
+  adminTab = tab;
+  document.querySelectorAll('#adminTabs .h-tab').forEach((b,i) => {
+    b.classList.toggle('active', ['pending','all','withdrawals','referrals','users','investments'][i]===tab);
+  });
+  const showFilter = ['pending','all','withdrawals','users','investments'].includes(tab);
+  document.getElementById('adminFilterBar').style.visibility = showFilter ? 'visible' : 'hidden';
+  renderAdminContent();
+}
+
 async function renderAdminContent(){
-    const c=document.getElementById('adminContent');c.innerHTML='Loading...';
-    const search=(document.getElementById('searchInput')?.value||'').toLowerCase();const filter=document.getElementById('filterSelect')?.value||'';
-    if(adminTab==='pending'||adminTab==='all'){const snap=await db.collection('deposits').get();let docs=snap.docs;if(adminTab==='pending')docs=docs.filter(d=>d.data().status==='pending');if(filter)docs=docs.filter(d=>d.data().status===filter);if(search)docs=docs.filter(d=>d.data().userEmail.includes(search)||d.data().packageName.includes(search));if(docs.length===0){c.innerHTML='No deposits';return;}let h='';docs.forEach(doc=>{const d=doc.data();h+=`<div class="history-item"><span>${d.userEmail}<br><small>${d.packageName} - ${formatCurrency(d.amount)}</small></span><span class="badge ${d.status}">${d.status.toUpperCase()}</span>${d.status==='pending'?`<button onclick="approveDeposit('${doc.id}')" style="padding:4px 8px; background:var(--primary); color:white; border:none; border-radius:6px;">Approve</button> <button onclick="rejectDeposit('${doc.id}')" style="padding:4px 8px; background:#f44336; color:white; border:none; border-radius:6px;">Reject</button>`:''}</div>`;});c.innerHTML=h;}
-    else if(adminTab==='withdrawals'){const snap=await db.collection('withdrawals').get();let docs=snap.docs;if(filter)docs=docs.filter(d=>d.data().status===filter);if(search)docs=docs.filter(d=>d.data().userEmail.includes(search));if(docs.length===0){c.innerHTML='No withdrawals';return;}let h='';docs.forEach(doc=>{const w=doc.data();h+=`<div class="history-item"><span>${w.userEmail}<br><small>${formatCurrency(w.amount)}</small></span><span class="badge ${w.status}">${w.status.toUpperCase()}</span>${w.status==='pending'?`<button onclick="approveWithdrawal('${doc.id}')" style="padding:4px 8px; background:var(--primary); color:white; border:none; border-radius:6px;">Approve</button> <button onclick="rejectWithdrawal('${doc.id}')" style="padding:4px 8px; background:#f44336; color:white; border:none; border-radius:6px;">Reject</button>`:''}</div>`;});c.innerHTML=h;}
-    else if(adminTab==='referrals'){const snap=await db.collection('referrals').get();let docs=snap.docs;if(search)docs=docs.filter(d=>d.data().referredEmail.includes(search));if(docs.length===0){c.innerHTML='No referrals';return;}let h='';docs.forEach(doc=>{const r=doc.data();h+=`<div class="history-item"><span>${r.referredEmail}<br><small>Referrer: ${r.referrerId}</small></span><span class="badge ${r.bonusGiven?'approved':'pending'}">${r.bonusGiven?'Bonus Given':'Pending'}</span>${!r.bonusGiven?`<button onclick="giveReferralBonus('${doc.id}')" style="padding:4px 8px; background:var(--primary); color:white; border:none; border-radius:6px;">Give Bonus</button>`:''}</div>`;});c.innerHTML=h;}
-    else if(adminTab==='users'){const snap=await db.collection('users').get();let docs=snap.docs;if(search)docs=docs.filter(d=>d.data().email?.includes(search));if(docs.length===0){c.innerHTML='No users';return;}let h='';for(const doc of docs){const u=doc.data();h+=`<div class="history-item"><span>${u.email||'No Email'}<br><small>Balance: ${formatCurrency(Math.floor(u.balance||0))}</small></span></div>`;}c.innerHTML=h;}
-    else if(adminTab==='investments'){const snap=await db.collection('investments').get();let docs=snap.docs;if(search)docs=docs.filter(d=>d.data().userEmail.includes(search)||d.data().packageName.includes(search));if(docs.length===0){c.innerHTML='No investments';return;}let h='';docs.forEach(doc=>{const inv=doc.data();h+=`<div class="history-item"><span>${inv.userEmail}<br><small>${inv.packageName} - ${inv.amount===0?'FREE':formatCurrency(inv.amount)}</small></span><span class="badge ${inv.active?'active':'completed'}">${inv.active?'ACTIVE':'COMPLETED'}</span></div>`;});c.innerHTML=h;}
+  const c = document.getElementById('adminContent');
+  c.innerHTML = '<div class="empty-state">Loading...</div>';
+  const search = (document.getElementById('adminSearch')?.value||'').toLowerCase();
+  const filter = document.getElementById('adminFilter')?.value||'';
+  try{
+    if(adminTab==='pending'||adminTab==='all'){
+      const snap = await db.collection('deposits').orderBy('createdAt','desc').get();
+      let docs = snap.docs;
+      if(adminTab==='pending') docs = docs.filter(d=>d.data().status==='pending');
+      if(filter) docs = docs.filter(d=>d.data().status===filter);
+      if(search) docs = docs.filter(d=>(d.data().userEmail||'').includes(search)||(d.data().packageName||'').toLowerCase().includes(search));
+      if(!docs.length){ c.innerHTML='<div class="empty-state">No deposits found</div>'; return; }
+      c.innerHTML = docs.map(doc => {
+        const d = doc.data();
+        const ssHtml = d.screenshot ? `<div style="margin-top:6px"><img src="${d.screenshot}" style="max-width:100%;border-radius:8px;max-height:120px;object-fit:cover" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'120px':'none'"></div>` : '';
+        return `<div class="admin-item">
+          <div class="admin-item-top">
+            <div>
+              <strong style="font-size:.85rem">${d.userEmail}</strong>
+              <div style="font-size:.75rem;color:var(--muted)">${d.packageName} — ${fmt(d.amount)}</div>
+              <div style="font-size:.7rem;color:var(--muted)">TID: ${d.tid||'N/A'}</div>
+              ${ssHtml}
+            </div>
+            <span class="badge ${d.status}">${d.status.toUpperCase()}</span>
+          </div>
+          ${d.status==='pending'?`<div class="admin-actions">
+            <button class="admin-btn approve" onclick="approveDeposit('${doc.id}')">✅ Approve</button>
+            <button class="admin-btn reject" onclick="rejectDeposit('${doc.id}')">❌ Reject</button>
+          </div>`:''}
+        </div>`;
+      }).join('');
+    } else if(adminTab==='withdrawals'){
+      const snap = await db.collection('withdrawals').orderBy('createdAt','desc').get();
+      let docs = snap.docs;
+      if(filter) docs = docs.filter(d=>d.data().status===filter);
+      if(search) docs = docs.filter(d=>(d.data().userEmail||'').includes(search));
+      if(!docs.length){ c.innerHTML='<div class="empty-state">No withdrawals found</div>'; return; }
+      c.innerHTML = docs.map(doc => {
+        const w = doc.data();
+        return `<div class="admin-item">
+          <div class="admin-item-top">
+            <div>
+              <strong style="font-size:.85rem">${w.userEmail}</strong>
+              <div style="font-size:.75rem;color:var(--muted)">${fmt(w.amount)} → Net: ${fmt(w.netAmount)}</div>
+              <div style="font-size:.7rem;color:var(--muted)">${w.accountType} — ${w.accountNumber}</div>
+            </div>
+            <span class="badge ${w.status}">${w.status.toUpperCase()}</span>
+          </div>
+          ${w.status==='pending'?`<div class="admin-actions">
+            <button class="admin-btn approve" onclick="approveWithdrawal('${doc.id}')">✅ Approve</button>
+            <button class="admin-btn reject" onclick="rejectWithdrawal('${doc.id}')">❌ Reject</button>
+          </div>`:''}
+        </div>`;
+      }).join('');
+    } else if(adminTab==='referrals'){
+      const snap = await db.collection('referrals').orderBy('createdAt','desc').get();
+      let docs = snap.docs;
+      if(search) docs = docs.filter(d=>(d.data().referredEmail||'').includes(search));
+      if(!docs.length){ c.innerHTML='<div class="empty-state">No referrals found</div>'; return; }
+      c.innerHTML = docs.map(doc => {
+        const r = doc.data();
+        return `<div class="admin-item">
+          <div class="admin-item-top">
+            <div>
+              <strong style="font-size:.85rem">${r.referredEmail}</strong>
+              <div style="font-size:.75rem;color:var(--muted)">Referrer ID: ${r.referrerId}</div>
+            </div>
+            <span class="badge ${r.bonusGiven?'approved':'pending'}">${r.bonusGiven?'Bonus Given':'Pending'}</span>
+          </div>
+        </div>`;
+      }).join('');
+    } else if(adminTab==='users'){
+      const snap = await db.collection('users').get();
+      let docs = snap.docs;
+      if(search) docs = docs.filter(d=>(d.data().email||'').includes(search));
+      if(!docs.length){ c.innerHTML='<div class="empty-state">No users found</div>'; return; }
+      c.innerHTML = docs.map(doc => {
+        const u = doc.data();
+        return `<div class="admin-item">
+          <div class="admin-item-top">
+            <div>
+              <strong style="font-size:.85rem">${u.email}</strong>
+              <div style="font-size:.75rem;color:var(--muted)">Balance: ${fmt(u.balance)} | Referrals: ${u.totalReferrals||0}</div>
+              <div style="font-size:.7rem;color:var(--muted)">Earned: ${fmt(u.totalEarned||0)} | Pending WD: ${fmt(u.pendingWithdrawal||0)}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    } else if(adminTab==='investments'){
+      const snap = await db.collection('investments').get();
+      let docs = snap.docs;
+      if(search) docs = docs.filter(d=>(d.data().userEmail||'').includes(search)||(d.data().packageName||'').toLowerCase().includes(search));
+      if(!docs.length){ c.innerHTML='<div class="empty-state">No investments found</div>'; return; }
+      c.innerHTML = docs.map(doc => {
+        const inv = doc.data();
+        return `<div class="admin-item">
+          <div class="admin-item-top">
+            <div>
+              <strong style="font-size:.85rem">${inv.userEmail}</strong>
+              <div style="font-size:.75rem;color:var(--muted)">${inv.packageName} — ${fmt(inv.amount)}</div>
+              <div style="font-size:.7rem;color:var(--muted)">Paid: ${fmt(inv.paidAmount||0)} / ${fmt(inv.durationDays*inv.dailyReturn)}</div>
+            </div>
+            <span class="badge ${inv.active?'active':'completed'}">${inv.active?'ACTIVE':'DONE'}</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e){ c.innerHTML=`<div class="empty-state">Error: ${e.message}</div>`; }
 }
+
+// ── ADMIN ACTIONS ──
 async function approveDeposit(depId){
-    try{
-        const depRef=db.collection('deposits').doc(depId);const depSnap=await depRef.get();if(!depSnap.exists)return;const dep=depSnap.data();if(dep.status!=='pending')return;
-        const userRef=db.collection('users').doc(dep.userId);const userSnap=await userRef.get();const ud=userSnap.data();const r1=ud.referredBy||null,r2=ud.referredBy2||null,r3=ud.referredBy3||null;
-        await db.runTransaction(async t=>{const fd=await t.get(depRef);if(!fd.exists||fd.data().status!=='pending')throw new Error('Already processed');
-            t.update(depRef,{status:'approved',approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
-            t.set(db.collection('investments').doc(),{userId:dep.userId,userEmail:dep.userEmail,packageId:dep.packageId,packageName:dep.packageName,amount:dep.amount,dailyReturn:dep.dailyReturn,durationDays:dep.durationDays,startDate:firebase.firestore.FieldValue.serverTimestamp(),paidAmount:0,active:true});
-            if(r1)t.update(db.collection('users').doc(r1),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L1),referralDeposits:firebase.firestore.FieldValue.increment(1)});
-            if(r2)t.update(db.collection('users').doc(r2),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L2)});
-            if(r3)t.update(db.collection('users').doc(r3),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L3)});
-        });
-        showNotification('Deposit approved');renderAdminContent();loadAdminStats();
-    }catch(e){showNotification(e.message);}
+  try{
+    const depRef = db.collection('deposits').doc(depId);
+    const depSnap = await depRef.get();
+    if(!depSnap.exists) return;
+    const dep = depSnap.data();
+    if(dep.status!=='pending') return notify('Already processed','warn');
+
+    const userSnap = await db.collection('users').doc(dep.userId).get();
+    const ud = userSnap.data();
+    const r1=ud.referredBy||null, r2=ud.referredBy2||null, r3=ud.referredBy3||null;
+
+    await db.runTransaction(async t => {
+      const fd = await t.get(depRef);
+      if(!fd.exists||fd.data().status!=='pending') throw new Error('Already processed');
+
+      t.update(depRef,{status:'approved', approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      t.set(db.collection('investments').doc(),{
+        userId:dep.userId, userEmail:dep.userEmail,
+        packageId:dep.packageId, packageName:dep.packageName,
+        amount:dep.amount, dailyReturn:dep.dailyReturn,
+        durationDays:dep.durationDays, totalReturn:dep.totalReturn,
+        startDate:firebase.firestore.FieldValue.serverTimestamp(),
+        paidAmount:0, active:true
+      });
+      // Referral bonuses
+      if(r1){
+        t.update(db.collection('users').doc(r1),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS.l1)});
+        // Mark referral bonus given
+        const rSnap2 = await db.collection('referrals').where('referrerId','==',r1).where('referredUserId','==',dep.userId).limit(1).get();
+        if(!rSnap2.empty) t.update(rSnap2.docs[0].ref,{bonusGiven:true});
+      }
+      if(r2) t.update(db.collection('users').doc(r2),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS.l2)});
+      if(r3) t.update(db.collection('users').doc(r3),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS.l3)});
+    });
+
+    notify('Deposit approved ✅');
+    renderAdminContent();
+    loadAdminStats();
+  } catch(e){ notify(e.message,'error'); }
 }
-async function rejectDeposit(depId){await db.collection('deposits').doc(depId).update({status:'rejected'});showNotification('Deposit rejected');renderAdminContent();}
-async function approveWithdrawal(wdId){await db.collection('withdrawals').doc(wdId).update({status:'approved',approvedAt:firebase.firestore.FieldValue.serverTimestamp()});showNotification('Withdrawal approved');renderAdminContent();}
-async function rejectWithdrawal(wdId){await db.runTransaction(async t=>{const ref=db.collection('withdrawals').doc(wdId);const doc=await t.get(ref);if(!doc.exists)return;const w=doc.data();if(w.status!=='pending')return;t.update(db.collection('users').doc(w.userId),{balance:firebase.firestore.FieldValue.increment(w.amount)});t.update(ref,{status:'rejected',rejectedAt:firebase.firestore.FieldValue.serverTimestamp()});});showNotification('Withdrawal rejected');renderAdminContent();}
-async function giveReferralBonus(refId){await db.runTransaction(async t=>{const ref=db.collection('referrals').doc(refId);const doc=await t.get(ref);if(!doc.exists)return;const r=doc.data();if(r.bonusGiven)return;t.update(db.collection('users').doc(r.referrerId),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS_L1)});t.update(ref,{bonusGiven:true,status:'completed',bonusAmount:REFERRAL_BONUS_L1});});showNotification('Bonus given');renderAdminContent();}
 
-function openOnboardingModal(){document.getElementById('onboardingModal').classList.remove('hidden');}
-function closeOnboardingModal(){document.getElementById('onboardingModal').classList.add('hidden');localStorage.setItem('onboardingShown','true');}
-function openPrivacyModal(){document.getElementById('privacyModal').classList.remove('hidden');}
-function closePrivacyModal(){document.getElementById('privacyModal').classList.add('hidden');}
-function openBroadcastModal(){document.getElementById('broadcastModal').classList.remove('hidden');}
-function closeBroadcastModal(){document.getElementById('broadcastModal').classList.add('hidden');}
-async function sendBroadcast(){const msg=document.getElementById('broadcastMessage').value.trim();if(!msg)return showNotification('Type message');await db.collection('announcements').add({message:msg,createdAt:firebase.firestore.FieldValue.serverTimestamp()});showNotification('Broadcast sent');closeBroadcastModal();}
-function openProfileModal(){if(!currentUser)return;document.getElementById('profileModal').classList.remove('hidden');db.collection('users').doc(currentUser.uid).get().then(doc=>{if(doc.exists){const d=doc.data();document.getElementById('profileEmail').value=d.email||currentUser.email;document.getElementById('profileName').value=d.name||'';document.getElementById('profileReferralCode').value=d.referralCode||'';document.getElementById('profileDob').value=d.dob||'';}});}
-function closeProfileModal(){document.getElementById('profileModal').classList.add('hidden');}
-async function saveProfile(){if(!currentUser)return;const name=document.getElementById('profileName').value.trim();const dob=document.getElementById('profileDob').value;try{await db.collection('users').doc(currentUser.uid).update({name,dob});showNotification('Profile saved');closeProfileModal();}catch(e){showNotification(e.message);}}
+async function rejectDeposit(depId){
+  if(!confirm('Reject this deposit?')) return;
+  try{
+    await db.collection('deposits').doc(depId).update({status:'rejected', rejectedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    notify('Deposit rejected');
+    renderAdminContent();
+  } catch(e){ notify(e.message,'error'); }
+}
 
-let deferredPrompt;window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;});
-function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});}else{showNotification('Install from browser menu');}}
+async function approveWithdrawal(wdId){
+  try{
+    await db.runTransaction(async t => {
+      const ref = db.collection('withdrawals').doc(wdId);
+      const doc = await t.get(ref);
+      if(!doc.exists) throw new Error('Not found');
+      const w = doc.data();
+      if(w.status!=='pending') throw new Error('Already processed');
+      t.update(ref,{status:'approved', approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      // Reduce pendingWithdrawal
+      t.update(db.collection('users').doc(w.userId),{
+        pendingWithdrawal: firebase.firestore.FieldValue.increment(-w.amount)
+      });
+    });
+    notify('Withdrawal approved ✅');
+    renderAdminContent();
+    loadAdminStats();
+  } catch(e){ notify(e.message,'error'); }
+}
 
-const refCode=getReferralFromURL();if(refCode)document.getElementById('inviteCodeInput').value=refCode;
-if(localStorage.getItem('onboardingShown')==='true')onboardingShown=true;
+async function rejectWithdrawal(wdId){
+  if(!confirm('Reject and refund this withdrawal?')) return;
+  try{
+    await db.runTransaction(async t => {
+      const ref = db.collection('withdrawals').doc(wdId);
+      const doc = await t.get(ref);
+      if(!doc.exists) return;
+      const w = doc.data();
+      if(w.status!=='pending') return;
+      // Refund balance and clear pending
+      t.update(db.collection('users').doc(w.userId),{
+        balance: firebase.firestore.FieldValue.increment(w.amount),
+        pendingWithdrawal: firebase.firestore.FieldValue.increment(-w.amount)
+      });
+      t.update(ref,{status:'rejected', rejectedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    });
+    notify('Withdrawal rejected & refunded ✅');
+    renderAdminContent();
+  } catch(e){ notify(e.message,'error'); }
+}
+
+// ── PWA INSTALL ──
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
+function installApp(){
+  if(deferredInstall){ deferredInstall.prompt(); deferredInstall.userChoice.then(()=>deferredInstall=null); }
+  else notify('Open browser menu → "Add to Home Screen"','warn');
+}
+
+// ── INIT ──
+// Pre-fill referral code from URL
+const urlRef = getRefFromURL();
+if(urlRef) document.getElementById('suRef').value = urlRef;
 </script>
 </body>
 </html>
