@@ -876,14 +876,37 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// ── LOAD DEPOSIT CONFIG FROM FIREBASE (admin can change anytime) ──
+async function loadDepositConfig(){
+  try{
+    const doc = await db.collection('appConfig').doc('depositInfo').get();
+    if(doc.exists){
+      const d = doc.data();
+      if(d.number) DEPOSIT_NUMBER = d.number;
+      if(d.name)   DEPOSIT_NAME   = d.name;
+      // Update visible deposit elements (deposit modal + settings)
+      const numEl  = document.getElementById('depNumber');
+      const nameEl = document.getElementById('depName');
+      const sNum   = document.getElementById('settDepNum');
+      const sName  = document.getElementById('settDepName');
+      if(numEl)  numEl.textContent  = DEPOSIT_NUMBER;
+      if(nameEl) nameEl.textContent = DEPOSIT_NAME;
+      if(sNum)   sNum.textContent   = DEPOSIT_NUMBER;
+      if(sName)  sName.textContent  = DEPOSIT_NAME;
+    }
+  } catch(e){ console.log('Config load:', e.message); }
+}
+// Load config immediately
+loadDepositConfig();
+
 // ── CONSTANTS ──
 const ADMIN_EMAIL = 'admin@engro.com';
 const REFERRAL_BONUS = {l1:100, l2:50, l3:25};
 const WELCOME_BONUS = 20;
 const MIN_WITHDRAWAL = 500;
 const WITHDRAWAL_FEE = 2; // percent
-const DEPOSIT_NUMBER = '03162806904';
-const DEPOSIT_NAME = 'AAREN KHAN';
+let DEPOSIT_NUMBER = '03162806904';
+let DEPOSIT_NAME = 'AAREN KHAN';
 const WA_COMMUNITY = 'https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
 const WA_CHANNEL = 'https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
 
@@ -1159,6 +1182,7 @@ function renderPackages(){
 }
 
 function openDepositModal(pkgId){
+  loadDepositConfig(); // Always get latest deposit number
   const pkg = PACKAGES.find(p => p.id===pkgId);
   if(!pkg) return;
   selectedPkg = pkg;
@@ -2163,7 +2187,65 @@ function renderSettings(){
         <div>👥 L2 Referral: <strong style="color:var(--text)">${fmt(REFERRAL_BONUS.l2)}</strong></div>
         <div>👥 L3 Referral: <strong style="color:var(--text)">${fmt(REFERRAL_BONUS.l3)}</strong></div>
       </div>
+    </div>
+
+    <!-- ── DEPOSIT ACCOUNT SETTINGS ── -->
+    <div class="settings-card">
+      <h4>💳 Deposit Account Settings</h4>
+      <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">
+        Current Number: <strong style="color:var(--g1)" id="settDepNum">${DEPOSIT_NUMBER}</strong><br>
+        Current Name: <strong style="color:var(--g1)" id="settDepName">${DEPOSIT_NAME}</strong><br>
+        <span style="font-size:.68rem;color:var(--muted)">Saved to Firebase — users see new number instantly on deposit.</span>
+      </p>
+      <input type="text" class="inp" id="newDepNumber" placeholder="New account number (e.g. 03001234567)" maxlength="20">
+      <input type="text" class="inp" id="newDepName" placeholder="New account holder name">
+      <button class="modal-btn primary" onclick="saveDepositConfig()">💾 Save Deposit Info</button>
     </div>`;
+}
+
+// ── SAVE DEPOSIT CONFIG TO FIREBASE ──
+async function saveDepositConfig(){
+  const num  = document.getElementById('newDepNumber')?.value.trim();
+  const name = document.getElementById('newDepName')?.value.trim();
+
+  if(!num && !name) return notify('Enter number or name to update', 'warn');
+  if(num && !/^0[0-9]{9,13}$/.test(num.replace(/\s/g,'')))
+    return notify('Enter a valid Pakistani number (03xxxxxxxxx)', 'warn');
+
+  try{
+    const updateData = { updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+    if(num)  updateData.number = num;
+    if(name) updateData.name   = name;
+
+    await db.collection('appConfig').doc('depositInfo').set(updateData, { merge: true });
+
+    // Update local vars immediately
+    if(num)  DEPOSIT_NUMBER = num;
+    if(name) DEPOSIT_NAME   = name;
+
+    // Log to adminLogs
+    await db.collection('adminLogs').add({
+      action:      'deposit_config_change',
+      targetEmail: 'system',
+      oldNumber:   num  ? 'changed' : 'unchanged',
+      newNumber:   num  || DEPOSIT_NUMBER,
+      newName:     name || DEPOSIT_NAME,
+      performedBy: ADMIN_EMAIL,
+      createdAt:   firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    notify('✅ Deposit info updated! Users will see new number instantly.');
+
+    // Refresh settings display
+    renderSettings();
+
+    // Clear inputs
+    const ni = document.getElementById('newDepNumber');
+    const nn = document.getElementById('newDepName');
+    if(ni) ni.value = '';
+    if(nn) nn.value = '';
+
+  } catch(e){ notify(e.message, 'error'); }
 }
 
 // ── CHANGE ADMIN EMAIL (Firebase Auth - permanent) ──
