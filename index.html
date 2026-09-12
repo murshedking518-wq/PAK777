@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Jetour Private Solution</title>
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a6b3c">
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
@@ -22,9 +23,8 @@ html,body{overflow-x:hidden;background:var(--g5)}
 body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .wrap{width:100%;max-width:430px;padding:0 0 90px;position:relative;min-height:100vh}
 
-.hdr{background:linear-gradient(135deg,var(--g1) 0%,#0d5c32 100%);padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;min-height:56px}
-.banner-wrap{margin:0 -0px;width:100%;overflow:hidden;background:#f0faf5;border-bottom:1px solid #e8f5ee}
-.banner-wrap svg{width:100%;display:block;max-height:175px}
+/* ── HEADER ── */
+.hdr{background:var(--g1);padding:18px 20px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
 .hdr-logo{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .hdr-logo svg{width:22px;height:22px;fill:#fff}
 .hdr-title{flex:1}
@@ -32,7 +32,8 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .hdr-title p{font-size:.65rem;color:rgba(255,255,255,.6);margin-top:1px}
 .hdr-profile{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:.8rem;font-weight:700}
 
-.bal-card{margin:14px 16px 10px;background:linear-gradient(145deg,var(--g1) 0%,#0d5c32 100%);border-radius:var(--r2);padding:22px 20px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+/* ── BALANCE CARD ── */
+.bal-card{margin:16px;background:linear-gradient(145deg,var(--g1) 0%,#0d5c32 100%);border-radius:var(--r2);padding:22px 20px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
 .bal-card::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:rgba(255,255,255,.06);border-radius:50%}
 .bal-card::after{content:'';position:absolute;right:30px;top:40px;width:60px;height:60px;background:rgba(255,255,255,.04);border-radius:50%}
 .bal-label{font-size:.65rem;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.6);margin-bottom:6px}
@@ -41,6 +42,7 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .bal-row-item{font-size:.72rem;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px}
 .bal-row-item strong{color:#fff}
 
+/* ── ACTION BUTTONS ── */
 .action-row{display:flex;gap:10px;padding:0 16px;margin-bottom:14px}
 .act-btn{flex:1;padding:14px 10px;border-radius:var(--r1);border:none;font-weight:700;font-size:.85rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:transform .15s,box-shadow .15s}
 .act-btn:active{transform:scale(.95)}
@@ -48,8 +50,10 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .act-btn.dep{background:#fff;color:var(--g1);box-shadow:var(--shadow)}
 .act-btn.wd{background:var(--dark);color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 
+/* ── SECTION TITLE ── */
 .sec-title{padding:4px 16px 10px;font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
 
+/* ── INVITE CARD ── */
 .invite-card{margin:0 16px 14px;background:#fff;border-radius:var(--r1);padding:14px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
 .inv-ico{width:38px;height:38px;border-radius:10px;background:var(--g4);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
 .inv-info{flex:1;min-width:0}
@@ -58,6 +62,7 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .copy-btn{background:var(--g1);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:.72rem;cursor:pointer;flex-shrink:0}
 .copy-btn:active{background:var(--g2)}
 
+/* ── SHORTCUT GRID ── */
 .sc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px;margin-bottom:16px}
 .sc-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform .15s}
 .sc-item:active{transform:scale(.9)}
@@ -68,6 +73,7 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .sc-ico.red{background:#fdeaea;color:var(--red)}
 .sc-label{font-size:.6rem;font-weight:600;color:var(--text);text-align:center;line-height:1.2}
 
+/* ── COMMUNITY CARDS ── */
 .comm-card{margin:0 16px 10px;background:#fff;border-radius:var(--r1);padding:14px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .15s}
 .comm-card:active{transform:scale(.98)}
 .comm-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
@@ -78,6 +84,7 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .comm-info p{font-size:.7rem;color:var(--muted);margin-top:2px}
 .comm-arr{margin-left:auto;color:var(--muted);font-size:.8rem}
 
+/* ── FEATURE 2COL ── */
 .f2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:16px}
 .f-card{background:#fff;border-radius:var(--r1);padding:16px 14px;box-shadow:var(--shadow);text-align:center;cursor:pointer;transition:transform .15s}
 .f-card:active{transform:scale(.97)}
@@ -85,6 +92,7 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .f-card h4{font-size:.82rem;font-weight:700}
 .f-card p{font-size:.65rem;color:var(--muted);margin-top:3px}
 
+/* ── ACTIVE INVESTMENT ── */
 .inv-section{padding:0 16px;margin-bottom:14px}
 .inv-card{background:linear-gradient(135deg,var(--g2),var(--g1));border-radius:var(--r1);padding:16px;color:#fff;margin-bottom:10px;box-shadow:var(--shadow)}
 .inv-card h4{font-size:.9rem;font-weight:700;margin-bottom:10px}
@@ -97,6 +105,7 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .countdown{text-align:center;font-size:1.1rem;font-weight:800;letter-spacing:1px}
 .cd-label{text-align:center;font-size:.6rem;opacity:.75;margin-top:2px}
 
+/* ── HISTORY ── */
 .hist-wrap{padding:0 16px}
 .hist-tabs{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px}
 .hist-tabs::-webkit-scrollbar{display:none}
@@ -109,20 +118,24 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .h-item-left small{color:var(--muted);font-size:.7rem}
 .empty-state{text-align:center;padding:24px;color:var(--muted);font-size:.82rem}
 
+/* ── BADGE ── */
 .badge{padding:4px 10px;border-radius:10px;font-size:.65rem;font-weight:700;white-space:nowrap}
 .badge.approved,.badge.active{background:#d4f5e2;color:var(--g1)}
 .badge.pending{background:#fff3e0;color:#c05e00}
 .badge.rejected{background:#fdeaea;color:var(--red)}
 .badge.completed{background:#f0f0f0;color:#888}
 
+/* ── BOTTOM NAV ── */
 .bnav{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:398px;background:#fff;border-radius:24px;display:flex;justify-content:space-around;align-items:center;padding:6px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:100}
 .bn-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:7px 10px;border-radius:16px;font-size:.58rem;font-weight:600;color:var(--muted);transition:all .2s;flex:1}
 .bn-item.active{background:var(--g1);color:#fff}
 .bn-ico{font-size:1.1rem}
 
+/* ── PAGES ── */
 .page{display:none}
 .page.active{display:block}
 
+/* ── DEPOSIT PAGE ── */
 .dep-page-hdr{padding:16px;display:flex;align-items:center;gap:10px;background:#fff;box-shadow:var(--shadow)}
 .back-btn{width:34px;height:34px;border-radius:10px;background:var(--g5);border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
 .dep-page-hdr h2{font-size:1rem;font-weight:800;color:var(--text)}
@@ -141,9 +154,10 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .pkg-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--g1);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;margin-top:4px}
 .pkg-btn:active{background:var(--g2)}
 
+/* ── MODAL ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:500;padding:0}
 .overlay.center{align-items:center;padding:16px}
-.modal{background:#fff;border-radius:var(--r3) var(--r3) 0 0;padding:24px 20px;width:100%;max-width:430px;max-height:90vh;overflow-y:auto;animation:slideUp .25s ease;position:relative}
+.modal{background:#fff;border-radius:var(--r3) var(--r3) 0 0;padding:24px 20px;width:100%;max-width:430px;max-height:90vh;overflow-y:auto;animation:slideUp .25s ease}
 .overlay.center .modal{border-radius:var(--r2);max-width:400px}
 @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-drag{width:36px;height:4px;background:#ddd;border-radius:4px;margin:0 auto 18px}
@@ -159,25 +173,31 @@ textarea.inp{resize:vertical;min-height:80px}
 .modal-btn.secondary{background:var(--g5);color:var(--text)}
 .modal-btn.danger{background:var(--red);color:#fff}
 
+/* ── DEPOSIT BOX ── */
 .dep-box{background:var(--g4);border-radius:12px;padding:14px;margin:12px 0;border-left:4px solid var(--g1)}
 .dep-box .db-label{font-size:.7rem;color:var(--muted);margin-bottom:4px}
 .dep-box .db-num{font-size:1.2rem;font-weight:900;color:var(--g1);letter-spacing:.5px;margin:4px 0}
 .dep-box .db-name{font-size:.82rem;font-weight:600}
 .dep-box .db-note{font-size:.72rem;color:var(--muted);margin-top:8px;line-height:1.5}
 
+/* ── UPLOAD AREA ── */
 .upload-area{border:2px dashed var(--g3);border-radius:10px;padding:18px;text-align:center;cursor:pointer;margin-bottom:10px;transition:border-color .2s,background .2s}
 .upload-area:hover{border-color:var(--g1);background:var(--g4)}
 .upload-area p{font-size:.8rem;color:var(--muted)}
 .upload-area .ico{font-size:1.6rem;margin-bottom:6px}
 .upload-preview{width:100%;border-radius:10px;max-height:160px;object-fit:cover;margin-bottom:10px;display:none}
 
+/* ── LOCKED BALANCE ── */
 .locked-row{display:flex;gap:6px;margin:0 16px 14px}
 .locked-pill{flex:1;background:#fff;border-radius:10px;padding:10px 12px;box-shadow:var(--shadow);text-align:center}
 .locked-pill .lp-val{font-size:1rem;font-weight:800;color:var(--text)}
 .locked-pill .lp-label{font-size:.62rem;color:var(--muted);margin-top:2px}
 
+/* ── AUTH ── */
 .auth-wrap{padding:20px 16px}
 .auth-logo{text-align:center;margin-bottom:24px}
+.auth-logo .al-ico{display:none}
+.auth-logo .al-ico svg{width:36px;height:36px;fill:#fff}
 .auth-logo h2{font-size:1.3rem;font-weight:900;color:var(--g1)}
 .auth-logo p{font-size:.72rem;color:var(--muted)}
 .auth-tabs{display:flex;background:#fff;border-radius:12px;padding:4px;margin-bottom:16px;box-shadow:var(--shadow)}
@@ -188,22 +208,40 @@ textarea.inp{resize:vertical;min-height:80px}
 .checkbox-row input{width:16px;height:16px;accent-color:var(--g1)}
 .checkbox-row a{color:var(--g1);text-decoration:none}
 
+/* ── ADMIN ── */
 .admin-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:0 16px;margin-bottom:14px}
 .admin-stat{background:#fff;border-radius:var(--r1);padding:14px;text-align:center;box-shadow:var(--shadow)}
 .admin-stat .as-val{font-size:1.5rem;font-weight:900;color:var(--g1)}
 .admin-stat .as-label{font-size:.68rem;color:var(--muted);margin-top:2px}
+.admin-filter{display:flex;gap:8px;padding:0 16px;margin-bottom:10px}
+.admin-filter .inp{margin-bottom:0;font-size:.85rem}
+.admin-content{margin:0 16px;background:#fff;border-radius:var(--r1);padding:12px;box-shadow:var(--shadow)}
+.admin-item{padding:12px 0;border-bottom:1px solid #f0f0f0}
+.admin-item:last-child{border-bottom:none}
+.admin-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+.admin-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.admin-btn{padding:6px 12px;border:none;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit}
+.admin-btn.approve{background:var(--g4);color:var(--g1)}
+.admin-btn.reject{background:#fdeaea;color:var(--red)}
 
+/* ── NOTIFICATION ── */
 .notif{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:12px 20px;border-radius:12px;z-index:9999;font-weight:600;font-size:.82rem;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:90%;text-align:center;display:none;animation:fadeIn .2s}
 @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 .notif.success{background:var(--g1)}
 .notif.error{background:var(--red)}
 .notif.warn{background:var(--orange)}
 
+/* ── TEAM MODAL ── */
 .team-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .team-stat{background:var(--g5);border-radius:10px;padding:12px;text-align:center}
 .team-stat .ts-val{font-size:1.2rem;font-weight:800;color:var(--g1)}
 .team-stat .ts-label{font-size:.62rem;color:var(--muted);margin-top:2px}
+.level-badge{display:inline-block;font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px}
+.level-badge.l1{background:#d4f5e2;color:var(--g1)}
+.level-badge.l2{background:#fff3e0;color:var(--orange)}
+.level-badge.l3{background:#f0e8ff;color:#7c3aed}
 
+/* ── SALARY ── */
 .salary-tier{background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;display:flex;align-items:center;gap:12px}
 .salary-tier.achieved{border-left:4px solid var(--g1)}
 .salary-tier .tier-ico{font-size:1.4rem;width:40px;text-align:center}
@@ -212,101 +250,44 @@ textarea.inp{resize:vertical;min-height:80px}
 .salary-tier .tier-info p{font-size:.72rem;color:var(--muted)}
 .salary-tier .tier-amount{font-size:1rem;font-weight:800;color:var(--g1)}
 
+/* ── PROFILE ── */
 .profile-header{text-align:center;margin-bottom:16px}
 .profile-avatar{width:60px;height:60px;border-radius:50%;background:var(--g1);color:#fff;font-size:1.4rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
 .profile-header h4{font-size:.95rem;font-weight:700}
 .profile-header p{font-size:.72rem;color:var(--muted)}
 
+/* ── RESPONSIVE ── */
 @media(max-width:360px){
   .sc-ico{width:46px;height:46px;font-size:1.05rem}
   .sc-label{font-size:.57rem}
   .bal-amount{font-size:1.8rem}
 }
+
 .hidden{display:none!important}
 
-/* ADMIN HEADER */
-.admin-hdr{background:linear-gradient(160deg,#0a1a0f 0%,#1a3a26 100%);position:sticky;top:0;z-index:50}
-.admin-hdr-inner{display:flex;align-items:center;gap:10px;padding:12px 16px}
-.admin-hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-.admin-logout-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:.72rem;font-weight:600;font-family:inherit}
-.admin-nav{display:flex;overflow-x:auto;background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.07)}
-.admin-nav::-webkit-scrollbar{display:none}
-.admin-nav-item{padding:10px 14px;border:none;background:transparent;color:rgba(255,255,255,.4);font-size:.68rem;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;flex-shrink:0;font-family:inherit}
-.admin-nav-item.active{color:#fff;border-bottom-color:#43c97a;background:rgba(255,255,255,.04)}
-.admin-body{padding:14px 14px 80px}
-.admin-search-bar{display:flex;gap:8px;margin-bottom:12px}
-.admin-search-bar .inp{margin-bottom:0;flex:1}
-.admin-search-bar select{padding:10px 12px;border:2px solid #e8f0eb;border-radius:10px;outline:none;background:#fff;color:var(--text);font-family:inherit;font-size:.82rem}
-.analytics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
-.ac{background:#fff;border-radius:14px;padding:14px 12px;box-shadow:0 2px 12px rgba(0,0,0,.06);border-top:3px solid var(--g2)}
-.ac.gold{border-top-color:#c8a84b}.ac.red{border-top-color:#e03030}.ac.blue{border-top-color:#3b82f6}.ac.purple{border-top-color:#8b5cf6}.ac.orange{border-top-color:#e07c30}
-.ac-val{font-size:1.55rem;font-weight:900;color:var(--g1);line-height:1}
-.ac.gold .ac-val{color:#c8a84b}.ac.red .ac-val{color:#e03030}.ac.blue .ac-val{color:#3b82f6}.ac.purple .ac-val{color:#8b5cf6}.ac.orange .ac-val{color:#e07c30}
-.ac-label{font-size:.62rem;color:var(--muted);margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.ac-sub{font-size:.65rem;margin-top:4px;font-weight:700;color:var(--g1)}
-.chart-box{background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:12px}
-.chart-box-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.chart-box-hdr h4{font-size:.82rem;font-weight:700;color:var(--text)}
-.period-pills{display:flex;gap:4px}
-.period-pill{padding:4px 10px;border-radius:6px;border:none;font-size:.62rem;font-weight:600;cursor:pointer;background:var(--g5);color:var(--muted);font-family:inherit;transition:.15s}
-.period-pill.active{background:var(--g1);color:#fff}
-.bar-wrap{display:flex;align-items:flex-end;gap:3px;height:80px;padding-top:4px}
-.bcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
-.bfill{width:100%;border-radius:3px 3px 0 0;background:linear-gradient(to top,var(--g1),var(--g3));min-height:3px;transition:height .4s ease}
-.blbl{font-size:.5rem;color:var(--muted);white-space:nowrap;margin-top:2px}
-.bval{font-size:.5rem;font-weight:700;color:var(--g1)}
-.p-table{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:12px}
-.p-table-hdr{padding:12px 14px;border-bottom:1px solid #f0f4f1;display:flex;justify-content:space-between;align-items:center}
-.p-table-hdr h4{font-size:.82rem;font-weight:700;color:var(--text)}
-.p-table-hdr span{font-size:.68rem;color:var(--muted)}
-.p-row{padding:11px 14px;border-bottom:1px solid #f5f9f5;display:flex;align-items:center;gap:10px}
-.p-row:last-child{border-bottom:none}
-.p-av{width:32px;height:32px;border-radius:50%;background:var(--g4);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:var(--g1);flex-shrink:0}
-.p-ri{flex:1;min-width:0}
-.p-ri strong{font-size:.78rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.p-ri small{font-size:.65rem;color:var(--muted)}
-.p-rr{text-align:right;flex-shrink:0}
-.p-rr .amt{font-size:.8rem;font-weight:700;color:var(--g1)}
-.p-rr .sub{font-size:.62rem;color:var(--muted)}
-.admin-item{background:#fff;border-radius:12px;padding:13px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);border-left:3px solid transparent}
-.admin-item.is-pending{border-left-color:var(--orange)}
-.admin-item.is-approved{border-left-color:var(--g2)}
-.admin-item.is-rejected{border-left-color:var(--red)}
-.admin-item.is-completed{border-left-color:#999}
-.admin-item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.admin-item-meta{font-size:.7rem;color:var(--muted);margin-top:4px;line-height:1.7}
-.admin-actions{display:flex;gap:6px;flex-wrap:wrap;padding-top:8px;margin-top:6px;border-top:1px solid #f0f4f0}
-.admin-btn{padding:7px 13px;border:none;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s}
-.admin-btn:active{opacity:.75}
-.admin-btn.approve{background:#d4f5e2;color:#1a6b3c}
-.admin-btn.reject{background:#fdeaea;color:#e03030}
+/* ── SUSPEND BADGE ── */
+.susp-badge{background:#fdeaea;color:#e03030;border-radius:8px;padding:3px 10px;font-size:.68rem;font-weight:700}
+.active-badge{background:#d4f5e2;color:#1a6b3c;border-radius:8px;padding:3px 10px;font-size:.68rem;font-weight:700}
+
+/* ── DANGER ZONE (admin) ── */
+.danger-zone{background:#fff5f5;border:1px solid #fcc;border-radius:10px;padding:12px;margin-top:8px}
+.danger-zone h5{font-size:.78rem;font-weight:700;color:#e03030;margin-bottom:8px}
+.danger-actions{display:flex;gap:6px;flex-wrap:wrap}
 .admin-btn.suspend{background:#fdeaea;color:#e03030}
 .admin-btn.unsuspend{background:#d4f5e2;color:#1a6b3c}
 .admin-btn.wash{background:#fff3e0;color:#c05e00}
-.susp-badge{background:#fdeaea;color:#e03030;border-radius:8px;padding:3px 10px;font-size:.65rem;font-weight:700;display:inline-block}
-.active-badge{background:#d4f5e2;color:#1a6b3c;border-radius:8px;padding:3px 10px;font-size:.65rem;font-weight:700;display:inline-block}
-.danger-zone{background:#fff8f8;border:1px solid #fcc;border-radius:10px;padding:10px 12px;margin-top:8px}
-.danger-zone h5{font-size:.7rem;font-weight:700;color:#e03030;margin-bottom:6px}
-.settings-card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:12px}
-.settings-card h4{font-size:.85rem;font-weight:700;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:6px}
-.settings-card .inp{margin-bottom:10px}
-.ss-thumb{max-width:100%;border-radius:8px;max-height:120px;object-fit:cover;margin-top:6px;cursor:zoom-in;display:block}
 </style>
 </head>
 <body>
 <div class="notif" id="notif"></div>
 <div class="wrap" id="wrap">
 
-  <!-- AUTH PAGE -->
+  <!-- ── AUTH PAGE ── -->
   <div id="authPage" class="page active">
     <div class="auth-wrap">
       <div class="auth-logo">
-        <svg viewBox="0 0 320 80" style="width:280px;max-width:82vw;height:auto;display:block;margin:0 auto 6px">
-          <rect width="320" height="80" fill="none"/>
-          <text x="160" y="45" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="34" font-weight="900" fill="#1a6b3c" letter-spacing="1">JETOUR</text>
-          <text x="160" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6b836f" letter-spacing="3">PRIVATE SOLUTION</text>
-        </svg>
-        <p style="font-size:.7rem;color:var(--muted);margin-top:4px">Investment Platform</p>
+        <img src="data:image/png;base64,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" alt="Jetour Private Solution" style="width:240px;object-fit:contain;margin-bottom:8px">
+        <p style="font-size:.72rem;color:var(--muted);margin-top:4px">Investment Platform</p>
       </div>
       <div class="auth-tabs">
         <button class="auth-tab active" id="signupTab" onclick="toggleAuth('signup')">Create Account</button>
@@ -332,30 +313,16 @@ textarea.inp{resize:vertical;min-height:80px}
     </div>
   </div>
 
-  <!-- HOME PAGE -->
+  <!-- ── HOME PAGE ── -->
   <div id="homePage" class="page">
     <div class="hdr">
-      <svg viewBox="0 0 100 30" style="height:32px;width:auto;flex-shrink:0">
-        <text x="0" y="22" font-family="Arial Black" font-size="18" font-weight="900" fill="#fff">JETOUR</text>
-      </svg>
-      <div style="flex:1"></div>
-      <p id="hdrEmail" style="font-size:.66rem;color:rgba(255,255,255,.6);margin-right:8px;white-space:nowrap;overflow:hidden;max-width:120px;text-overflow:ellipsis"></p>
+      <img src="data:image/png;base64,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" alt="Jetour" style="height:36px;object-fit:contain;filter:brightness(0) invert(1)">
+      <div class="hdr-title" style="display:none">
+        <h1>Jetour Private</h1>
+        <p id="hdrEmail">Welcome back</p>
+      </div>
+      <div style="flex:1"><p id="hdrEmail" style="font-size:.68rem;color:rgba(255,255,255,.65);margin-top:1px">Welcome back</p></div>
       <div class="hdr-profile" onclick="openProfileModal()" id="hdrAvatar">?</div>
-    </div>
-
-    <div class="banner-wrap">
-      <svg viewBox="0 0 430 175" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#1a6b3c"/>
-            <stop offset="100%" stop-color="#0d5c32"/>
-          </linearGradient>
-        </defs>
-        <rect width="430" height="175" fill="url(#bg1)"/>
-        <text x="215" y="80" text-anchor="middle" font-family="Arial Black" font-size="30" font-weight="900" fill="#fff">JETOUR</text>
-        <text x="215" y="110" text-anchor="middle" font-family="Arial" font-size="14" fill="rgba(255,255,255,.85)" letter-spacing="2">OFFICIAL VERIFIED PLATFORM</text>
-        <text x="215" y="135" text-anchor="middle" font-family="Arial" font-size="12" fill="rgba(255,255,255,.6)">Made in Pakistan · FBR Registered</text>
-      </svg>
     </div>
 
     <div class="bal-card">
@@ -434,12 +401,6 @@ textarea.inp{resize:vertical;min-height:80px}
       <div class="comm-info"><h4>WhatsApp Channel</h4><p>Latest updates &amp; announcements</p></div>
       <span class="comm-arr">›</span>
     </div>
-    <div class="comm-card" onclick="window.open('https://www.facebook.com/share/g/1GBuD7FTVt/','_blank')">
-      <div class="comm-ico" style="background:#e7f0fb;color:#1877f2">👥</div>
-      <div class="comm-info"><h4>Facebook Group</h4><p>Join our official FB community</p></div>
-      <span class="comm-arr">›</span>
-    </div>
-
     <div class="comm-card" onclick="openModal('adminLoginModal')">
       <div class="comm-ico adm">🛠️</div>
       <div class="comm-info"><h4>Admin Panel</h4><p>Administrator access</p></div>
@@ -467,7 +428,7 @@ textarea.inp{resize:vertical;min-height:80px}
     </div>
   </div>
 
-  <!-- DEPOSIT PAGE -->
+  <!-- ── DEPOSIT PAGE ── -->
   <div id="depositPage" class="page">
     <div class="dep-page-hdr">
       <button class="back-btn" onclick="showPage('homePage')">←</button>
@@ -476,45 +437,49 @@ textarea.inp{resize:vertical;min-height:80px}
     <div class="pkg-grid" id="pkgGrid"></div>
   </div>
 
-  <!-- ADMIN PAGE -->
+  <!-- ── ADMIN PAGE ── -->
   <div id="adminPage" class="page">
-    <div class="admin-hdr">
-      <div class="admin-hdr-inner">
-        <svg viewBox="0 0 100 30" style="height:28px;width:auto;flex-shrink:0">
-          <text x="0" y="22" font-family="Arial Black" font-size="18" font-weight="900" fill="#fff">JETOUR</text>
-        </svg>
-        <div class="admin-hdr-right">
-          <span style="font-size:.65rem;color:rgba(255,255,255,.4);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="adminLoggedAs"></span>
-          <button class="admin-logout-btn" onclick="adminLogout()">Logout</button>
-        </div>
+    <div class="hdr" style="background:var(--dark)">
+      <div class="hdr-logo" style="background:rgba(255,255,255,.1)">
+        <svg viewBox="0 0 24 24" style="fill:#fff"><path d="M12 2L2 7v10l10 5 10-5V7l-10-5z"/></svg>
       </div>
-      <div class="admin-nav" id="adminNav">
-        <button class="admin-nav-item active" onclick="switchAdminTab('analytics')">📊 Analytics</button>
-        <button class="admin-nav-item" onclick="switchAdminTab('pending')">⏳ Pending</button>
-        <button class="admin-nav-item" onclick="switchAdminTab('all')">💰 Deposits</button>
-        <button class="admin-nav-item" onclick="switchAdminTab('withdrawals')">💸 Withdrawals</button>
-        <button class="admin-nav-item" onclick="switchAdminTab('users')">👥 Users</button>
-        <button class="admin-nav-item" onclick="switchAdminTab('investments')">📦 Plans</button>
-        <button class="admin-nav-item" onclick="switchAdminTab('referrals')">🔗 Referrals</button>
-        <button class="admin-nav-item" onclick="switchAdminTab('logs')">📋 Logs</button>
-        <button class="admin-nav-item" onclick="switchAdminTab('settings')">⚙️ Settings</button>
+      <div class="hdr-title">
+        <h1 style="color:#fff">Admin Panel</h1>
+        <p style="color:rgba(255,255,255,.5)">Jetour Private Solution</p>
+      </div>
+      <button onclick="adminLogout()" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600">Logout</button>
+    </div>
+
+    <div class="admin-stats" id="adminStats"></div>
+
+    <div class="hist-wrap" style="margin-bottom:10px">
+      <div class="hist-tabs" id="adminTabs">
+        <button class="h-tab active" onclick="switchAdminTab('pending')">Pending</button>
+        <button class="h-tab" onclick="switchAdminTab('all')">All Deposits</button>
+        <button class="h-tab" onclick="switchAdminTab('withdrawals')">Withdrawals</button>
+        <button class="h-tab" onclick="switchAdminTab('referrals')">Referrals</button>
+        <button class="h-tab" onclick="switchAdminTab('users')">Users</button>
+        <button class="h-tab" onclick="switchAdminTab('investments')">Investments</button>
+        <button class="h-tab" onclick="switchAdminTab('logs')" style="background:#fff3e0;color:#c05e00">📋 Logs</button>
       </div>
     </div>
-    <div class="admin-body">
-      <div class="admin-search-bar" id="adminSearchBar" style="display:none">
-        <input type="text" class="inp" id="adminSearch" placeholder="Search by email..." oninput="renderAdminContent()">
-        <select id="adminFilter" onchange="renderAdminContent()">
-          <option value="">All</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-        </select>
-      </div>
-      <div id="adminContent"><div class="empty-state">Loading...</div></div>
+
+    <div class="admin-filter" id="adminFilterBar">
+      <input type="text" class="inp" id="adminSearch" placeholder="Search by email..." oninput="renderAdminContent()">
+      <select class="inp" id="adminFilter" onchange="renderAdminContent()" style="max-width:120px">
+        <option value="">All</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
     </div>
+
+    <div class="admin-content" id="adminContent"><div class="empty-state">Loading...</div></div>
   </div>
 
-<!-- BOTTOM NAV -->
+</div><!-- end wrap -->
+
+<!-- ── BOTTOM NAV ── -->
 <div class="bnav hidden" id="bnav">
   <div class="bn-item active" data-tab="home" onclick="showPage('homePage')"><span class="bn-ico">🏠</span>Home</div>
   <div class="bn-item" data-tab="deposit" onclick="showPage('depositPage')"><span class="bn-ico">💰</span>Deposit</div>
@@ -523,7 +488,9 @@ textarea.inp{resize:vertical;min-height:80px}
   <div class="bn-item" data-tab="logout" onclick="logout()"><span class="bn-ico">🚪</span>Logout</div>
 </div>
 
-<!-- MODALS -->
+<!-- ════════════════════ MODALS ════════════════════ -->
+
+<!-- Deposit Confirm Modal -->
 <div class="overlay hidden" id="depositModal" onclick="closeModalOutside(event,'depositModal')">
   <div class="modal">
     <div class="modal-drag"></div>
@@ -547,6 +514,7 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<!-- Withdraw Modal -->
 <div class="overlay hidden" id="withdrawModal" onclick="closeModalOutside(event,'withdrawModal')">
   <div class="modal">
     <div class="modal-drag"></div>
@@ -555,8 +523,9 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<!-- Profile Modal -->
 <div class="overlay center hidden" id="profileModal" onclick="closeModalOutside(event,'profileModal')">
-  <div class="modal">
+  <div class="modal" style="position:relative">
     <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
     <div class="profile-header">
       <div class="profile-avatar" id="profileAvatar">?</div>
@@ -570,6 +539,7 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<!-- Team Modal -->
 <div class="overlay hidden" id="teamModal" onclick="closeModalOutside(event,'teamModal')">
   <div class="modal">
     <div class="modal-drag"></div>
@@ -579,6 +549,7 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<!-- Team Reward Modal -->
 <div class="overlay hidden" id="teamRewardModal" onclick="closeModalOutside(event,'teamRewardModal')">
   <div class="modal">
     <div class="modal-drag"></div>
@@ -588,6 +559,7 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<!-- Salary Modal -->
 <div class="overlay hidden" id="salaryModal" onclick="closeModalOutside(event,'salaryModal')">
   <div class="modal">
     <div class="modal-drag"></div>
@@ -597,8 +569,9 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<!-- Certificates Modal -->
 <div class="overlay center hidden" id="certsModal" onclick="closeModalOutside(event,'certsModal')">
-  <div class="modal">
+  <div class="modal" style="position:relative">
     <button class="modal-close" onclick="closeModal('certsModal')">✕</button>
     <h3>Certificates</h3>
     <div id="certsContent"><div class="empty-state">Loading...</div></div>
@@ -606,8 +579,9 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<!-- Admin Login Modal -->
 <div class="overlay center hidden" id="adminLoginModal" onclick="closeModalOutside(event,'adminLoginModal')">
-  <div class="modal">
+  <div class="modal" style="position:relative">
     <button class="modal-close" onclick="closeModal('adminLoginModal')">✕</button>
     <h3>Admin Login</h3>
     <input type="email" class="inp" id="adminEmail" placeholder="Admin email">
@@ -616,8 +590,9 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<!-- Privacy Modal -->
 <div class="overlay center hidden" id="privacyModal" onclick="closeModalOutside(event,'privacyModal')">
-  <div class="modal">
+  <div class="modal" style="position:relative">
     <button class="modal-close" onclick="closeModal('privacyModal')">✕</button>
     <h3>Privacy Policy</h3>
     <p style="font-size:.82rem;color:var(--muted);line-height:1.7;max-height:260px;overflow-y:auto">
@@ -627,8 +602,9 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<!-- Onboarding Modal -->
 <div class="overlay center hidden" id="onboardingModal">
-  <div class="modal" style="text-align:center">
+  <div class="modal" style="position:relative;text-align:center">
     <div style="font-size:2.5rem;margin-bottom:10px">🎉</div>
     <h3 style="text-align:center">Welcome to Jetour!</h3>
     <p style="font-size:.84rem;color:var(--muted);line-height:1.7;margin:12px 0">
@@ -642,11 +618,9 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
-<!-- SCRIPT -->
+<!-- ════════════════════ SCRIPT ════════════════════ -->
 <script>
-// ═══════════════════════════════════════
-// FIREBASE
-// ═══════════════════════════════════════
+// ── FIREBASE CONFIG ──
 const firebaseConfig = {
   apiKey:"AIzaSyBUUvgeDFSWUYZEg7QdmXRMGSe8okAEXrc",
   authDomain:"halal-pk.firebaseapp.com",
@@ -659,22 +633,18 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ═══════════════════════════════════════
-// CONSTANTS (FIRST!)
-// ═══════════════════════════════════════
+// ── CONSTANTS ──
 const ADMIN_EMAIL = 'admin@engro.com';
 const REFERRAL_BONUS = {l1:100, l2:50, l3:25};
 const WELCOME_BONUS = 20;
 const MIN_WITHDRAWAL = 500;
-const WITHDRAWAL_FEE = 2;
-let DEPOSIT_NUMBER = '03162806904';
-let DEPOSIT_NAME = 'AAREN KHAN';
+const WITHDRAWAL_FEE = 2; // percent
+const DEPOSIT_NUMBER = '03162806904';
+const DEPOSIT_NAME = 'AAREN KHAN';
 const WA_COMMUNITY = 'https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
 const WA_CHANNEL = 'https://whatsapp.com/channel/0029VbCoYMz2phHD9UWHEA47';
 
-// ═══════════════════════════════════════
-// PACKAGES
-// ═══════════════════════════════════════
+// ── PACKAGES ──
 const PACKAGES = [
   {id:'p1', name:'Jetour X70',        amount:300,   daily:75,   days:30, total:2250,  color:'#2ecc71'},
   {id:'p2', name:'Jetour X90',        amount:500,   daily:125,  days:30, total:3750,  color:'#cd7f32'},
@@ -689,22 +659,17 @@ const PACKAGES = [
   {id:'p11',name:'Jetour Voyage',     amount:25000, daily:6250, days:30, total:187500,color:'#b8860b', badge:'Elite'},
 ];
 
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
+// ── STATE ──
 let currentUser = null;
 let isAdmin = false;
 let selectedPkg = null;
 let histTab = 'activePlans';
-let adminTab = 'analytics';
+let adminTab = 'pending';
 let countdownTimers = {};
 let unsubscribers = [];
 let deferredInstall = null;
-let compressedScreenshot = '';
 
-// ═══════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════
+// ── UTILS ──
 function fmt(n){ return 'PKR ' + Math.floor(Number(n)||0).toLocaleString('en-US'); }
 function genCode(){ const c='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let s=''; for(let i=0;i<6;i++) s+=c[Math.floor(Math.random()*c.length)]; return s; }
 function getRefFromURL(){ return new URLSearchParams(window.location.search).get('ref')||''; }
@@ -715,7 +680,7 @@ function notify(msg, type='success'){
   n.className = 'notif ' + type;
   n.style.display = 'block';
   clearTimeout(n._t);
-  n._t = setTimeout(()=>{ n.style.display='none'; }, 3000);
+  n._t = setTimeout(()=>{ n.style.display='none'; }, 2800);
 }
 
 function setLoading(btnId, loading, text){
@@ -725,42 +690,19 @@ function setLoading(btnId, loading, text){
   btn.textContent = loading ? 'Please wait...' : text;
 }
 
-// ═══════════════════════════════════════
-// DEPOSIT CONFIG LOADER
-// ═══════════════════════════════════════
-async function loadDepositConfig(){
-  try{
-    const doc = await db.collection('appConfig').doc('depositInfo').get();
-    if(doc.exists){
-      const d = doc.data();
-      if(d.number) DEPOSIT_NUMBER = d.number;
-      if(d.name)   DEPOSIT_NAME   = d.name;
-      const numEl  = document.getElementById('depNumber');
-      const nameEl = document.getElementById('depName');
-      const sNum   = document.getElementById('settDepNum');
-      const sName  = document.getElementById('settDepName');
-      if(numEl)  numEl.textContent  = DEPOSIT_NUMBER;
-      if(nameEl) nameEl.textContent = DEPOSIT_NAME;
-      if(sNum)   sNum.textContent   = DEPOSIT_NUMBER;
-      if(sName)  sName.textContent  = DEPOSIT_NAME;
-    }
-  } catch(e){ console.log('Config load:', e.message); }
-}
-
-// ═══════════════════════════════════════
-// PAGE / MODAL
-// ═══════════════════════════════════════
+// ── PAGE / MODAL SYSTEM ──
 function showPage(pageId){
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const el = document.getElementById(pageId);
-  if(el) el.classList.add('active');
-  if(pageId === 'depositPage'){ renderPackages(); setNavActive('deposit'); }
+  document.getElementById(pageId).classList.add('active');
+  if(pageId === 'depositPage') renderPackages();
   if(pageId === 'homePage') setNavActive('home');
+  if(pageId === 'depositPage') setNavActive('deposit');
 }
 
 function openModal(id){
   const m = document.getElementById(id);
   if(m) m.classList.remove('hidden');
+  // Populate modal content
   if(id==='teamModal') loadTeamModal();
   if(id==='teamRewardModal') loadTeamRewardModal();
   if(id==='salaryModal') loadSalaryModal();
@@ -784,9 +726,7 @@ function setNavActive(tab){
   if(el) el.classList.add('active');
 }
 
-// ═══════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════
+// ── AUTH STATE ──
 auth.onAuthStateChanged(async user => {
   currentUser = user;
   clearTimers();
@@ -799,8 +739,9 @@ auth.onAuthStateChanged(async user => {
       document.getElementById('bnav').classList.add('hidden');
       showPage('adminPage');
       loadAdminStats();
-      showAdminDashboard();
+      renderAdminContent();
     } else {
+      // Check suspension on every auth restore
       const uSnap = await db.collection('users').doc(user.uid).get();
       if(uSnap.exists && uSnap.data().suspended){
         await auth.signOut();
@@ -846,8 +787,7 @@ async function signupUser(){
       const rs = await db.collection('users').where('referralCode','==',ref).limit(1).get();
       if(!rs.empty){
         const rd = rs.docs[0]; r1 = rd.id;
-        if(rd.data().referredBy){
-          r2 = rd.data().referredBy;
+        if(rd.data().referredBy){ r2 = rd.data().referredBy;
           const l2 = await db.collection('users').doc(r2).get();
           if(l2.exists && l2.data().referredBy) r3 = l2.data().referredBy;
         }
@@ -858,7 +798,6 @@ async function signupUser(){
       referralCode: code, referredBy: r1, referredBy2: r2, referredBy3: r3,
       accountHolderName:'', accountType:'', accountNumber:'', cnic:'',
       totalReferrals:0, totalEarned:0, pendingWithdrawal:0, onboarded:false,
-      suspended:false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     if(r1){
@@ -884,6 +823,7 @@ async function loginUser(){
   setLoading('loginBtn', true, 'Login');
   try{
     const uc = await auth.signInWithEmailAndPassword(email, pass);
+    // Check suspended AFTER login
     const userDoc = await db.collection('users').doc(uc.user.uid).get();
     if(userDoc.exists && userDoc.data().suspended){
       await auth.signOut();
@@ -899,6 +839,7 @@ async function loginUser(){
 }
 
 function showSuspendedScreen(){
+  // Show overlay suspended message
   let ov = document.getElementById('suspendedOverlay');
   if(!ov){
     ov = document.createElement('div');
@@ -911,7 +852,7 @@ function showSuspendedScreen(){
         Your account has been suspended by the administrator. Please contact support for assistance.
       </p>
       <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:14px 20px;margin-bottom:20px;font-size:.8rem;color:rgba(255,255,255,.5)">
-        Contact: <strong style="color:#fff">${ADMIN_EMAIL}</strong>
+        Contact: <strong style="color:#fff">admin@jetour.com</strong>
       </div>
       <button onclick="document.getElementById('suspendedOverlay').remove()" 
         style="background:#e03030;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.88rem">
@@ -923,24 +864,22 @@ function showSuspendedScreen(){
 
 function logout(){ clearTimers(); auth.signOut(); }
 
-// ═══════════════════════════════════════
-// DASHBOARD
-// ═══════════════════════════════════════
+// ── DASHBOARD ──
 function initDashboard(user){
+  // Real-time user data
   const unsub1 = db.collection('users').doc(user.uid).onSnapshot(doc => {
     if(!doc.exists) return;
     const d = doc.data();
     document.getElementById('balDisplay').textContent = fmt(d.balance||0);
     document.getElementById('balName').textContent = d.name || user.email.split('@')[0];
     document.getElementById('balRef').textContent = d.referredBy ? 'Yes' : 'No';
-    const displayName = d.name || user.email.split('@')[0];
-    const hdrEl = document.getElementById('hdrEmail');
-    if(hdrEl) hdrEl.textContent = displayName;
-    document.getElementById('hdrAvatar').textContent = displayName.charAt(0).toUpperCase();
+    document.getElementById('hdrEmail').textContent = d.name || user.email;
+    document.getElementById('hdrAvatar').textContent = (d.name||user.email).charAt(0).toUpperCase();
     document.getElementById('lockedDisplay').textContent = fmt(d.pendingWithdrawal||0);
     document.getElementById('earnedDisplay').textContent = fmt(d.totalEarned||0);
     if(d.referralCode)
       document.getElementById('refLinkDisplay').textContent = window.location.origin + window.location.pathname + '?ref=' + d.referralCode;
+    // Show onboarding if not done
     if(!d.onboarded) openModal('onboardingModal');
   });
   unsubscribers.push(unsub1);
@@ -954,9 +893,7 @@ function markOnboarded(){
   db.collection('users').doc(currentUser.uid).update({onboarded:true}).catch(()=>{});
 }
 
-// ═══════════════════════════════════════
-// PACKAGES UI
-// ═══════════════════════════════════════
+// ── PACKAGES ──
 function renderPackages(){
   const grid = document.getElementById('pkgGrid');
   grid.innerHTML = PACKAGES.map(p => {
@@ -977,20 +914,9 @@ function renderPackages(){
 }
 
 function openDepositModal(pkgId){
-  loadDepositConfig();
   const pkg = PACKAGES.find(p => p.id===pkgId);
   if(!pkg) return;
   selectedPkg = pkg;
-  compressedScreenshot = '';
-  const tidEl = document.getElementById('tidInput');
-  const ssEl = document.getElementById('ssInput');
-  const pvEl = document.getElementById('ssPreview');
-  if(tidEl) tidEl.value = '';
-  if(ssEl) ssEl.value = '';
-  if(pvEl){ pvEl.style.display = 'none'; pvEl.src = ''; }
-  const upText = document.querySelector('.upload-area p');
-  if(upText) upText.textContent = 'Tap to upload payment screenshot';
-
   document.getElementById('depositModalContent').innerHTML = `
     <div style="background:var(--g5);border-radius:10px;padding:12px;margin-bottom:12px">
       <strong style="font-size:.95rem">${pkg.name}</strong>
@@ -998,6 +924,9 @@ function openDepositModal(pkgId){
         ${fmt(pkg.amount)} → ${fmt(pkg.daily)}/day × ${pkg.days} days = ${fmt(pkg.total)}
       </div>
     </div>`;
+  document.getElementById('tidInput').value = '';
+  document.getElementById('ssPreview').style.display = 'none';
+  document.getElementById('ssPreview').src = '';
   openModal('depositModal');
   showPage('homePage');
 }
@@ -1005,31 +934,12 @@ function openDepositModal(pkgId){
 function previewScreenshot(e){
   const file = e.target.files[0];
   if(!file) return;
-  if(file.size > 5 * 1024 * 1024){
-    notify('Image 5MB se choti honi chahiye', 'error');
-    e.target.value = '';
-    return;
-  }
   const reader = new FileReader();
   reader.onload = ev => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const MAX = 800;
-      let w = img.width, h = img.height;
-      if(w > h && w > MAX){ h = h * MAX / w; w = MAX; }
-      else if(h > MAX){ w = w * MAX / h; h = MAX; }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      compressedScreenshot = canvas.toDataURL('image/jpeg', 0.6);
-
-      const preview = document.getElementById('ssPreview');
-      preview.src = compressedScreenshot;
-      preview.style.display = 'block';
-      const upText = document.querySelector('.upload-area p');
-      if(upText) upText.textContent = 'Screenshot ready ✓';
-    };
+    const img = document.getElementById('ssPreview');
     img.src = ev.target.result;
+    img.style.display = 'block';
+    document.querySelector('.upload-area p').textContent = 'Screenshot selected ✓';
   };
   reader.readAsDataURL(file);
 }
@@ -1041,6 +951,16 @@ async function submitDeposit(){
 
   setLoading('submitDepBtn', true, 'Submit Deposit Request');
   try{
+    // Get screenshot as base64 if provided
+    let screenshotBase64 = '';
+    const ssFile = document.getElementById('ssInput').files[0];
+    if(ssFile){
+      screenshotBase64 = await new Promise(res => {
+        const r = new FileReader();
+        r.onload = e => res(e.target.result);
+        r.readAsDataURL(ssFile);
+      });
+    }
     await db.collection('deposits').add({
       userId: currentUser.uid,
       userEmail: currentUser.email,
@@ -1050,21 +970,17 @@ async function submitDeposit(){
       dailyReturn: selectedPkg.daily,
       durationDays: selectedPkg.days,
       totalReturn: selectedPkg.total,
-      tid,
-      screenshot: compressedScreenshot || '',
+      tid, screenshot: screenshotBase64,
       status: 'pending',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     notify('Deposit submitted! Admin will verify within 24hrs ✅');
-    compressedScreenshot = '';
     closeModal('depositModal');
   } catch(e){ notify(e.message,'error'); }
   setLoading('submitDepBtn', false, 'Submit Deposit Request');
 }
 
-// ═══════════════════════════════════════
-// WITHDRAWAL
-// ═══════════════════════════════════════
+// ── WITHDRAWAL ──
 function loadWithdrawModal(){
   if(!currentUser) return;
   const c = document.getElementById('withdrawContent');
@@ -1137,6 +1053,7 @@ async function submitWithdrawal(){
       const ref = db.collection('users').doc(currentUser.uid);
       const doc = await t.get(ref);
       const bal = doc.data().balance||0;
+      const pending = doc.data().pendingWithdrawal||0;
       if(amt > bal) throw new Error('Insufficient balance');
       t.update(ref, {
         balance: firebase.firestore.FieldValue.increment(-amt),
@@ -1156,9 +1073,7 @@ async function submitWithdrawal(){
   } catch(e){ notify(e.message,'error'); }
 }
 
-// ═══════════════════════════════════════
-// INVESTMENTS
-// ═══════════════════════════════════════
+// ── INVESTMENTS ──
 function loadActiveInvestments(user){
   const sec = document.getElementById('activeInvSection');
   const unsub = db.collection('investments')
@@ -1225,6 +1140,8 @@ function clearTimers(){
   countdownTimers = {};
 }
 
+// Process due earnings — called client-side as backup trigger
+// Real production should use Cloud Functions
 async function processInvestmentsDue(user){
   try{
     const snap = await db.collection('investments')
@@ -1258,9 +1175,7 @@ async function processInvestmentsDue(user){
   } catch(e){ console.error('processInvestments:', e); }
 }
 
-// ═══════════════════════════════════════
-// HISTORY
-// ═══════════════════════════════════════
+// ── HISTORY ──
 function setupHistory(user){
   const tabs = [
     {col:'investments', q:q=>q.where('userId','==',user.uid), tab:'activePlans'},
@@ -1290,8 +1205,9 @@ async function renderHistory(uid){
   try{
     if(histTab==='activePlans'){
       const snap = await db.collection('investments').where('userId','==',uid).get();
-      if(snap.empty){ c.innerHTML='<div class="empty-state">No active plans yet</div>'; return; }
-      c.innerHTML = snap.docs.map(doc => {
+      const docs = snap.docs;
+      if(docs.length===0){ c.innerHTML='<div class="empty-state">No active plans yet</div>'; return; }
+      c.innerHTML = docs.map(doc => {
         const inv = doc.data();
         return `<div class="h-item">
           <div class="h-item-left"><strong>${inv.packageName}</strong><small>${fmt(inv.amount)} — ${fmt(inv.dailyReturn)}/day</small></div>
@@ -1322,9 +1238,7 @@ async function renderHistory(uid){
   } catch(e){ c.innerHTML='<div class="empty-state">Error loading data</div>'; }
 }
 
-// ═══════════════════════════════════════
-// REFERRAL
-// ═══════════════════════════════════════
+// ── REFERRAL ──
 function copyReferralLink(){
   const link = document.getElementById('refLinkDisplay').textContent;
   if(!link||link==='Loading...') return notify('Link not ready','warn');
@@ -1333,9 +1247,7 @@ function copyReferralLink(){
     .catch(()=>notify('Copy failed','error'));
 }
 
-// ═══════════════════════════════════════
-// TEAM / REWARD / SALARY / CERTS
-// ═══════════════════════════════════════
+// ── TEAM MODAL ──
 async function loadTeamModal(){
   const c = document.getElementById('teamContent');
   if(!currentUser){ c.innerHTML='<div class="empty-state">Not logged in</div>'; return; }
@@ -1365,6 +1277,7 @@ async function loadTeamModal(){
   } catch(e){ c.innerHTML='<div class="empty-state">Error loading team</div>'; }
 }
 
+// ── TEAM REWARD MODAL ──
 async function loadTeamRewardModal(){
   const c = document.getElementById('teamRewardContent');
   if(!currentUser){ c.innerHTML='<div class="empty-state">Not logged in</div>'; return; }
@@ -1396,6 +1309,7 @@ async function loadTeamRewardModal(){
   } catch(e){ c.innerHTML='<div class="empty-state">Error loading rewards</div>'; }
 }
 
+// ── SALARY MODAL ──
 async function loadSalaryModal(){
   const c = document.getElementById('salaryContent');
   if(!currentUser){ c.innerHTML='<div class="empty-state">Not logged in</div>'; return; }
@@ -1433,63 +1347,30 @@ async function loadSalaryModal(){
   } catch(e){ c.innerHTML='<div class="empty-state">Error loading salary info</div>'; }
 }
 
+// ── CERTIFICATES ──
 async function loadCertsModal(){
   const c = document.getElementById('certsContent');
   if(!currentUser){ c.innerHTML='<div class="empty-state">Not logged in</div>'; return; }
   c.innerHTML = '<div class="empty-state">Loading...</div>';
   try{
     const snap = await db.collection('investments').where('userId','==',currentUser.uid).get();
-    let html = `
-      <div style="margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <span style="font-size:1.1rem">🏛️</span>
-          <strong style="font-size:.9rem;color:var(--g1)">FBR Registration Certificate</strong>
-          <span class="badge active" style="margin-left:auto">VERIFIED</span>
-        </div>
-        <div style="border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12);border:1px solid #e0e0e0;background:#fff">
-          <svg viewBox="0 0 400 260" style="width:100%;display:block;background:#fff">
-            <rect width="400" height="260" fill="#fff"/>
-            <rect x="10" y="10" width="380" height="240" fill="none" stroke="#1a6b3c" stroke-width="3"/>
-            <rect x="18" y="18" width="364" height="224" fill="none" stroke="#c8a84b" stroke-width="1"/>
-            <text x="200" y="50" text-anchor="middle" font-family="serif" font-size="16" font-weight="700" fill="#1a6b3c">FEDERAL BOARD OF REVENUE</text>
-            <text x="200" y="70" text-anchor="middle" font-family="serif" font-size="12" fill="#333">GOVERNMENT OF PAKISTAN</text>
-            <text x="200" y="100" text-anchor="middle" font-family="serif" font-size="14" font-weight="700" fill="#0d5c32">TAXPAYER REGISTRATION CERTIFICATE</text>
-            <text x="200" y="140" text-anchor="middle" font-family="serif" font-size="11" fill="#555">This certifies that the taxpayer</text>
-            <text x="200" y="165" text-anchor="middle" font-family="serif" font-size="15" font-weight="700" fill="#1a6b3c">JETOUR PRIVATE SOLUTION</text>
-            <text x="200" y="185" text-anchor="middle" font-family="serif" font-size="11" fill="#555">has been duly registered</text>
-            <text x="200" y="215" text-anchor="middle" font-family="serif" font-size="11" fill="#333">Registration No: <strong>8503331</strong></text>
-            <circle cx="340" cy="215" r="25" fill="none" stroke="#c8a84b" stroke-width="2"/>
-            <text x="340" y="220" text-anchor="middle" font-size="9" fill="#c8a84b">SEAL</text>
-          </svg>
-        </div>
-        <p style="font-size:.68rem;color:var(--muted);text-align:center;margin-top:6px">FBR Reg No: 8503331</p>
-      </div>
-      <div style="border-top:1px solid #f0f0f0;padding-top:14px;margin-bottom:10px">
-        <strong style="font-size:.82rem;color:var(--text)">📦 My Investment Plans</strong>
-      </div>`;
-    if(snap.empty){
-      html += '<div class="empty-state" style="padding:16px">No active investment plans yet.<br>Choose a plan to start earning!</div>';
-    } else {
-      html += snap.docs.map(doc => {
-        const inv = doc.data();
-        return `<div style="background:var(--g5);border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid var(--g2)">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <strong style="font-size:.88rem">${inv.packageName}</strong>
-              <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Invested: ${fmt(inv.amount)} · Daily: ${fmt(inv.dailyReturn)}</div>
-            </div>
-            <span class="badge ${inv.active?'active':'completed'}">${inv.active?'ACTIVE':'DONE'}</span>
+    if(snap.empty){ c.innerHTML='<div class="empty-state">Complete an investment to earn certificates</div>'; return; }
+    c.innerHTML = snap.docs.map(doc => {
+      const inv = doc.data();
+      return `<div style="background:var(--g5);border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid var(--g2)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong style="font-size:.88rem">${inv.packageName}</strong>
+            <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Invested: ${fmt(inv.amount)}</div>
           </div>
-        </div>`;
-      }).join('');
-    }
-    c.innerHTML = html;
+          <span class="badge ${inv.active?'active':'completed'}">${inv.active?'ACTIVE':'COMPLETED'}</span>
+        </div>
+      </div>`;
+    }).join('');
   } catch(e){ c.innerHTML='<div class="empty-state">Error loading certificates</div>'; }
 }
 
-// ═══════════════════════════════════════
-// PROFILE
-// ═══════════════════════════════════════
+// ── PROFILE ──
 function loadProfileModal(){
   if(!currentUser) return;
   db.collection('users').doc(currentUser.uid).get().then(doc => {
@@ -1515,13 +1396,12 @@ async function saveProfile(){
   } catch(e){ notify(e.message,'error'); }
 }
 
+// ── WHATSAPP ──
 function openWhatsApp(type){
   window.open(type==='community' ? WA_COMMUNITY : WA_CHANNEL, '_blank');
 }
 
-// ═══════════════════════════════════════
-// ADMIN AUTH
-// ═══════════════════════════════════════
+// ── ADMIN AUTH ──
 async function adminLogin(){
   const email = document.getElementById('adminEmail').value.trim();
   const pass = document.getElementById('adminPass').value;
@@ -1535,267 +1415,58 @@ async function adminLogin(){
 
 function adminLogout(){ clearTimers(); auth.signOut(); }
 
+// ── ADMIN DASHBOARD ──
 function loadAdminStats(){
-  const el = document.getElementById('adminLoggedAs');
-  if(el) el.textContent = ADMIN_EMAIL;
+  const c = document.getElementById('adminStats');
+  Promise.all([
+    db.collection('users').get(),
+    db.collection('investments').where('active','==',true).get(),
+    db.collection('deposits').where('status','==','pending').get(),
+    db.collection('withdrawals').where('status','==','pending').get(),
+  ]).then(([u,i,d,w]) => {
+    const suspended = u.docs.filter(doc=>doc.data().suspended).length;
+    c.innerHTML = [
+      {val:u.size, label:'Total Users'},
+      {val:i.size, label:'Active Plans'},
+      {val:d.size, label:'Pending Deposits'},
+      {val:w.size, label:'Pending Withdrawals'},
+      {val:suspended, label:'Suspended', color:'#e03030'},
+    ].map(s => `<div class="admin-stat"><div class="as-val" style="color:${s.color||'var(--g1)'}">${s.val}</div><div class="as-label">${s.label}</div></div>`).join('');
+  });
 }
 
 function switchAdminTab(tab){
   adminTab = tab;
-  document.querySelectorAll('.admin-nav-item').forEach(b => {
-    const t = b.getAttribute('onclick').match(/switchAdminTab\('(\w+)'\)/);
-    if(t) b.classList.toggle('active', t[1] === tab);
+  document.querySelectorAll('#adminTabs .h-tab').forEach((b,i) => {
+    b.classList.toggle('active', ['pending','all','withdrawals','referrals','users','investments'][i]===tab);
   });
-  const showSearch = ['pending','all','withdrawals','users','investments','referrals'].includes(tab);
-  const sb = document.getElementById('adminSearchBar');
-  if(sb) sb.style.display = showSearch ? 'flex' : 'none';
-  const af = document.getElementById('adminFilter');
-  if(af) af.style.display = ['pending','all','withdrawals'].includes(tab) ? 'block' : 'none';
+  const showFilter = ['pending','all','withdrawals','users','investments'].includes(tab);
+  document.getElementById('adminFilterBar').style.visibility = showFilter ? 'visible' : 'hidden';
   renderAdminContent();
 }
 
-let chartPeriod = 'week';
-function setChartPeriod(p){
-  chartPeriod = p;
-  document.querySelectorAll('.period-pill').forEach(b => {
-    b.classList.toggle('active', b.dataset.p===p);
-  });
-  renderSignupChart();
-}
-
-let depChartPeriod = 'week';
-function setDepChartPeriod(p){
-  depChartPeriod = p;
-  document.querySelectorAll('#adminContent .chart-box')[1]?.querySelectorAll('.period-pill').forEach(b => {
-    b.classList.toggle('active', b.dataset.p===p);
-  });
-  renderDepositChart();
-}
-
-// ═══════════════════════════════════════
-// ANALYTICS
-// ═══════════════════════════════════════
-async function renderAnalytics(){
-  const c = document.getElementById('adminContent');
-  c.innerHTML = '<div class="empty-state">Loading analytics...</div>';
-  try{
-    const [usersSnap, depositsSnap, withdrawalsSnap, investmentsSnap] =
-      await Promise.all([
-        db.collection('users').get(),
-        db.collection('deposits').get(),
-        db.collection('withdrawals').get(),
-        db.collection('investments').get(),
-      ]);
-    const now = Date.now();
-    const DAY = 86400000;
-    const users = usersSnap.docs.map(d=>({...d.data(), id:d.id}));
-    const deposits = depositsSnap.docs.map(d=>d.data());
-    const withdrawals = withdrawalsSnap.docs.map(d=>d.data());
-    const investments = investmentsSnap.docs.map(d=>d.data());
-
-    const totalUsers = users.length;
-    const activeInv = investments.filter(i=>i.active).length;
-    const totalRevenue = deposits.filter(d=>d.status==='approved').reduce((s,d)=>s+(d.amount||0),0);
-    const totalPaidOut = withdrawals.filter(w=>w.status==='approved').reduce((s,w)=>s+(w.netAmount||0),0);
-    const pendingDeps = deposits.filter(d=>d.status==='pending').length;
-    const pendingWds = withdrawals.filter(w=>w.status==='pending').length;
-    const suspended = users.filter(u=>u.suspended).length;
-    const totalRefs = users.reduce((s,u)=>s+(u.totalReferrals||0),0);
-    const todayUsers = users.filter(u => u.createdAt && (now - u.createdAt.toMillis()) < DAY).length;
-    const weekUsers = users.filter(u => u.createdAt && (now - u.createdAt.toMillis()) < 7*DAY).length;
-    const monthUsers = users.filter(u => u.createdAt && (now - u.createdAt.toMillis()) < 30*DAY).length;
-    const todayRevenue = deposits.filter(d=>d.status==='approved' && d.createdAt && (now-d.createdAt.toMillis())<DAY)
-                                 .reduce((s,d)=>s+(d.amount||0),0);
-
-    c.innerHTML = `
-      <div class="analytics-grid">
-        <div class="ac blue">
-          <div class="ac-val">${totalUsers}</div>
-          <div class="ac-label">Total Users</div>
-          <div class="ac-sub">+${todayUsers} today · +${weekUsers} this week</div>
-        </div>
-        <div class="ac gold">
-          <div class="ac-val">${fmt(totalRevenue)}</div>
-          <div class="ac-label">Total Deposits</div>
-          <div class="ac-sub">+${fmt(todayRevenue)} today</div>
-        </div>
-        <div class="ac">
-          <div class="ac-val">${activeInv}</div>
-          <div class="ac-label">Active Plans</div>
-          <div class="ac-sub">${investments.length} all time</div>
-        </div>
-        <div class="ac purple">
-          <div class="ac-val">${fmt(totalPaidOut)}</div>
-          <div class="ac-label">Total Paid Out</div>
-          <div class="ac-sub">${withdrawals.filter(w=>w.status==='approved').length} withdrawals</div>
-        </div>
-        <div class="ac orange">
-          <div class="ac-val">${pendingDeps}</div>
-          <div class="ac-label">Pending Deposits</div>
-          <div class="ac-sub">${pendingWds} pending withdrawals</div>
-        </div>
-        <div class="ac red">
-          <div class="ac-val">${suspended}</div>
-          <div class="ac-label">Suspended</div>
-          <div class="ac-sub">${totalRefs} total referrals</div>
-        </div>
-      </div>
-
-      <div class="chart-box">
-        <div class="chart-box-hdr">
-          <h4>📈 New Signups</h4>
-          <div class="period-pills">
-            <button class="period-pill active" data-p="week" onclick="setChartPeriod('week')">7D</button>
-            <button class="period-pill" data-p="month" onclick="setChartPeriod('month')">30D</button>
-          </div>
-        </div>
-        <div class="bar-wrap" id="signupChart"></div>
-      </div>
-
-      <div class="chart-box">
-        <div class="chart-box-hdr">
-          <h4>💰 Daily Deposits (PKR)</h4>
-          <div class="period-pills">
-            <button class="period-pill active" data-p="week" onclick="setDepChartPeriod('week')">7D</button>
-            <button class="period-pill" data-p="month" onclick="setDepChartPeriod('month')">30D</button>
-          </div>
-        </div>
-        <div class="bar-wrap" id="depositChart"></div>
-      </div>
-
-      <div class="p-table">
-        <div class="p-table-hdr"><h4>📅 Period Breakdown</h4><span>Users</span></div>
-        <div class="p-row">
-          <div class="p-av">D</div>
-          <div class="p-ri"><strong>Today</strong><small>New signups</small></div>
-          <div class="p-rr"><div class="amt">${todayUsers}</div></div>
-        </div>
-        <div class="p-row">
-          <div class="p-av">W</div>
-          <div class="p-ri"><strong>This Week</strong><small>Last 7 days</small></div>
-          <div class="p-rr"><div class="amt">${weekUsers}</div></div>
-        </div>
-        <div class="p-row">
-          <div class="p-av">M</div>
-          <div class="p-ri"><strong>This Month</strong><small>Last 30 days</small></div>
-          <div class="p-rr"><div class="amt">${monthUsers}</div></div>
-        </div>
-        <div class="p-row">
-          <div class="p-av">T</div>
-          <div class="p-ri"><strong>All Time</strong><small>Total registered</small></div>
-          <div class="p-rr"><div class="amt">${totalUsers}</div></div>
-        </div>
-      </div>
-
-      <div class="p-table">
-        <div class="p-table-hdr"><h4>🏆 Top Users by Balance</h4><span>Balance</span></div>
-        ${users.sort((a,b)=>(b.balance||0)-(a.balance||0)).slice(0,5).map(u=>`
-        <div class="p-row">
-          <div class="p-av">${(u.name||u.email||'?').charAt(0).toUpperCase()}</div>
-          <div class="p-ri">
-            <strong>${u.email}</strong>
-            <small>${u.totalReferrals||0} referrals · ${u.suspended?'🚫 Suspended':'✅ Active'}</small>
-          </div>
-          <div class="p-rr">
-            <div class="amt">${fmt(u.balance||0)}</div>
-            <div class="sub">Earned: ${fmt(u.totalEarned||0)}</div>
-          </div>
-        </div>`).join('')}
-      </div>`;
-
-    window._analyticsUsers = users;
-    window._analyticsDeposits = deposits;
-    renderSignupChart();
-    renderDepositChart();
-  } catch(e){ c.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`; }
-}
-
-function renderSignupChart(){
-  const users = window._analyticsUsers || [];
-  const now = Date.now();
-  const isWeek = chartPeriod==='week';
-  const days = isWeek ? 7 : 30;
-  const DAY = 86400000;
-  const counts = [];
-  const labels = [];
-  for(let i=days-1;i>=0;i--){
-    const dayStart = now - (i+1)*DAY;
-    const dayEnd = now - i*DAY;
-    const cnt = users.filter(u=> u.createdAt && u.createdAt.toMillis()>=dayStart && u.createdAt.toMillis()<dayEnd).length;
-    counts.push(cnt);
-    const d = new Date(dayEnd);
-    labels.push(isWeek ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()] : (d.getDate()+''));
-  }
-  const max = Math.max(...counts, 1);
-  const el = document.getElementById('signupChart');
-  if(!el) return;
-  el.innerHTML = counts.map((v,i)=>`
-    <div class="bcol">
-      <div class="bval">${v||''}</div>
-      <div class="bfill" style="height:${Math.round((v/max)*70)+4}px"></div>
-      <div class="blbl">${labels[i]}</div>
-    </div>`).join('');
-}
-
-function renderDepositChart(){
-  const deps = (window._analyticsDeposits||[]).filter(d=>d.status==='approved');
-  const now = Date.now();
-  const isWeek = depChartPeriod==='week';
-  const days = isWeek ? 7 : 30;
-  const DAY = 86400000;
-  const totals = [];
-  const labels = [];
-  for(let i=days-1;i>=0;i--){
-    const ds = now-(i+1)*DAY, de = now-i*DAY;
-    const total = deps.filter(d=>d.createdAt&&d.createdAt.toMillis()>=ds&&d.createdAt.toMillis()<de)
-                      .reduce((s,d)=>s+(d.amount||0),0);
-    totals.push(total);
-    const d=new Date(de);
-    labels.push(isWeek?['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()]:(d.getDate()+''));
-  }
-  const max = Math.max(...totals,1);
-  const el = document.getElementById('depositChart');
-  if(!el) return;
-  el.innerHTML = totals.map((v,i)=>`
-    <div class="bcol">
-      <div class="bval">${v>0?Math.round(v/1000)+'k':''}</div>
-      <div class="bfill" style="height:${Math.round((v/max)*70)+4}px;background:linear-gradient(to top,#c8a84b,#f0c84a)"></div>
-      <div class="blbl">${labels[i]}</div>
-    </div>`).join('');
-}
-
-// ═══════════════════════════════════════
-// ADMIN CONTENT RENDER
-// ═══════════════════════════════════════
 async function renderAdminContent(){
-  if(adminTab==='analytics'){ renderAnalytics(); return; }
-  if(adminTab==='settings') { renderSettings(); return; }
-
   const c = document.getElementById('adminContent');
   c.innerHTML = '<div class="empty-state">Loading...</div>';
   const search = (document.getElementById('adminSearch')?.value||'').toLowerCase();
   const filter = document.getElementById('adminFilter')?.value||'';
-
   try{
     if(adminTab==='pending'||adminTab==='all'){
       const snap = await db.collection('deposits').orderBy('createdAt','desc').get();
       let docs = snap.docs;
       if(adminTab==='pending') docs = docs.filter(d=>d.data().status==='pending');
       if(filter) docs = docs.filter(d=>d.data().status===filter);
-      if(search) docs = docs.filter(d=>(d.data().userEmail||'').toLowerCase().includes(search)||(d.data().packageName||'').toLowerCase().includes(search));
+      if(search) docs = docs.filter(d=>(d.data().userEmail||'').includes(search)||(d.data().packageName||'').toLowerCase().includes(search));
       if(!docs.length){ c.innerHTML='<div class="empty-state">No deposits found</div>'; return; }
-      c.innerHTML = docs.map(doc=>{
+      c.innerHTML = docs.map(doc => {
         const d = doc.data();
-        const ssHtml = d.screenshot?`<img src="${d.screenshot}" class="ss-thumb" onclick="expandCert(this)" alt="Screenshot">`: '<small style="color:var(--muted)">No screenshot</small>';
-        const dateStr = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleDateString('en-PK') : '-';
-        return `<div class="admin-item is-${d.status}">
-          <div class="admin-item-head">
+        const ssHtml = d.screenshot ? `<div style="margin-top:6px"><img src="${d.screenshot}" style="max-width:100%;border-radius:8px;max-height:120px;object-fit:cover" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'120px':'none'"></div>` : '';
+        return `<div class="admin-item">
+          <div class="admin-item-top">
             <div>
-              <strong style="font-size:.82rem">${d.userEmail}</strong>
-              <div class="admin-item-meta">
-                📦 ${d.packageName} &nbsp;·&nbsp; ${fmt(d.amount)}<br>
-                🔑 TID: <strong>${d.tid||'N/A'}</strong> &nbsp;·&nbsp; 📅 ${dateStr}
-              </div>
+              <strong style="font-size:.85rem">${d.userEmail}</strong>
+              <div style="font-size:.75rem;color:var(--muted)">${d.packageName} — ${fmt(d.amount)}</div>
+              <div style="font-size:.7rem;color:var(--muted)">TID: ${d.tid||'N/A'}</div>
               ${ssHtml}
             </div>
             <span class="badge ${d.status}">${d.status.toUpperCase()}</span>
@@ -1806,25 +1477,20 @@ async function renderAdminContent(){
           </div>`:''}
         </div>`;
       }).join('');
-
     } else if(adminTab==='withdrawals'){
       const snap = await db.collection('withdrawals').orderBy('createdAt','desc').get();
       let docs = snap.docs;
       if(filter) docs = docs.filter(d=>d.data().status===filter);
-      if(search) docs = docs.filter(d=>(d.data().userEmail||'').toLowerCase().includes(search));
+      if(search) docs = docs.filter(d=>(d.data().userEmail||'').includes(search));
       if(!docs.length){ c.innerHTML='<div class="empty-state">No withdrawals found</div>'; return; }
-      c.innerHTML = docs.map(doc=>{
+      c.innerHTML = docs.map(doc => {
         const w = doc.data();
-        const dateStr = w.createdAt ? new Date(w.createdAt.toMillis()).toLocaleDateString('en-PK') : '-';
-        return `<div class="admin-item is-${w.status}">
-          <div class="admin-item-head">
+        return `<div class="admin-item">
+          <div class="admin-item-top">
             <div>
-              <strong style="font-size:.82rem">${w.userEmail}</strong>
-              <div class="admin-item-meta">
-                💵 ${fmt(w.amount)} &nbsp;→&nbsp; Net: <strong>${fmt(w.netAmount)}</strong><br>
-                🏦 ${w.accountType} — ${w.accountNumber}<br>
-                🪪 CNIC: ${w.cnic||'-'} &nbsp;·&nbsp; 📅 ${dateStr}
-              </div>
+              <strong style="font-size:.85rem">${w.userEmail}</strong>
+              <div style="font-size:.75rem;color:var(--muted)">${fmt(w.amount)} → Net: ${fmt(w.netAmount)}</div>
+              <div style="font-size:.7rem;color:var(--muted)">${w.accountType} — ${w.accountNumber}</div>
             </div>
             <span class="badge ${w.status}">${w.status.toUpperCase()}</span>
           </div>
@@ -1834,239 +1500,183 @@ async function renderAdminContent(){
           </div>`:''}
         </div>`;
       }).join('');
-
+    } else if(adminTab==='referrals'){
+      const snap = await db.collection('referrals').orderBy('createdAt','desc').get();
+      let docs = snap.docs;
+      if(search) docs = docs.filter(d=>(d.data().referredEmail||'').includes(search));
+      if(!docs.length){ c.innerHTML='<div class="empty-state">No referrals found</div>'; return; }
+      c.innerHTML = docs.map(doc => {
+        const r = doc.data();
+        return `<div class="admin-item">
+          <div class="admin-item-top">
+            <div>
+              <strong style="font-size:.85rem">${r.referredEmail}</strong>
+              <div style="font-size:.75rem;color:var(--muted)">Referrer ID: ${r.referrerId}</div>
+            </div>
+            <span class="badge ${r.bonusGiven?'approved':'pending'}">${r.bonusGiven?'Bonus Given':'Pending'}</span>
+          </div>
+        </div>`;
+      }).join('');
     } else if(adminTab==='users'){
       const snap = await db.collection('users').get();
       let docs = snap.docs;
-      if(search) docs = docs.filter(d=>(d.data().email||'').toLowerCase().includes(search));
+      if(search) docs = docs.filter(d=>(d.data().email||'').includes(search));
       if(!docs.length){ c.innerHTML='<div class="empty-state">No users found</div>'; return; }
-      c.innerHTML = docs.map(doc=>{
-        const u = doc.data(); const uid = doc.id;
-        const isSusp = u.suspended||false;
-        const initials = (u.name||u.email||'?').charAt(0).toUpperCase();
-        const dateStr = u.createdAt ? new Date(u.createdAt.toMillis()).toLocaleDateString('en-PK') : '-';
-        return `<div class="admin-item ${isSusp?'is-rejected':'is-approved'}">
-          <div class="admin-item-head">
-            <div style="display:flex;gap:10px;align-items:flex-start;flex:1">
-              <div class="p-av" style="flex-shrink:0">${initials}</div>
-              <div style="flex:1;min-width:0">
-                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-                  <strong style="font-size:.82rem">${u.email}</strong>
-                  <span class="${isSusp?'susp-badge':'active-badge'}">${isSusp?'SUSPENDED':'ACTIVE'}</span>
-                </div>
-                <div class="admin-item-meta">
-                  💰 Bal: <strong>${fmt(u.balance||0)}</strong> &nbsp;·&nbsp; 
-                  📈 Earned: ${fmt(u.totalEarned||0)}<br>
-                  👥 Referrals: ${u.totalReferrals||0} &nbsp;·&nbsp; 📅 Joined: ${dateStr}
-                </div>
+      c.innerHTML = docs.map(doc => {
+        const u = doc.data();
+        const uid = doc.id;
+        const isSuspended = u.suspended || false;
+        return `<div class="admin-item">
+          <div class="admin-item-top">
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <strong style="font-size:.85rem">${u.email}</strong>
+                <span class="${isSuspended?'susp-badge':'active-badge'}">${isSuspended?'SUSPENDED':'ACTIVE'}</span>
               </div>
+              <div style="font-size:.75rem;color:var(--muted);margin-top:3px">Balance: ${fmt(u.balance)} | Referrals: ${u.totalReferrals||0}</div>
+              <div style="font-size:.7rem;color:var(--muted)">Earned: ${fmt(u.totalEarned||0)} | Pending WD: ${fmt(u.pendingWithdrawal||0)}</div>
             </div>
           </div>
           <div class="danger-zone">
-            <h5>⚠️ Admin Controls</h5>
-            <div class="admin-actions" style="padding-top:0;border:none;margin-top:0">
-              ${isSusp
-                ?`<button class="admin-btn unsuspend" onclick="toggleSuspend('${uid}',false,'${u.email}')">✅ Unsuspend</button>`
-                :`<button class="admin-btn suspend" onclick="toggleSuspend('${uid}',true,'${u.email}')">🚫 Suspend</button>`}
+            <h5>⚠️ Admin Actions</h5>
+            <div class="danger-actions">
+              ${isSuspended
+                ? `<button class="admin-btn unsuspend" onclick="toggleSuspend('${uid}',false,'${u.email}')">✅ Unsuspend</button>`
+                : `<button class="admin-btn suspend" onclick="toggleSuspend('${uid}',true,'${u.email}')">🚫 Suspend Account</button>`
+              }
               <button class="admin-btn wash" onclick="washBalance('${uid}','${u.email}')">💸 Wash Balance</button>
             </div>
           </div>
         </div>`;
       }).join('');
-
     } else if(adminTab==='investments'){
-      const snap = await db.collection('investments').orderBy('startDate','desc').get();
+      const snap = await db.collection('investments').get();
       let docs = snap.docs;
-      if(search) docs = docs.filter(d=>(d.data().userEmail||'').toLowerCase().includes(search)||(d.data().packageName||'').toLowerCase().includes(search));
+      if(search) docs = docs.filter(d=>(d.data().userEmail||'').includes(search)||(d.data().packageName||'').toLowerCase().includes(search));
       if(!docs.length){ c.innerHTML='<div class="empty-state">No investments found</div>'; return; }
-      c.innerHTML = docs.map(doc=>{
+      c.innerHTML = docs.map(doc => {
         const inv = doc.data();
-        const pct = inv.startDate ? Math.min(Math.floor((Date.now()-inv.startDate.toMillis())/86400000/inv.durationDays*100),100) : 0;
-        return `<div class="admin-item is-${inv.active?'approved':'completed'}">
-          <div class="admin-item-head">
+        return `<div class="admin-item">
+          <div class="admin-item-top">
             <div>
-              <strong style="font-size:.82rem">${inv.userEmail}</strong>
-              <div class="admin-item-meta">
-                📦 ${inv.packageName} &nbsp;·&nbsp; ${fmt(inv.amount)}<br>
-                💵 Daily: ${fmt(inv.dailyReturn)} &nbsp;·&nbsp; Paid: ${fmt(inv.paidAmount||0)}
-              </div>
-              <div style="background:#f0f4f0;height:5px;border-radius:4px;margin-top:8px;overflow:hidden">
-                <div style="height:100%;width:${pct}%;background:var(--g2);border-radius:4px"></div>
-              </div>
+              <strong style="font-size:.85rem">${inv.userEmail}</strong>
+              <div style="font-size:.75rem;color:var(--muted)">${inv.packageName} — ${fmt(inv.amount)}</div>
+              <div style="font-size:.7rem;color:var(--muted)">Paid: ${fmt(inv.paidAmount||0)} / ${fmt(inv.durationDays*inv.dailyReturn)}</div>
             </div>
             <span class="badge ${inv.active?'active':'completed'}">${inv.active?'ACTIVE':'DONE'}</span>
           </div>
         </div>`;
       }).join('');
-
-    } else if(adminTab==='referrals'){
-      const snap = await db.collection('referrals').orderBy('createdAt','desc').get();
-      let docs = snap.docs;
-      if(search) docs = docs.filter(d=>(d.data().referredEmail||'').toLowerCase().includes(search));
-      if(!docs.length){ c.innerHTML='<div class="empty-state">No referrals found</div>'; return; }
-      c.innerHTML = `<div class="p-table">
-        <div class="p-table-hdr"><h4>All Referrals</h4><span>${docs.length} total</span></div>
-        ${docs.map(doc=>{
-          const r = doc.data();
-          const dateStr = r.createdAt?new Date(r.createdAt.toMillis()).toLocaleDateString('en-PK'):'-';
-          return `<div class="p-row">
-            <div class="p-av">${(r.referredEmail||'?').charAt(0).toUpperCase()}</div>
-            <div class="p-ri">
-              <strong>${r.referredEmail||'-'}</strong>
-              <small>Via: ${r.referrerId||'-'} · ${dateStr}</small>
-            </div>
-            <div class="p-rr">
-              <span class="badge ${r.bonusGiven?'approved':'pending'}">${r.bonusGiven?'Confirmed':'Pending'}</span>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>`;
-
-    } else if(adminTab==='logs'){
-      const snap = await db.collection('adminLogs').orderBy('createdAt','desc').limit(50).get();
-      if(snap.empty){ c.innerHTML='<div class="empty-state">No admin actions logged yet</div>'; return; }
-      c.innerHTML = `<div class="p-table">
-        <div class="p-table-hdr"><h4>Admin Action Logs</h4><span>Last 50</span></div>
-        ${snap.docs.map(doc=>{
-          const l = doc.data();
-          const dateStr = l.createdAt?new Date(l.createdAt.toMillis()).toLocaleString('en-PK'):'-';
-          const ico = l.action==='balance_wash'?'💸':l.action==='suspend'?'🚫':l.action==='deposit_approve'?'✅':l.action==='withdrawal_approve'?'💵':'📋';
-          return `<div class="p-row">
-            <div class="p-av">${ico}</div>
-            <div class="p-ri">
-              <strong>${(l.action||'').replace(/_/g,' ').toUpperCase()}</strong>
-              <small>Target: ${l.targetEmail||'-'}</small>
-              ${l.amountWashed!=null?`<small>Washed: ${fmt(l.amountWashed)}</small>`:''}
-              <small>${dateStr}</small>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>`;
     }
   } catch(e){ c.innerHTML=`<div class="empty-state">Error: ${e.message}</div>`; }
 }
 
-// ═══════════════════════════════════════
-// SETTINGS
-// ═══════════════════════════════════════
-function renderSettings(){
-  const c = document.getElementById('adminContent');
-  c.innerHTML = `
-    <div class="settings-card">
-      <h4>📧 Change Admin Email</h4>
-      <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">
-        Current: <strong id="currentAdminEmail">${ADMIN_EMAIL}</strong><br>
-        This updates Firebase Auth email. You will need to login again.
-      </p>
-      <input type="password" class="inp" id="setEmailCurrentPass" placeholder="Current password (to verify)">
-      <input type="email" class="inp" id="setNewEmail" placeholder="New admin email">
-      <button class="modal-btn primary" onclick="changeAdminEmail()">Update Email</button>
-    </div>
-
-    <div class="settings-card">
-      <h4>🔑 Change Admin Password</h4>
-      <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">
-        Password is updated directly in Firebase Auth — permanent change.
-      </p>
-      <input type="password" class="inp" id="setPassCurrent" placeholder="Current password">
-      <input type="password" class="inp" id="setPassNew" placeholder="New password (min 8 characters)">
-      <input type="password" class="inp" id="setPassConfirm" placeholder="Confirm new password">
-      <button class="modal-btn primary" onclick="changeAdminPassword()">Update Password</button>
-    </div>
-
-    <div class="settings-card">
-      <h4>💳 Deposit Account Settings</h4>
-      <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">
-        Current Number: <strong style="color:var(--g1)" id="settDepNum">${DEPOSIT_NUMBER}</strong><br>
-        Current Name: <strong style="color:var(--g1)" id="settDepName">${DEPOSIT_NAME}</strong><br>
-        <span style="font-size:.68rem;color:var(--muted)">Saved to Firebase — users see new number instantly.</span>
-      </p>
-      <input type="text" class="inp" id="newDepNumber" placeholder="New account number (e.g. 03001234567)" maxlength="20">
-      <input type="text" class="inp" id="newDepName" placeholder="New account holder name">
-      <button class="modal-btn primary" onclick="saveDepositConfig()">💾 Save Deposit Info</button>
-    </div>
-
-    <div class="settings-card">
-      <h4>ℹ️ Platform Info</h4>
-      <div style="font-size:.78rem;line-height:2;color:var(--muted)">
-        <div>💰 Welcome Bonus: <strong style="color:var(--text)">${fmt(WELCOME_BONUS)}</strong></div>
-        <div>💸 Min Withdrawal: <strong style="color:var(--text)">${fmt(MIN_WITHDRAWAL)}</strong></div>
-        <div>📊 Withdrawal Fee: <strong style="color:var(--text)">${WITHDRAWAL_FEE}%</strong></div>
-        <div>👥 L1: <strong style="color:var(--text)">${fmt(REFERRAL_BONUS.l1)}</strong> | L2: <strong style="color:var(--text)">${fmt(REFERRAL_BONUS.l2)}</strong> | L3: <strong style="color:var(--text)">${fmt(REFERRAL_BONUS.l3)}</strong></div>
-      </div>
-    </div>`;
-}
-
-async function saveDepositConfig(){
-  const num  = document.getElementById('newDepNumber')?.value.trim();
-  const name = document.getElementById('newDepName')?.value.trim();
-  if(!num && !name) return notify('Enter number or name to update', 'warn');
-  if(num && !/^0[0-9]{9,13}$/.test(num.replace(/\s/g,'')))
-    return notify('Enter a valid Pakistani number (03xxxxxxxxx)', 'warn');
-
+// ── ADMIN ACTIONS ──
+async function approveDeposit(depId){
   try{
-    const updateData = { updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-    if(num)  updateData.number = num;
-    if(name) updateData.name   = name;
+    const depRef = db.collection('deposits').doc(depId);
+    const depSnap = await depRef.get();
+    if(!depSnap.exists) return;
+    const dep = depSnap.data();
+    if(dep.status!=='pending') return notify('Already processed','warn');
 
-    await db.collection('appConfig').doc('depositInfo').set(updateData, { merge: true });
+    const userSnap = await db.collection('users').doc(dep.userId).get();
+    const ud = userSnap.data();
+    const r1=ud.referredBy||null, r2=ud.referredBy2||null, r3=ud.referredBy3||null;
 
-    if(num)  DEPOSIT_NUMBER = num;
-    if(name) DEPOSIT_NAME   = name;
+    await db.runTransaction(async t => {
+      const fd = await t.get(depRef);
+      if(!fd.exists||fd.data().status!=='pending') throw new Error('Already processed');
 
-    await db.collection('adminLogs').add({
-      action: 'deposit_config_change',
-      targetEmail: 'system',
-      newNumber: num || DEPOSIT_NUMBER,
-      newName: name || DEPOSIT_NAME,
-      performedBy: ADMIN_EMAIL,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      t.update(depRef,{status:'approved', approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      t.set(db.collection('investments').doc(),{
+        userId:dep.userId, userEmail:dep.userEmail,
+        packageId:dep.packageId, packageName:dep.packageName,
+        amount:dep.amount, dailyReturn:dep.dailyReturn,
+        durationDays:dep.durationDays, totalReturn:dep.totalReturn,
+        startDate:firebase.firestore.FieldValue.serverTimestamp(),
+        paidAmount:0, active:true
+      });
+      // Referral bonuses
+      if(r1){
+        t.update(db.collection('users').doc(r1),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS.l1)});
+        // Mark referral bonus given
+        const rSnap2 = await db.collection('referrals').where('referrerId','==',r1).where('referredUserId','==',dep.userId).limit(1).get();
+        if(!rSnap2.empty) t.update(rSnap2.docs[0].ref,{bonusGiven:true});
+      }
+      if(r2) t.update(db.collection('users').doc(r2),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS.l2)});
+      if(r3) t.update(db.collection('users').doc(r3),{balance:firebase.firestore.FieldValue.increment(REFERRAL_BONUS.l3)});
     });
 
-    notify('✅ Deposit info updated!');
-    renderSettings();
-  } catch(e){ notify(e.message, 'error'); }
-}
-
-async function changeAdminEmail(){
-  const currentPass = document.getElementById('setEmailCurrentPass')?.value;
-  const newEmail    = document.getElementById('setNewEmail')?.value?.trim();
-  if(!currentPass||!newEmail) return notify('Fill all fields','warn');
-  if(!newEmail.includes('@')) return notify('Invalid email','error');
-  try{
-    const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, currentPass);
-    await auth.currentUser.reauthenticateWithCredential(cred);
-    await auth.currentUser.updateEmail(newEmail);
-    notify('Email updated! Please login again ✅');
-    setTimeout(()=> auth.signOut(), 2000);
+    notify('Deposit approved ✅');
+    renderAdminContent();
+    loadAdminStats();
   } catch(e){ notify(e.message,'error'); }
 }
 
-async function changeAdminPassword(){
-  const current  = document.getElementById('setPassCurrent')?.value;
-  const newPass  = document.getElementById('setPassNew')?.value;
-  const confirm  = document.getElementById('setPassConfirm')?.value;
-  if(!current||!newPass||!confirm) return notify('Fill all fields','warn');
-  if(newPass.length < 8) return notify('Password must be at least 8 characters','warn');
-  if(newPass !== confirm) return notify('Passwords do not match','error');
+async function rejectDeposit(depId){
+  if(!confirm('Reject this deposit?')) return;
   try{
-    const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, current);
-    await auth.currentUser.reauthenticateWithCredential(cred);
-    await auth.currentUser.updatePassword(newPass);
-    notify('Password updated successfully! ✅');
-    document.getElementById('setPassCurrent').value = '';
-    document.getElementById('setPassNew').value = '';
-    document.getElementById('setPassConfirm').value = '';
+    await db.collection('deposits').doc(depId).update({status:'rejected', rejectedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    notify('Deposit rejected');
+    renderAdminContent();
   } catch(e){ notify(e.message,'error'); }
 }
 
-// ═══════════════════════════════════════
-// SUSPEND / WASH
-// ═══════════════════════════════════════
+async function approveWithdrawal(wdId){
+  try{
+    await db.runTransaction(async t => {
+      const ref = db.collection('withdrawals').doc(wdId);
+      const doc = await t.get(ref);
+      if(!doc.exists) throw new Error('Not found');
+      const w = doc.data();
+      if(w.status!=='pending') throw new Error('Already processed');
+      t.update(ref,{status:'approved', approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      // Reduce pendingWithdrawal
+      t.update(db.collection('users').doc(w.userId),{
+        pendingWithdrawal: firebase.firestore.FieldValue.increment(-w.amount)
+      });
+    });
+    notify('Withdrawal approved ✅');
+    renderAdminContent();
+    loadAdminStats();
+  } catch(e){ notify(e.message,'error'); }
+}
+
+async function rejectWithdrawal(wdId){
+  if(!confirm('Reject and refund this withdrawal?')) return;
+  try{
+    await db.runTransaction(async t => {
+      const ref = db.collection('withdrawals').doc(wdId);
+      const doc = await t.get(ref);
+      if(!doc.exists) return;
+      const w = doc.data();
+      if(w.status!=='pending') return;
+      // Refund balance and clear pending
+      t.update(db.collection('users').doc(w.userId),{
+        balance: firebase.firestore.FieldValue.increment(w.amount),
+        pendingWithdrawal: firebase.firestore.FieldValue.increment(-w.amount)
+      });
+      t.update(ref,{status:'rejected', rejectedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    });
+    notify('Withdrawal rejected & refunded ✅');
+    renderAdminContent();
+  } catch(e){ notify(e.message,'error'); }
+}
+
+// ── PWA INSTALL ──
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
+function installApp(){
+  if(deferredInstall){ deferredInstall.prompt(); deferredInstall.userChoice.then(()=>deferredInstall=null); }
+  else notify('Open browser menu → "Add to Home Screen"','warn');
+}
+
+// ── SUSPEND / UNSUSPEND ──
 async function toggleSuspend(uid, suspend, email){
+  const action = suspend ? 'SUSPEND' : 'UNSUSPEND';
   const msg = suspend 
     ? `Suspend account of ${email}?\nUser will be blocked from logging in.`
-    : `Unsuspend account of ${email}?`;
+    : `Unsuspend account of ${email}?\nUser will regain access.`;
   if(!confirm(msg)) return;
   try{
     await db.collection('users').doc(uid).update({
@@ -2076,13 +1686,17 @@ async function toggleSuspend(uid, suspend, email){
     });
     notify(suspend ? `🚫 ${email} suspended` : `✅ ${email} unsuspended`);
     renderAdminContent();
+    loadAdminStats();
   } catch(e){ notify(e.message, 'error'); }
 }
 
+// ── BALANCE WASH ──
 async function washBalance(uid, email){
-  if(!confirm(`Wash (zero out) balance of:\n${email}\n\nCannot be undone!`)) return;
-  const confirm2 = prompt(`Type "WASH" to confirm:`);
-  if(confirm2 !== 'WASH') return notify('Cancelled','warn');
+  const confirmMsg = `Wash (zero out) the balance of:\n${email}\n\nThis will set their balance to PKR 0.\nThis action CANNOT be undone!`;
+  if(!confirm(confirmMsg)) return;
+  // Double confirm for safety
+  const confirm2 = prompt(`Type "WASH" to confirm zero out of ${email}'s balance:`);
+  if(confirm2 !== 'WASH') return notify('Cancelled — type WASH exactly','warn');
   try{
     await db.runTransaction(async t => {
       const ref = db.collection('users').doc(uid);
@@ -2096,6 +1710,7 @@ async function washBalance(uid, email){
         balanceWashedBy: ADMIN_EMAIL,
         lastWashedAmount: oldBalance
       });
+      // Log the wash action
       t.set(db.collection('adminLogs').doc(), {
         action: 'balance_wash',
         targetUserId: uid,
@@ -2110,223 +1725,8 @@ async function washBalance(uid, email){
   } catch(e){ notify(e.message, 'error'); }
 }
 
-// ═══════════════════════════════════════
-// ✅ APPROVE / REJECT — MAIN FIX
-// ═══════════════════════════════════════
-async function approveDeposit(depositId){
-  if(!isAdmin) return notify('Admin only!', 'error');
-  if(!confirm('✅ Approve this deposit?\nInvestment plan activate ho jayega aur user ko daily earning milna shuru hoga.')) return;
-
-  try{
-    const depRef = db.collection('deposits').doc(depositId);
-    const depSnap = await depRef.get();
-    if(!depSnap.exists) throw new Error('Deposit not found');
-    const dep = depSnap.data();
-    if(dep.status !== 'pending') throw new Error('Already ' + dep.status);
-
-    const now = firebase.firestore.Timestamp.now();
-    const invRef = db.collection('investments').doc();
-
-    await db.runTransaction(async t => {
-      const fresh = await t.get(depRef);
-      if(fresh.data().status !== 'pending') throw new Error('Already processed');
-
-      t.update(depRef, {
-        status: 'approved',
-        approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        approvedBy: ADMIN_EMAIL
-      });
-
-      t.set(invRef, {
-        userId:         dep.userId,
-        userEmail:      dep.userEmail,
-        packageId:      dep.packageId,
-        packageName:    dep.packageName,
-        amount:         dep.amount,
-        dailyReturn:    dep.dailyReturn,
-        durationDays:   dep.durationDays,
-        totalReturn:    dep.totalReturn,
-        paidAmount:     0,
-        active:         true,
-        startDate:      now,
-        depositId:      depositId,
-        createdAt:      firebase.firestore.FieldValue.serverTimestamp()
-      });
-    });
-
-    // L1 Referral bonus credit
-    try{
-      const uSnap = await db.collection('users').doc(dep.userId).get();
-      if(uSnap.exists && uSnap.data().referredBy){
-        const refSnap = await db.collection('referrals')
-          .where('referredUserId','==',dep.userId)
-          .where('level','==',1).limit(1).get();
-
-        if(!refSnap.empty && !refSnap.docs[0].data().bonusGiven){
-          const bonus = REFERRAL_BONUS.l1;
-          await refSnap.docs[0].ref.update({
-            bonusGiven: true,
-            bonusAmount: bonus,
-            bonusGivenAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          await db.collection('users').doc(uSnap.data().referredBy).update({
-            balance: firebase.firestore.FieldValue.increment(bonus),
-            totalEarned: firebase.firestore.FieldValue.increment(bonus)
-          });
-        }
-      }
-    } catch(rbErr){ console.log('Ref bonus:', rbErr.message); }
-
-    await db.collection('adminLogs').add({
-      action: 'deposit_approve',
-      targetUserId: dep.userId,
-      targetEmail: dep.userEmail,
-      amount: dep.amount,
-      packageName: dep.packageName,
-      performedBy: ADMIN_EMAIL,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    notify('✅ Deposit approved & plan activated!');
-    renderAdminContent();
-  } catch(e){ notify(e.message, 'error'); }
-}
-
-async function rejectDeposit(depositId){
-  if(!isAdmin) return notify('Admin only!', 'error');
-  const reason = prompt('Reject reason (optional):') || 'No reason';
-  if(!confirm('❌ Reject this deposit?')) return;
-
-  try{
-    const depSnap = await db.collection('deposits').doc(depositId).get();
-    if(!depSnap.exists) throw new Error('Not found');
-    const dep = depSnap.data();
-
-    await db.collection('deposits').doc(depositId).update({
-      status: 'rejected',
-      rejectedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      rejectedBy: ADMIN_EMAIL,
-      rejectReason: reason
-    });
-
-    await db.collection('adminLogs').add({
-      action: 'deposit_reject',
-      targetUserId: dep.userId,
-      targetEmail: dep.userEmail,
-      reason, performedBy: ADMIN_EMAIL,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    notify('Deposit rejected');
-    renderAdminContent();
-  } catch(e){ notify(e.message, 'error'); }
-}
-
-async function approveWithdrawal(wid){
-  if(!isAdmin) return notify('Admin only!', 'error');
-  if(!confirm('✅ Approve withdrawal?\nPakka user ko payment bhej di hai?')) return;
-
-  try{
-    const wRef = db.collection('withdrawals').doc(wid);
-    await db.runTransaction(async t => {
-      const wDoc = await t.get(wRef);
-      if(!wDoc.exists) throw new Error('Not found');
-      const w = wDoc.data();
-      if(w.status !== 'pending') throw new Error('Already ' + w.status);
-
-      t.update(wRef, {
-        status: 'approved',
-        approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        approvedBy: ADMIN_EMAIL
-      });
-      t.update(db.collection('users').doc(w.userId), {
-        pendingWithdrawal: firebase.firestore.FieldValue.increment(-w.amount)
-      });
-    });
-
-    const finalSnap = await wRef.get();
-    await db.collection('adminLogs').add({
-      action: 'withdrawal_approve',
-      targetEmail: finalSnap.data().userEmail,
-      amount: finalSnap.data().amount,
-      performedBy: ADMIN_EMAIL,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    notify('✅ Withdrawal approved');
-    renderAdminContent();
-  } catch(e){ notify(e.message, 'error'); }
-}
-
-async function rejectWithdrawal(wid){
-  if(!isAdmin) return notify('Admin only!', 'error');
-  const reason = prompt('Reject reason:') || 'No reason';
-  if(!confirm('❌ Reject? Amount user ko wapas refund hoga.')) return;
-
-  try{
-    const wRef = db.collection('withdrawals').doc(wid);
-    await db.runTransaction(async t => {
-      const wDoc = await t.get(wRef);
-      if(!wDoc.exists) throw new Error('Not found');
-      const w = wDoc.data();
-      if(w.status !== 'pending') throw new Error('Already ' + w.status);
-
-      t.update(wRef, {
-        status: 'rejected',
-        rejectedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        rejectedBy: ADMIN_EMAIL,
-        rejectReason: reason
-      });
-      t.update(db.collection('users').doc(w.userId), {
-        balance: firebase.firestore.FieldValue.increment(w.amount),
-        pendingWithdrawal: firebase.firestore.FieldValue.increment(-w.amount)
-      });
-    });
-
-    notify('Withdrawal rejected & refunded');
-    renderAdminContent();
-  } catch(e){ notify(e.message, 'error'); }
-}
-
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
-function expandCert(img){
-  const ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out';
-  ov.onclick = ()=> ov.remove();
-  const i = document.createElement('img');
-  i.src = img.src;
-  i.style.cssText = 'max-width:100%;max-height:90vh;object-fit:contain;border-radius:12px';
-  ov.appendChild(i);
-  document.body.appendChild(ov);
-}
-
-async function installApp(){
-  if(deferredInstall){
-    deferredInstall.prompt();
-    const { outcome } = await deferredInstall.userChoice;
-    if(outcome === 'accepted') notify('App install ho gaya! 🎉');
-    deferredInstall = null;
-  } else {
-    notify('Ye browser install support nahi karta. Chrome/Safari use karein.', 'warn');
-  }
-}
-
-function showAdminDashboard(){
-  loadAdminStats();
-  switchAdminTab('analytics');
-}
-
-// ═══════════════════════════════════════
-// PWA
-// ═══════════════════════════════════════
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
-
-// ═══════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════
-loadDepositConfig();
+// ── INIT ──
+// Pre-fill referral code from URL
 const urlRef = getRefFromURL();
 if(urlRef) document.getElementById('suRef').value = urlRef;
 </script>
