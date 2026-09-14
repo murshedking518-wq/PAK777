@@ -24,7 +24,7 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .wrap{width:100%;max-width:430px;padding:0 0 90px;position:relative;min-height:100vh}
 
 /* ── HEADER ── */
-.hdr{background:linear-gradient(135deg,var(--g1) 0%,#0d5c32 100%);padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;min-height:56px}
+.hdr{background:linear-gradient(135deg,#101820 0%,#1f2937 100%);padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;min-height:56px;box-shadow:0 2px 16px rgba(0,0,0,.18)}
 .banner-wrap{margin:0 -0px;width:100%;overflow:hidden;background:#f0faf5;border-bottom:1px solid #e8f5ee}
 .banner-wrap img{width:100%;display:block;object-fit:cover;object-position:center top;max-height:175px}
 .hdr-logo{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -63,6 +63,12 @@ body{min-height:100vh;display:flex;justify-content:center;color:var(--text)}
 .inv-link{font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .copy-btn{background:var(--g1);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:.72rem;cursor:pointer;flex-shrink:0}
 .copy-btn:active{background:var(--g2)}
+.invite-progress{margin:0 16px 14px;background:#fff;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow)}
+.invite-progress-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px;font-size:.72rem;font-weight:700}
+.invite-progress-top span:last-child{color:var(--g1)}
+.invite-progress-track{height:8px;background:#e9f2ec;border-radius:99px;overflow:hidden}
+.invite-progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--g2),var(--g3));border-radius:99px;transition:width .35s ease}
+.invite-progress-note{font-size:.63rem;color:var(--muted);margin-top:7px;line-height:1.4}
 
 /* ── SHORTCUT GRID ── */
 .sc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px;margin-bottom:16px}
@@ -577,6 +583,15 @@ textarea.inp{resize:vertical;min-height:80px}
       <button class="copy-btn" onclick="copyReferralLink()">Copy</button>
     </div>
 
+    <div class="invite-progress">
+      <div class="invite-progress-top">
+        <span>Withdrawal Qualification</span>
+        <span id="inviteProgressCount">0 / 2</span>
+      </div>
+      <div class="invite-progress-track"><div class="invite-progress-fill" id="inviteProgressFill"></div></div>
+      <div class="invite-progress-note">Invite 2 people and make sure both invited users complete an approved deposit to unlock withdrawals.</div>
+    </div>
+
     <div class="sec-title">Quick Access</div>
     <div class="sc-grid">
       <div class="sc-item" onclick="switchHistTab('withdrawals');showPage('homePage')">
@@ -1081,7 +1096,7 @@ async function signupUser(){
     if(r1){
       await db.collection('referrals').add({
         referrerId:r1, referredUserId:user.uid, referredEmail:user.email,
-        level:1, bonusGiven:false,
+        level:1, bonusGiven:false, depositApproved:false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       await db.collection('users').doc(r1).update({totalReferrals: firebase.firestore.FieldValue.increment(1)});
@@ -1143,6 +1158,36 @@ function showSuspendedScreen(){
 function logout(){ clearTimers(); auth.signOut(); }
 
 // ── DASHBOARD ──
+async function getWithdrawalQualification(uid){
+  const refSnap = await db.collection('referrals').where('referrerId','==',uid).get();
+  const rows = refSnap.docs.map(doc => {
+    const r = doc.data();
+    return {
+      id: doc.id,
+      email: r.referredEmail || 'Invited user',
+      depositApproved: r.depositApproved === true || r.bonusGiven === true,
+      createdAt: r.createdAt || null
+    };
+  });
+  const confirmed = rows.filter(r => r.depositApproved).length;
+  return {total: rows.length, confirmed, rows, eligible: confirmed >= 2};
+}
+
+async function updateInviteProgress(){
+  if(!currentUser) return;
+  try{
+    const q = await getWithdrawalQualification(currentUser.uid);
+    const confirmed = Math.min(q.confirmed, 2);
+    const pct = Math.round((confirmed/2)*100);
+    const countEl = document.getElementById('inviteProgressCount');
+    const fillEl = document.getElementById('inviteProgressFill');
+    if(countEl) countEl.textContent = `${confirmed} / 2`;
+    if(fillEl) fillEl.style.width = `${pct}%`;
+  } catch(e){
+    console.warn('Invite progress:', e.message);
+  }
+}
+
 function initDashboard(user){
   // Real-time user data
   const unsub1 = db.collection('users').doc(user.uid).onSnapshot(doc => {
@@ -1166,6 +1211,7 @@ function initDashboard(user){
   loadActiveInvestments(user);
   setupHistory(user);
   processInvestmentsDue(user);
+  updateInviteProgress();
 }
 
 function markOnboarded(){
@@ -1266,32 +1312,60 @@ function loadWithdrawModal(){
   if(!currentUser) return;
   const c = document.getElementById('withdrawContent');
   c.innerHTML = '<div class="empty-state">Loading...</div>';
-  db.collection('users').doc(currentUser.uid).get().then(doc => {
+  Promise.all([
+    db.collection('users').doc(currentUser.uid).get(),
+    getWithdrawalQualification(currentUser.uid)
+  ]).then(([doc, q]) => {
     if(!doc.exists) return;
     const d = doc.data();
+    const confirmed = Math.min(q.confirmed, 2);
+    const pct = Math.round((confirmed/2)*100);
+    const gateHtml = `
+      <div style="background:${q.eligible?'var(--g5)':'#fff8e6'};border-radius:12px;padding:13px;margin-bottom:12px;border-left:4px solid ${q.eligible?'var(--g2)':'var(--orange)'}">
+        <div style="font-size:.82rem;font-weight:800;color:${q.eligible?'var(--g1)':'#a55b00'}">${q.eligible?'✅ Withdrawal unlocked':'🔒 Withdrawal locked'}</div>
+        <div style="font-size:.75rem;line-height:1.5;margin-top:4px">${q.eligible?'Your 2 required invited members have completed approved deposits.':'Invite 2 people and both invited users must complete an approved deposit before your withdrawal request can reach the admin.'}</div>
+        <div class="invite-progress-track" style="margin-top:9px"><div class="invite-progress-fill" style="width:${pct}%"></div></div>
+        <div style="font-size:.65rem;color:var(--muted);margin-top:5px;font-weight:700">${confirmed} / 2 qualifying deposits confirmed</div>
+      </div>`;
+
     if(d.accountHolderName){
       c.innerHTML = `
+        ${gateHtml}
         <div style="background:var(--g5);border-radius:10px;padding:12px;margin-bottom:12px">
           <strong>${d.accountHolderName}</strong>
           <div style="font-size:.8rem;color:var(--muted);margin-top:4px">${d.accountType} — ${d.accountNumber}</div>
           <div style="font-size:.72rem;color:var(--muted)">CNIC: ${d.cnic}</div>
         </div>
-        <input type="number" class="inp" id="wdAmt" placeholder="Amount (PKR)" min="${MIN_WITHDRAWAL}">
+        <input type="number" class="inp" id="wdAmt" placeholder="Amount (PKR)" min="${MIN_WITHDRAWAL}" ${q.eligible?'':'disabled'}>
         <p style="font-size:.72rem;color:var(--muted);margin-bottom:10px">Min: ${fmt(MIN_WITHDRAWAL)} | Fee: ${WITHDRAWAL_FEE}% | Balance: ${fmt(d.balance)}</p>
-        <button class="modal-btn primary" onclick="submitWithdrawal()">Request Withdrawal</button>
+        <button class="modal-btn primary" onclick="submitWithdrawal()" ${q.eligible?'':'disabled'}>${q.eligible?'Request Withdrawal':'Complete 2 Qualified Invites First'}</button>
         <button class="modal-btn secondary" onclick="showAccountForm()" style="margin-top:6px">Edit Account Details</button>`;
     } else {
+      c.innerHTML = gateHtml + `<div style="font-size:.82rem;color:var(--muted);margin-bottom:10px">Save your payment account details first. You must also complete the 2 qualified invites above.</div>`;
       showAccountForm();
     }
-  });
+  }).catch(e => { c.innerHTML='<div class="empty-state">Error loading withdrawal requirements</div>'; });
 }
 
 function showAccountForm(){
   if(!currentUser) return;
   const c = document.getElementById('withdrawContent');
-  db.collection('users').doc(currentUser.uid).get().then(doc => {
+  c.innerHTML = '<div class="empty-state">Loading...</div>';
+  Promise.all([
+    db.collection('users').doc(currentUser.uid).get(),
+    getWithdrawalQualification(currentUser.uid)
+  ]).then(([doc,q]) => {
     const d = doc.exists ? doc.data() : {};
-    c.innerHTML = `
+    const confirmed = Math.min(q.confirmed,2);
+    const pct = Math.round((confirmed/2)*100);
+    const gateHtml = `
+      <div style="background:${q.eligible?'var(--g5)':'#fff8e6'};border-radius:12px;padding:13px;margin-bottom:12px;border-left:4px solid ${q.eligible?'var(--g2)':'var(--orange)'}">
+        <div style="font-size:.82rem;font-weight:800;color:${q.eligible?'var(--g1)':'#a55b00'}">${q.eligible?'✅ Withdrawal unlocked':'🔒 Withdrawal locked'}</div>
+        <div style="font-size:.75rem;line-height:1.5;margin-top:4px">${q.eligible?'Your 2 required invited members have completed approved deposits.':'Invite 2 people and both invited users must complete an approved deposit before your withdrawal request can reach the admin.'}</div>
+        <div class="invite-progress-track" style="margin-top:9px"><div class="invite-progress-fill" style="width:${pct}%"></div></div>
+        <div style="font-size:.65rem;color:var(--muted);margin-top:5px;font-weight:700">${confirmed} / 2 qualifying deposits confirmed</div>
+      </div>`;
+    c.innerHTML = gateHtml + `
       <p style="font-size:.82rem;color:var(--muted);margin-bottom:10px">Enter your payment account details:</p>
       <input type="text" class="inp" id="wdHolder" placeholder="Account Holder Name" value="${d.accountHolderName||''}">
       <select class="inp" id="wdType">
@@ -1303,7 +1377,7 @@ function showAccountForm(){
       <input type="text" class="inp" id="wdCnic" placeholder="CNIC Number" value="${d.cnic||''}">
       <button class="modal-btn primary" onclick="saveAccountDetails()">Save Details</button>
       ${d.accountHolderName?'<button class="modal-btn secondary" onclick="loadWithdrawModal()" style="margin-top:6px">Back</button>':''}`;
-  });
+  }).catch(() => { c.innerHTML='<div class="empty-state">Error loading withdrawal requirements</div>'; });
 }
 
 async function saveAccountDetails(){
@@ -1325,20 +1399,31 @@ async function submitWithdrawal(){
   const amt = parseFloat(document.getElementById('wdAmt')?.value||0);
   if(!amt || amt < MIN_WITHDRAWAL) return notify(`Minimum withdrawal is ${fmt(MIN_WITHDRAWAL)}`,'warn');
   try{
+    const q = await getWithdrawalQualification(currentUser.uid);
+    if(!q.eligible){
+      updateInviteProgress();
+      return notify(`Withdrawal locked: ${q.confirmed}/2 invited members have approved deposits.`,'warn');
+    }
+
     const ud = await db.collection('users').doc(currentUser.uid).get();
+    if(!ud.exists) return notify('User account not found','error');
     const d = ud.data();
     if(!d.accountHolderName) return notify('Save account details first','warn');
     const fee = (amt * WITHDRAWAL_FEE) / 100;
     const net = amt - fee;
+
     await db.runTransaction(async t => {
       const ref = db.collection('users').doc(currentUser.uid);
       const doc = await t.get(ref);
-      const bal = doc.data().balance||0;
-      const pending = doc.data().pendingWithdrawal||0;
+      if(!doc.exists) throw new Error('User account not found');
+      const data = doc.data();
+      const bal = Number(data.balance||0);
       if(amt > bal) throw new Error('Insufficient balance');
       t.update(ref, {
         balance: firebase.firestore.FieldValue.increment(-amt),
-        pendingWithdrawal: firebase.firestore.FieldValue.increment(amt)
+        pendingWithdrawal: firebase.firestore.FieldValue.increment(amt),
+        lastWithdrawalQualificationCount: q.confirmed,
+        withdrawalEligibleAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       t.set(db.collection('withdrawals').doc(), {
         userId: currentUser.uid, userEmail: currentUser.email,
@@ -1346,6 +1431,9 @@ async function submitWithdrawal(){
         accountHolderName:d.accountHolderName, accountType:d.accountType,
         accountNumber:d.accountNumber, cnic:d.cnic,
         status:'pending',
+        qualificationRequired:2,
+        qualificationCount:q.confirmed,
+        qualifiedReferralIds:q.rows.filter(r=>r.depositApproved).slice(0,2).map(r=>r.id),
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     });
@@ -1534,27 +1622,28 @@ async function loadTeamModal(){
   if(!currentUser){ c.innerHTML='<div class="empty-state">Not logged in</div>'; return; }
   c.innerHTML = '<div class="empty-state">Loading...</div>';
   try{
-    const refSnap = await db.collection('referrals').where('referrerId','==',currentUser.uid).get();
-    const total = refSnap.size;
-    const bonusCount = refSnap.docs.filter(r=>r.data().bonusGiven).length;
+    const q = await getWithdrawalQualification(currentUser.uid);
+    const total = q.total;
+    const confirmed = q.confirmed;
     c.innerHTML = `
       <div class="team-stats">
         <div class="team-stat"><div class="ts-val">${total}</div><div class="ts-label">Members</div></div>
-        <div class="team-stat"><div class="ts-val">${fmt(bonusCount*REFERRAL_BONUS.l1)}</div><div class="ts-label">Bonus Earned</div></div>
-        <div class="team-stat"><div class="ts-val">${bonusCount}</div><div class="ts-label">Confirmed</div></div>
+        <div class="team-stat"><div class="ts-val">${fmt(confirmed*REFERRAL_BONUS.l1)}</div><div class="ts-label">Bonus Earned</div></div>
+        <div class="team-stat"><div class="ts-val">${Math.min(confirmed,2)}/2</div><div class="ts-label">Withdrawal Progress</div></div>
       </div>
-      <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">
-        L1: ${fmt(REFERRAL_BONUS.l1)} | L2: ${fmt(REFERRAL_BONUS.l2)} | L3: ${fmt(REFERRAL_BONUS.l3)} per referral
-      </p>
-      ${refSnap.empty
+      <div class="invite-progress" style="margin:0 0 12px;padding:12px">
+        <div class="invite-progress-top"><span>Withdrawal Qualification</span><span>${Math.min(confirmed,2)} / 2</span></div>
+        <div class="invite-progress-track"><div class="invite-progress-fill" style="width:${Math.min(confirmed,2)*50}%"></div></div>
+        <div class="invite-progress-note">${q.eligible?'✅ You have completed the 2 required qualified invites.':'Invite 2 people and make sure both invited users complete an approved deposit.'}</div>
+      </div>
+      ${q.rows.length===0
         ? '<div class="empty-state">No team members yet. Share your referral link!</div>'
-        : refSnap.docs.map(doc => {
-            const r = doc.data();
-            return `<div class="h-item">
-              <div class="h-item-left"><strong>${r.referredEmail}</strong><small>Joined via your link</small></div>
-              <span class="badge ${r.bonusGiven?'approved':'pending'}">${r.bonusGiven?'Confirmed':'Pending'}</span>
-            </div>`;
-          }).join('')}`;
+        : q.rows.map(r => `
+          <div class="h-item">
+            <div class="h-item-left"><strong>${r.email}</strong><small>Invited via your referral link</small></div>
+            <span class="badge ${r.depositApproved?'approved':'pending'}">${r.depositApproved?'Deposit Confirmed':'Deposit Pending'}</span>
+          </div>`).join('')}
+      <p style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.5">Withdrawal rule: 2 invited members must have an approved deposit.</p>`;
   } catch(e){ c.innerHTML='<div class="empty-state">Error loading team</div>'; }
 }
 
@@ -1752,6 +1841,12 @@ async function approveDeposit(depId){
     if(!userSnap.exists) return notify('User not found', 'error');
     const ud = userSnap.data();
     const r1 = ud.referredBy || null, r2 = ud.referredBy2 || null, r3 = ud.referredBy3 || null;
+    let r1DocRef = null;
+    if(r1){
+      const rSnap = await db.collection('referrals')
+        .where('referrerId','==',r1).where('referredUserId','==',dep.userId).limit(1).get();
+      if(!rSnap.empty) r1DocRef = rSnap.docs[0].ref;
+    }
 
     await db.runTransaction(async t => {
       const fd = await t.get(depRef);
@@ -1771,16 +1866,16 @@ async function approveDeposit(depId){
       if(r1) t.update(db.collection('users').doc(r1), {balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS.l1)});
       if(r2) t.update(db.collection('users').doc(r2), {balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS.l2)});
       if(r3) t.update(db.collection('users').doc(r3), {balance: firebase.firestore.FieldValue.increment(REFERRAL_BONUS.l3)});
+      if(r1DocRef) t.update(r1DocRef, {
+        bonusGiven:true,
+        depositApproved:true,
+        depositApprovedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        qualifyingDepositId: depId
+      });
     });
 
-    // Mark referral bonus given (outside transaction — needs a query)
-    if(r1){
-      const rSnap = await db.collection('referrals')
-        .where('referrerId','==',r1).where('referredUserId','==',dep.userId).limit(1).get();
-      if(!rSnap.empty) await rSnap.docs[0].ref.update({bonusGiven:true});
-    }
-
     notify('✅ Deposit approved & investment activated');
+    if(currentUser && !isAdmin) updateInviteProgress();
     renderAdminContent();
   } catch(e){ notify(e.message, 'error'); }
 }
@@ -1807,6 +1902,7 @@ async function approveWithdrawal(wdId){
       if(!doc.exists) throw new Error('Withdrawal not found');
       const w = doc.data();
       if(w.status !== 'pending') throw new Error('Already processed');
+      if(Number(w.qualificationCount||0) < 2) throw new Error('Withdrawal is not qualified: 2 approved invited deposits are required.');
       t.update(ref, {status:'approved', approvedAt: firebase.firestore.FieldValue.serverTimestamp()});
       t.update(db.collection('users').doc(w.userId), {
         pendingWithdrawal: firebase.firestore.FieldValue.increment(-w.amount)
@@ -2201,10 +2297,11 @@ async function renderAdminContent(){
     // ── WITHDRAWALS ──
     } else if(adminTab==='withdrawals'){
       const snap = await db.collection('withdrawals').orderBy('createdAt','desc').get();
-      let docs = snap.docs;
+      // Only qualified withdrawal requests reach the admin list.
+      let docs = snap.docs.filter(d => Number(d.data().qualificationCount||0) >= 2);
       if(filter) docs = docs.filter(d=>d.data().status===filter);
       if(search) docs = docs.filter(d=>(d.data().userEmail||'').includes(search));
-      if(!docs.length){ c.innerHTML='<div class="empty-state">No withdrawals found</div>'; return; }
+      if(!docs.length){ c.innerHTML='<div class="empty-state">No qualified withdrawals found</div>'; return; }
       c.innerHTML = docs.map(doc=>{
         const w = doc.data();
         const dateStr = w.createdAt ? new Date(w.createdAt.toMillis()).toLocaleDateString('en-PK') : '-';
@@ -2215,7 +2312,8 @@ async function renderAdminContent(){
               <div class="admin-item-meta">
                 💵 ${fmt(w.amount)} &nbsp;→&nbsp; Net: <strong>${fmt(w.netAmount)}</strong><br>
                 🏦 ${w.accountType} — ${w.accountNumber}<br>
-                🪪 CNIC: ${w.cnic||'-'} &nbsp;·&nbsp; 📅 ${dateStr}
+                🪪 CNIC: ${w.cnic||'-'} &nbsp;·&nbsp; 📅 ${dateStr}<br>
+                👥 Qualification: ${w.qualificationCount||0}/${w.qualificationRequired||2} approved invites
               </div>
             </div>
             <span class="badge ${w.status}">${w.status.toUpperCase()}</span>
