@@ -734,9 +734,9 @@ html,body{background:var(--premium-bg)}
       <div class="comm-info"><h4>WhatsApp Channel</h4><p>Latest updates &amp; announcements</p></div>
       <span class="comm-arr">›</span>
     </div>
-    <div class="comm-card" onclick="window.open('https://www.facebook.com/share/g/1GBuD7FTVt/','_blank')">
-      <div class="comm-ico" style="background:#e7f0fb;color:#1877f2">👥</div>
-      <div class="comm-info"><h4>Facebook Group</h4><p>Join our official FB community</p></div>
+    <div class="comm-card" onclick="openWhatsApp('support')">
+      <div class="comm-ico wa">🎧</div>
+      <div class="comm-info"><h4>24/7 Support</h4><p>Get help directly on WhatsApp</p></div>
       <span class="comm-arr">›</span>
     </div>
 
@@ -1933,7 +1933,9 @@ async function saveProfile(){
 
 // ── WHATSAPP ──
 function openWhatsApp(type){
-  window.open(type==='community' ? WA_COMMUNITY : WA_CHANNEL, '_blank');
+  // 24/7 Support always opens the official WhatsApp Channel.
+  const target = (type === 'community' && WA_COMMUNITY) ? WA_COMMUNITY : WA_CHANNEL;
+  window.open(target, '_blank', 'noopener,noreferrer');
 }
 
 // ── ADMIN AUTH ──
